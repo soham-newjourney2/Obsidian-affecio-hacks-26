@@ -1,0 +1,106 @@
+/* Atmosphere layers injected by fx.js: fog, film grain, vignette, gaslight flicker. */
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fx-fog {
+  z-index: var(--z-fx);
+  overflow: hidden;
+}
+
+.fx-fog::before,
+.fx-fog::after {
+  content: "";
+  position: absolute;
+  inset: -20% -40%;
+  background:
+    radial-gradient(40% 30% at 20% 70%, rgb(120 140 180 / 0.1), transparent 70%),
+    radial-gradient(35% 25% at 70% 60%, rgb(150 160 190 / 0.08), transparent 70%),
+    radial-gradient(50% 35% at 50% 100%, rgb(110 125 160 / 0.12), transparent 70%);
+  filter: blur(8px);
+  animation: fog-drift 60s linear infinite alternate;
+  will-change: transform;
+}
+
+.fx-fog::after {
+  opacity: 0.7;
+  animation-duration: 90s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes fog-drift {
+  from {
+    transform: translate3d(-8%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(8%, -3%, 0);
+  }
+}
+
+.fx-vignette {
+  z-index: var(--z-fx);
+  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.6) 100%);
+}
+
+.fx-grain {
+  z-index: var(--z-grain);
+  inset: -50%;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.9s steps(6) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-4%, 3%, 0); }
+  40% { transform: translate3d(3%, -5%, 0); }
+  60% { transform: translate3d(-6%, -2%, 0); }
+  80% { transform: translate3d(5%, 4%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Gaslight: warm glow that occasionally flickers */
+.gaslight {
+  position: relative;
+}
+
+.gaslight::before {
+  content: "";
+  position: absolute;
+  inset: -30% -20%;
+  z-index: -1;
+  background: radial-gradient(45% 50% at 50% 45%, rgb(217 178 106 / 0.16), transparent 70%);
+  animation: gaslight-flicker 7s infinite;
+  pointer-events: none;
+}
+
+@keyframes gaslight-flicker {
+  0%, 100% { opacity: 1; }
+  41% { opacity: 1; }
+  42% { opacity: 0.72; }
+  43% { opacity: 0.95; }
+  45% { opacity: 0.8; }
+  47% { opacity: 1; }
+  78% { opacity: 0.92; }
+  80% { opacity: 1; }
+}
+
+/* Reduced motion: keep the look, drop the movement. */
+:root[data-motion="reduced"] .fx-fog::before,
+:root[data-motion="reduced"] .fx-fog::after,
+:root[data-motion="reduced"] .fx-grain,
+:root[data-motion="reduced"] .gaslight::before {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-fog::before,
+  .fx-fog::after,
+  .fx-grain,
+  .gaslight::before {
+    animation: none;
+  }
+}

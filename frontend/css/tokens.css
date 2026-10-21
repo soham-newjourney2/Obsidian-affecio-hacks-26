@@ -1,0 +1,104 @@
+/* ECHO design tokens: cinematic noir. Every colour, size and duration lives here. */
+:root {
+  /* Base: ink-black and deep navy */
+  --ink-950: #06080d;
+  --ink-900: #0b0f17;
+  --navy-850: #10172a;
+  --navy-800: #151e33;
+  --navy-700: #1d2842;
+  --navy-600: #2a3756;
+
+  /* Gaslight gold */
+  --gold-200: #f1dcae;
+  --gold-300: #e8c98a;
+  --gold-400: #d9b26a;
+  --gold-500: #c09447;
+  --gold-600: #9b7533;
+
+  /* Parchment (clue cards) */
+  --parchment-50: #faf4e6;
+  --parchment-100: #f3e9d2;
+  --parchment-200: #e9dab8;
+  --parchment-400: #c9b48a;
+  --sepia-900: #2b2117;
+  --sepia-700: #54432f;
+
+  /* Oxblood (wax seal) */
+  --oxblood-400: #b3393c;
+  --oxblood-500: #962a2d;
+  --oxblood-600: #7a1f22;
+  --oxblood-700: #5c1619;
+
+  /* Semantic */
+  --bg: var(--ink-900);
+  --bg-raised: var(--navy-850);
+  --surface: var(--navy-800);
+  --border: rgb(217 178 106 / 0.18);
+  --border-strong: rgb(217 178 106 / 0.42);
+  --text: #ebe5d6;
+  --text-muted: #aaa391;
+  --accent: var(--gold-400);
+  --accent-strong: var(--gold-300);
+  --on-accent: #17110a;
+  --danger: #e0686b;
+  --success: #8fc79a;
+  --focus-ring: var(--gold-300);
+
+  /* Type */
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-type: "Courier Prime", "Courier New", ui-monospace, monospace;
+
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --fs-2xl: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  --fs-hero: clamp(2.6rem, 1.6rem + 5vw, 5.5rem);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.25;
+  --lh-body: 1.6;
+  --tracking-caps: 0.18em;
+
+  /* Space (4px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+
+  --container: 72rem;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+
+  /* Shape and depth */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 18px 40px -18px rgb(0 0 0 / 0.75);
+  --shadow-raised: 0 24px 60px -24px rgb(0 0 0 / 0.85);
+  --glow-gold: 0 0 0 1px rgb(217 178 106 / 0.35), 0 0 28px -4px rgb(217 178 106 / 0.45);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 600ms;
+
+  /* Layers */
+  --z-fx: 0;
+  --z-content: 1;
+  --z-header: 10;
+  --z-toast: 50;
+  --z-modal: 60;
+  --z-grain: 100;
+
+  color-scheme: dark;
+}

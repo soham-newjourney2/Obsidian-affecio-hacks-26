@@ -21,17 +21,33 @@ echo/
 │   │   └── api/v1/         # REST routers per domain (health)
 │   └── tests/
 │       ├── conftest.py     # settings + TestClient fixtures
-│       └── integration/    # HTTP-level tests: health, error shape, static serving
+│       ├── integration/    # HTTP-level tests: health, error shape, static serving
+│       └── e2e/            # Playwright browser tests against a live uvicorn (marker: e2e)
 └── frontend/               # served at "/"
-    └── index.html          # placeholder landing (replaced in P02)
+    ├── index.html          # landing: hero, how it works, audience, CTA
+    ├── auth.html           # holding page until accounts land (P04)
+    ├── css/                # tokens (palette, type, space, motion), base, components, effects, pages/
+    ├── js/core/            # strings (all UI text), ui (toast, modal, busy state), fx (atmosphere, reduced motion)
+    ├── js/pages/           # one module per page
+    └── assets/brand/       # logo.svg (wordmark, ripple "O"), favicon.svg
 ```
+
+## Design system
+
+- Palette: ink/navy base, gaslight gold accent, parchment cards, oxblood wax seal (`css/tokens.css`).
+- Type: Cormorant Garamond (display), Inter (UI), Courier Prime (narration) via Google Fonts.
+- Motion: GSAP 3 from cdnjs with SRI, optional. Pages render fully without it, and
+  `prefers-reduced-motion` skips all GSAP timelines and CSS atmosphere animation.
+- Text is bound from `strings.js` through `data-s` attributes and always set with `textContent`.
 
 ## Run
 
 ```
 uv sync
+uv run playwright install chromium
 uv run uvicorn backend.app.main:app --reload
-uv run pytest -q
+uv run pytest -q            # unit + integration
+uv run pytest -q -m e2e     # browser tests (needs network for CDN fonts/GSAP)
 uv run ruff check .
 ```
 

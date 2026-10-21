@@ -1,5 +1,7 @@
 """App factory: settings, middleware, error handlers, API routers, static frontend at "/"."""
 
+import mimetypes
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -9,6 +11,10 @@ from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
 
 API_PREFIX = "/api/v1"
+
+# The Windows registry can map these to text/plain, which breaks ES modules and stylesheets.
+for _type, _ext in (("text/javascript", ".js"), ("text/css", ".css"), ("image/svg+xml", ".svg")):
+    mimetypes.add_type(_type, _ext)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:

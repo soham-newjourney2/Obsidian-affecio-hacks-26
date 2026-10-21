@@ -14,6 +14,7 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "pytest-playwright>=0.10.0",
     "ruff>=0.17.1",
 ]
 
@@ -25,7 +26,8 @@ testpaths = ["backend/tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-p no:cacheprovider"
+addopts = "-p no:cacheprovider -m 'not e2e'"
+markers = ["e2e: browser tests against a live server (run with -m e2e)"]
 
 [tool.ruff]
 line-length = 100
