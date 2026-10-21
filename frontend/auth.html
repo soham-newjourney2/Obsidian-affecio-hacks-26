@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ECHO</title>
+  <meta name="theme-color" content="#0b0f17">
+  <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/pages/auth.css">
+  <script type="module" src="/js/pages/auth.js"></script>
+</head>
+<body class="page-auth">
+  <a class="skip-link" href="#main" data-s="common.skip"></a>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/" data-s-label="common.home">
+        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
+      </a>
+    </div>
+  </header>
+  <main id="main" class="container auth-main">
+    <article class="case-card auth-card">
+      <span class="case-card__label" data-s="auth.soon.eyebrow"></span>
+      <h1 class="case-card__title" data-s="auth.soon.title"></h1>
+      <p class="case-card__body" data-s="auth.soon.body"></p>
+      <p class="auth-card__actions"><a class="btn btn--seal" href="/" data-s="auth.soon.back"></a></p>
+    </article>
+  </main>
+</body>
+</html>
