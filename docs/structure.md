@@ -9,9 +9,11 @@ echo/
 ├── .gitignore
 ├── .python-version         # 3.12
 ├── LICENSE
+├── README.md               # short intro (full version in P20)
 ├── pyproject.toml          # deps, pytest and ruff config (uv-managed)
 ├── uv.lock
-├── structure.md            # this file
+├── docs/
+│   └── structure.md        # this file
 ├── backend/
 │   ├── app/
 │   │   ├── main.py         # app factory: middleware, error handlers, routers, static mount
