@@ -1,0 +1,39 @@
+# Local-only planning and assistant files
+planning_final.md
+planning.md
+CLAUDE.md
+.claude/
+
+# Secrets and local data
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.pem
+*.key
+
+# Python / tooling
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Test artifacts and scratch
+test-results/
+playwright-report/
+scratch/
+*.log
+*.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
