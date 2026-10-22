@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+/* `hidden` must win over component display rules (e.g. .form { display: grid }). */
+[hidden] {
+  display: none !important;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

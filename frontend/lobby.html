@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ECHO</title>
+  <meta name="theme-color" content="#0b0f17">
+  <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/pages/lobby.css">
+  <script type="module" src="/js/pages/lobby.js"></script>
+</head>
+<body class="page-lobby">
+  <a class="skip-link" href="#main" data-s="common.skip"></a>
+  <header class="site-header app-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/lobby.html" data-s-label="nav.lobby">
+        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
+      </a>
+      <nav class="site-nav" data-s-label="nav.label">
+        <span class="app-header__user" id="user-name"></span>
+        <a class="site-nav__link" href="/onboarding.html" data-s="nav.profile"></a>
+        <button class="btn btn--ghost btn--sm" type="button" id="sign-out" data-s="nav.signOut"></button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container lobby">
+    <div id="page-state" class="state" role="status" aria-live="polite"></div>
+
+    <div id="lobby-content" class="lobby__content" hidden>
+      <header class="lobby__intro">
+        <p class="eyebrow" data-s="lobby.eyebrow"></p>
+        <h1 id="welcome" class="lobby__title"></h1>
+      </header>
+
+      <article class="case-card lobby__soon">
+        <span class="case-card__label" data-s="lobby.soonLabel"></span>
+        <h2 class="case-card__title" data-s="lobby.soonTitle"></h2>
+        <p class="case-card__body" data-s="lobby.soonBody"></p>
+        <p class="lobby__soon-actions">
+          <a class="btn btn--seal" href="/onboarding.html" data-s="lobby.editProfile"></a>
+        </p>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

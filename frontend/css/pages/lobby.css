@@ -1,0 +1,35 @@
+/* Lobby */
+.lobby {
+  position: relative;
+  z-index: var(--z-content);
+  padding-block: var(--space-7) var(--space-9);
+}
+
+.lobby__content {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.lobby__intro {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lobby__title {
+  font-size: var(--fs-2xl);
+  color: var(--parchment-50);
+}
+
+.lobby__soon {
+  max-width: 34rem;
+}
+
+.lobby__soon-actions {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 600px) {
+  .page-lobby .site-nav__link {
+    display: none;
+  }
+}

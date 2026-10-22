@@ -37,6 +37,18 @@ def test_gsap_loaded_with_sri(client: TestClient) -> None:
     assert 'crossorigin="anonymous"' in html
 
 
-def test_frontend_has_no_inner_html(client: TestClient) -> None:
-    for path in ("/js/core/ui.js", "/js/core/fx.js", "/js/core/strings.js", "/js/pages/landing.js"):
-        assert "innerHTML" not in client.get(path).text
+def test_frontend_has_no_inner_html(client: TestClient, settings) -> None:
+    scripts = sorted((settings.frontend_dir / "js").rglob("*.js"))
+    assert len(scripts) >= 8
+    for script in scripts:
+        path = "/" + script.relative_to(settings.frontend_dir).as_posix()
+        source = client.get(path).text
+        assert "innerHTML" not in source and "insertAdjacentHTML" not in source, path
+
+
+def test_credential_forms_cannot_leak_into_urls(client: TestClient) -> None:
+    """Before JS wires them, auth forms must not be submittable as GET (password in URL)."""
+    html = client.get("/auth.html").text
+    for form_id in ("panel-login", "panel-register"):
+        assert f'<form id="{form_id}" class="form" method="post"' in html
+    assert html.count('type="submit" disabled') == 2

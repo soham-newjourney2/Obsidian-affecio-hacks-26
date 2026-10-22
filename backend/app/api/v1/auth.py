@@ -9,6 +9,7 @@ from backend.app.services.auth import authenticate, register_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
 def invalid_credentials() -> AppError:
     return AppError(401, "INVALID_CREDENTIALS", "Incorrect email or password.")
 

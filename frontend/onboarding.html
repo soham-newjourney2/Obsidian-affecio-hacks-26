@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ECHO</title>
+  <meta name="theme-color" content="#0b0f17">
+  <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/pages/onboarding.css">
+  <script type="module" src="/js/pages/onboarding.js"></script>
+</head>
+<body class="page-onboarding">
+  <a class="skip-link" href="#main" data-s="common.skip"></a>
+  <header class="site-header app-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/lobby.html" data-s-label="nav.lobby">
+        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
+      </a>
+      <nav class="site-nav" data-s-label="nav.label">
+        <span class="app-header__user" id="user-name"></span>
+        <button class="btn btn--ghost btn--sm" type="button" id="sign-out" data-s="nav.signOut"></button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container onboarding">
+    <header class="onboarding__intro">
+      <p class="eyebrow" data-s="onboarding.eyebrow"></p>
+      <h1 class="onboarding__title" data-s="onboarding.title"></h1>
+      <p class="onboarding__lede" data-s="onboarding.lede"></p>
+    </header>
+
+    <div id="page-state" class="state" role="status" aria-live="polite"></div>
+
+    <form id="profile-form" class="form onboarding__form" method="post" novalidate hidden>
+      <p class="form-error" role="alert" hidden></p>
+      <div id="sections" class="onboarding__sections"></div>
+      <div class="onboarding__actions">
+        <button class="btn btn--seal" type="submit" id="save"></button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

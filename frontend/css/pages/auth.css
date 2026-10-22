@@ -2,14 +2,26 @@
 .auth-main {
   position: relative;
   z-index: var(--z-content);
-  padding-block: 12vh;
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 7rem);
+  min-height: calc(100dvh - 7rem);
+  padding-block: var(--space-6) var(--space-8);
 }
 
-.auth-card {
-  max-width: 32rem;
-  margin-inline: auto;
+.auth-panel {
+  display: grid;
+  gap: var(--space-5);
+  width: min(100%, 28rem);
 }
 
-.auth-card__actions {
-  margin-top: var(--space-5);
+.auth-lede {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-style: italic;
+}
+
+.auth-panel .btn {
+  width: 100%;
 }

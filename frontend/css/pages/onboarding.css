@@ -1,0 +1,84 @@
+/* Onboarding: the player's case file */
+.onboarding {
+  position: relative;
+  z-index: var(--z-content);
+  max-width: 52rem;
+  padding-block: var(--space-7) var(--space-9);
+}
+
+.onboarding__intro {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.onboarding__title {
+  font-size: var(--fs-2xl);
+  color: var(--parchment-50);
+}
+
+.onboarding__lede {
+  max-width: 38rem;
+  color: var(--text-muted);
+}
+
+.onboarding__sections {
+  display: grid;
+  gap: var(--space-5);
+  counter-reset: section;
+}
+
+.field-group {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgb(16 23 42 / 0.7);
+  counter-increment: section;
+}
+
+.field-group[aria-invalid="true"] {
+  border-color: rgb(224 104 107 / 0.6);
+}
+
+.field-group__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.field-group__legend + * {
+  clear: both;
+}
+
+.field-group__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--parchment-50);
+}
+
+.field-group__title::before {
+  content: counter(section, upper-roman) ". ";
+  color: var(--gold-400);
+  font-family: var(--font-type);
+  font-size: var(--fs-sm);
+}
+
+.onboarding__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-3);
+}
+
+@media (max-width: 600px) {
+  .onboarding__actions .btn {
+    width: 100%;
+  }
+}
