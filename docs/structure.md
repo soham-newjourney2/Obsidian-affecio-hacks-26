@@ -10,22 +10,28 @@ echo/
 ├── .python-version         # 3.12
 ├── LICENSE
 ├── README.md               # short intro (full version in P20)
+├── alembic.ini             # migrations config (URL comes from DATABASE_URL)
 ├── pyproject.toml          # deps, pytest and ruff config (uv-managed)
 ├── uv.lock
 ├── docs/
 │   └── structure.md        # this file
 ├── backend/
 │   ├── app/
-│   │   ├── main.py         # app factory: middleware, error handlers, routers, static mount
-│   │   ├── core/           # config (settings), errors (standard error shape), logging (request id + access log)
-│   │   └── api/v1/         # REST routers per domain (health)
+│   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
+│   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
+│   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
+│   │   ├── models/         # SQLAlchemy tables (users)
+│   │   ├── schemas/        # Pydantic I/O (auth)
+│   │   ├── services/       # business logic (auth: register, authenticate)
+│   │   └── api/            # deps (session, current user), v1/ routers (health, auth)
 │   └── tests/
-│       ├── conftest.py     # settings + TestClient fixtures
-│       ├── integration/    # HTTP-level tests: health, error shape, static serving
+│       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
+│       ├── unit/           # security, rate limiter, settings, schemas
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, migrations
 │       └── e2e/            # Playwright browser tests against a live uvicorn (marker: e2e)
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
-    ├── auth.html           # holding page until accounts land (P04)
+    ├── auth.html           # holding page until accounts UI lands (P04)
     ├── css/                # tokens (palette, type, space, motion), base, components, effects, pages/
     ├── js/core/            # strings (all UI text), ui (toast, modal, busy state), fx (atmosphere, reduced motion)
     ├── js/pages/           # one module per page
@@ -43,19 +49,26 @@ echo/
 ## Run
 
 ```
+cp .env.example .env        # then set SECRET_KEY to 32+ random bytes
 uv sync
 uv run playwright install chromium
+uv run alembic upgrade head
 uv run uvicorn backend.app.main:app --reload
 uv run pytest -q            # unit + integration
 uv run pytest -q -m e2e     # browser tests (needs network for CDN fonts/GSAP)
 uv run ruff check .
 ```
 
-## Endpoints
+## Endpoints (`/api/v1`)
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/v1/health/live` | process is up |
-| GET | `/api/v1/health/ready` | app can serve (frontend present) |
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/health/live` | – | process is up |
+| GET | `/health/ready` | – | frontend present and database reachable |
+| POST | `/auth/register` | – | create account (18+ confirmed); returns a token. 5/h per IP |
+| POST | `/auth/login` | – | returns a token; one generic error. 10/15 min per IP+email |
+| POST | `/auth/logout` | bearer | revokes the current token |
+| GET | `/auth/me` | bearer | id, email, display name, created_at |
 
-All errors use `{"error": {"code", "message", "request_id"}}`; every response carries `X-Request-ID`.
+- Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
+- All errors use `{"error": {"code", "message", "request_id"}}`; every response carries `X-Request-ID`.

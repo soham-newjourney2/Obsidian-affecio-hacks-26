@@ -14,24 +14,33 @@ log = logging.getLogger("echo.errors")
 
 
 class AppError(Exception):
-    def __init__(self, status_code: int, code: str, message: str) -> None:
+    def __init__(
+        self, status_code: int, code: str, message: str, headers: dict[str, str] | None = None
+    ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.code = code
         self.message = message
+        self.headers = headers or {}
 
 
-def error_response(request: Request, status_code: int, code: str, message: str) -> JSONResponse:
+def error_response(
+    request: Request,
+    status_code: int,
+    code: str,
+    message: str,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
     request_id = get_request_id(request)
     return JSONResponse(
         status_code=status_code,
         content={"error": {"code": code, "message": message, "request_id": request_id}},
-        headers={REQUEST_ID_HEADER: request_id},
+        headers={**(headers or {}), REQUEST_ID_HEADER: request_id},
     )
 
 
 async def _app_error(request: Request, exc: AppError) -> JSONResponse:
-    return error_response(request, exc.status_code, exc.code, exc.message)
+    return error_response(request, exc.status_code, exc.code, exc.message, exc.headers)
 
 
 async def _http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
