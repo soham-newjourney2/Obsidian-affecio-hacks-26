@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from backend.app.core.config import Settings
@@ -17,10 +19,17 @@ def test_ready(client: TestClient) -> None:
     assert res.json() == {"status": "ready"}
 
 
-def test_ready_fails_without_frontend(tmp_path, monkeypatch) -> None:
-    settings = Settings(_env_file=None, app_env="test", frontend_dir=tmp_path)
-    monkeypatch.setattr("backend.app.api.v1.health.get_settings", lambda: settings)
-    with TestClient(create_app(settings)) as c:
+def test_ready_fails_without_frontend(settings: Settings, tmp_path: Path) -> None:
+    broken = settings.model_copy(update={"frontend_dir": tmp_path})
+    with TestClient(create_app(broken)) as c:
+        res = c.get("/api/v1/health/ready")
+    assert res.status_code == 503
+    assert res.json()["error"]["code"] == "NOT_READY"
+
+
+def test_ready_fails_without_database(settings: Settings, tmp_path: Path) -> None:
+    url = f"sqlite+aiosqlite:///{(tmp_path / 'missing-dir' / 'x.db').as_posix()}"
+    with TestClient(create_app(settings.model_copy(update={"database_url": url}))) as c:
         res = c.get("/api/v1/health/ready")
     assert res.status_code == 503
     assert res.json()["error"]["code"] == "NOT_READY"

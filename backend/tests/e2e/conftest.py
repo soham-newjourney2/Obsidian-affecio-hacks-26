@@ -9,6 +9,7 @@ from playwright.sync_api import Page
 
 from backend.app.core.config import Settings
 from backend.app.main import create_app
+from backend.tests.conftest import migrate, sqlite_url
 
 
 def _free_port() -> int:
@@ -20,9 +21,10 @@ def _free_port() -> int:
 @pytest.fixture(scope="session")
 def live_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
     """Real uvicorn on a free port, with a temp DB and mock AI for later phases."""
-    tmp = tmp_path_factory.mktemp("e2e")
+    database_url = sqlite_url(tmp_path_factory.mktemp("e2e") / "e2e.db")
+    migrate(database_url)
     with pytest.MonkeyPatch.context() as mp:
-        mp.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{tmp.as_posix()}/e2e.db")
+        mp.setenv("DATABASE_URL", database_url)
         mp.setenv("AI_PROVIDER", "mock")
         mp.setenv("ENABLE_VOICE_VIDEO", "false")
         mp.setenv("ENABLE_BLOCKCHAIN", "false")
