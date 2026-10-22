@@ -28,7 +28,14 @@ def live_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
         mp.setenv("AI_PROVIDER", "mock")
         mp.setenv("ENABLE_VOICE_VIDEO", "false")
         mp.setenv("ENABLE_BLOCKCHAIN", "false")
-        settings = Settings(_env_file=None, app_env="test", log_level="WARNING")
+        settings = Settings(
+            _env_file=None,
+            app_env="test",
+            log_level="WARNING",
+            # Every e2e test registers from 127.0.0.1; limits are covered by API tests.
+            register_rate_limit=10_000,
+            login_rate_limit=10_000,
+        )
         port = _free_port()
         server = uvicorn.Server(
             uvicorn.Config(create_app(settings), host="127.0.0.1", port=port, log_level="warning")
@@ -50,10 +57,23 @@ def base_url(live_server: str) -> str:
     return live_server
 
 
+# API responses that are part of normal flows (browsers log every 4xx fetch as an error).
+EXPECTED_HTTP_ERRORS = ("/api/v1/users/me/profile",)  # 404 until onboarding is done
+
+
 @pytest.fixture
 def console_errors(page: Page) -> list[str]:
     """Collects console errors and uncaught page errors for the test's page."""
     errors: list[str] = []
-    page.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" else None)
+
+    def on_console(msg) -> None:
+        if msg.type != "error":
+            return
+        url = msg.location.get("url", "")
+        if msg.text.startswith("Failed to load resource") and url.endswith(EXPECTED_HTTP_ERRORS):
+            return
+        errors.append(f"{msg.text} @ {url}")
+
+    page.on("console", on_console)
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     return errors

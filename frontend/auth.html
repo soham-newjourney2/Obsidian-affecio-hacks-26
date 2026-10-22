@@ -25,13 +25,62 @@
       </a>
     </div>
   </header>
+
   <main id="main" class="container auth-main">
-    <article class="case-card auth-card">
-      <span class="case-card__label" data-s="auth.soon.eyebrow"></span>
-      <h1 class="case-card__title" data-s="auth.soon.title"></h1>
-      <p class="case-card__body" data-s="auth.soon.body"></p>
-      <p class="auth-card__actions"><a class="btn btn--seal" href="/" data-s="auth.soon.back"></a></p>
-    </article>
+    <section class="panel auth-panel gaslight" aria-labelledby="auth-title">
+      <h1 id="auth-title" class="visually-hidden" data-s="auth.title"></h1>
+
+      <div class="tabs" role="tablist" data-s-label="auth.tabs.label">
+        <button class="tab" type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true" data-s="auth.tabs.login"></button>
+        <button class="tab" type="button" role="tab" id="tab-register" aria-controls="panel-register" aria-selected="false" tabindex="-1" data-s="auth.tabs.register"></button>
+      </div>
+
+      <form id="panel-login" class="form" method="post" role="tabpanel" aria-labelledby="tab-login" novalidate>
+        <p class="auth-lede" data-s="auth.login.lede"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="field">
+          <label class="label" for="login-email" data-s="auth.fields.email"></label>
+          <input class="input" id="login-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="login-email-error" data-invalid="auth.invalid.email">
+          <p class="field-error" id="login-email-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="label" for="login-password" data-s="auth.fields.password"></label>
+          <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128" aria-describedby="login-password-error" data-invalid="auth.invalid.password">
+          <p class="field-error" id="login-password-error" hidden></p>
+        </div>
+        <button class="btn btn--primary" type="submit" disabled data-s="auth.login.submit"></button>
+      </form>
+
+      <form id="panel-register" class="form" method="post" role="tabpanel" aria-labelledby="tab-register" novalidate hidden>
+        <p class="auth-lede" data-s="auth.register.lede"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="field">
+          <label class="label" for="register-name" data-s="auth.fields.displayName"></label>
+          <input class="input" id="register-name" name="display_name" type="text" autocomplete="nickname" required minlength="2" maxlength="24" pattern="[\p{L}\p{N}_][\p{L}\p{N}_ .'\-]*" aria-describedby="register-name-hint register-name-error" data-invalid="auth.invalid.displayName">
+          <p class="hint" id="register-name-hint" data-s="auth.fields.displayNameHint"></p>
+          <p class="field-error" id="register-name-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="label" for="register-email" data-s="auth.fields.email"></label>
+          <input class="input" id="register-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="register-email-error" data-invalid="auth.invalid.email">
+          <p class="field-error" id="register-email-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="label" for="register-password" data-s="auth.fields.password"></label>
+          <input class="input" id="register-password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" aria-describedby="register-password-hint register-password-error" data-invalid="auth.invalid.newPassword">
+          <p class="hint" id="register-password-hint" data-s="auth.fields.passwordHint"></p>
+          <p class="field-error" id="register-password-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="check" for="register-age">
+            <input id="register-age" name="age_confirmed" type="checkbox" required aria-describedby="register-age-error" data-invalid="auth.invalid.age">
+            <span data-s="auth.fields.age"></span>
+          </label>
+          <p class="field-error" id="register-age-error" hidden></p>
+        </div>
+        <button class="btn btn--seal" type="submit" disabled data-s="auth.register.submit"></button>
+      </form>
+    </section>
   </main>
 </body>
 </html>

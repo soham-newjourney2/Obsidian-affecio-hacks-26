@@ -76,3 +76,57 @@ export function setBusy(button, busy) {
   if (busy) button.setAttribute("aria-busy", "true");
   else button.removeAttribute("aria-busy");
 }
+
+// Forms: field errors live in an element whose id is in the input's aria-describedby.
+function errorSlot(input) {
+  return document.getElementById(`${input.id}-error`);
+}
+
+export function setFieldError(input, message) {
+  const slot = errorSlot(input);
+  input.setAttribute("aria-invalid", message ? "true" : "false");
+  if (slot) {
+    slot.textContent = message || "";
+    slot.hidden = !message;
+  }
+}
+
+export function clearFormErrors(form) {
+  for (const input of form.querySelectorAll("[aria-invalid]")) setFieldError(input, "");
+  setFormError(form, "");
+}
+
+export function setFormError(form, message) {
+  const slot = form.querySelector(".form-error");
+  if (!slot) return;
+  slot.textContent = message || "";
+  slot.hidden = !message;
+}
+
+// Page state panel: "loading" | "error" | null (hidden).
+export function setPageState(panel, state, { message = "", onRetry } = {}) {
+  panel.replaceChildren();
+  panel.hidden = state === null;
+  if (state === "loading") {
+    const spinner = el("div", "spinner");
+    spinner.setAttribute("aria-hidden", "true");
+    panel.append(spinner, el("p", null, message || t("common.loading")));
+  } else if (state === "error") {
+    panel.append(el("p", null, message || t("errors.generic")));
+    if (onRetry) {
+      const retry = el("button", "btn btn--ghost", t("common.retry"));
+      retry.type = "button";
+      retry.addEventListener("click", onRetry);
+      panel.append(retry);
+    }
+  }
+}
+
+export function mountAppHeader(user, onSignOut) {
+  const name = document.querySelector("#user-name");
+  if (name) name.textContent = user.display_name;
+  document.querySelector("#sign-out")?.addEventListener("click", (event) => {
+    setBusy(event.currentTarget, true);
+    onSignOut();
+  });
+}

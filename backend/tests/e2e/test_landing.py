@@ -34,10 +34,11 @@ def test_no_fake_stats_on_landing(page: Page) -> None:
 def test_primary_cta_opens_auth(page: Page, console_errors: list[str]) -> None:
     page.goto("/")
     page.locator("#cta-start").click()
-    expect(page).to_have_url(re.compile(r"/auth\.html$"))
-    expect(page.locator("h1")).to_have_text("Accounts are on their way.")
-    page.get_by_role("link", name="Back to the start").click()
-    expect(page).to_have_url(re.compile(r"/$"))
+    expect(page).to_have_url(re.compile(r"/auth\.html#register$"))
+    register_tab = page.get_by_role("tab", name="Create account")
+    expect(register_tab).to_have_attribute("aria-selected", "true")
+    expect(page.locator("#register-name")).to_be_visible()
+    expect(page.locator("#panel-login")).to_be_hidden()
     assert console_errors == []
 
 

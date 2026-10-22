@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     secret_key: SecretStr
     access_token_minutes: int = Field(default=60, ge=1, le=24 * 60)
     database_url: str = "sqlite+aiosqlite:///./echo.db"
+    # Attempts per window (register: per IP per hour; login: per IP+email per 15 min).
+    register_rate_limit: int = Field(default=5, ge=1)
+    login_rate_limit: int = Field(default=10, ge=1)
 
     @field_validator("secret_key")
     @classmethod

@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.v1 import auth, health
+from backend.app.api.v1 import auth, health, meta, users
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
@@ -45,8 +45,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.sessionmaker = create_sessionmaker(engine)
     app.state.denylist = TokenDenylist()
     app.state.limits = {
-        "register": RateLimiter(limit=5, window_s=60 * 60),
-        "login": RateLimiter(limit=10, window_s=15 * 60),
+        "register": RateLimiter(limit=settings.register_rate_limit, window_s=60 * 60),
+        "login": RateLimiter(limit=settings.login_rate_limit, window_s=15 * 60),
     }
 
     app.add_middleware(RequestIdMiddleware)
@@ -54,6 +54,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(health.router, prefix=API_PREFIX)
     app.include_router(auth.router, prefix=API_PREFIX)
+    app.include_router(users.router, prefix=API_PREFIX)
+    app.include_router(meta.router, prefix=API_PREFIX)
     # Mounted last so API routes take precedence.
     app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="frontend")
     return app

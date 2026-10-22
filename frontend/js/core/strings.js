@@ -8,11 +8,29 @@ export const STRINGS = Object.freeze({
     close: "Close",
     ok: "OK",
     cancel: "Cancel",
+    retry: "Try again",
+    loading: "Loading…",
+  },
+  nav: {
+    label: "Account",
+    profile: "Edit profile",
+    signOut: "Sign out",
+    lobby: "Lobby",
+  },
+  errors: {
+    network: "Can't reach ECHO. Check your connection and try again.",
+    generic: "Something went wrong. Please try again.",
+    RATE_LIMITED: "Too many attempts. Please wait a few minutes and try again.",
+    INVALID_CREDENTIALS: "Incorrect email or password.",
+    EMAIL_TAKEN: "An account with this email already exists. Try signing in instead.",
+    VALIDATION_ERROR: "Some details need another look.",
+    UNAUTHORIZED: "Your session has ended. Please sign in again.",
   },
   landing: {
     nav: {
       label: "Main",
       how: "How it works",
+      signIn: "Sign in",
       start: "Start a case",
     },
     hero: {
@@ -52,20 +70,78 @@ export const STRINGS = Object.freeze({
     },
   },
   auth: {
-    soon: {
-      eyebrow: "The door is nearly open",
-      title: "Accounts are on their way.",
-      body: "Sign-up and sign-in arrive in the next build. Until then, the case file stays sealed.",
-      back: "Back to the start",
+    title: "Sign in or create an account",
+    tabs: {
+      label: "Account",
+      login: "Sign in",
+      register: "Create account",
     },
+    fields: {
+      email: "Email",
+      password: "Password",
+      displayName: "Display name",
+      displayNameHint: "2–24 characters. This is what your group sees.",
+      passwordHint: "At least 10 characters.",
+      age: "I confirm I am 18 or older.",
+    },
+    invalid: {
+      email: "Enter a valid email address.",
+      password: "Enter your password.",
+      newPassword: "Use 10–128 characters.",
+      displayName: "Use 2–24 letters, numbers, spaces or . ' - _",
+      age: "ECHO is for adults. Please confirm you are 18 or older.",
+    },
+    login: {
+      lede: "Welcome back. Your table is waiting.",
+      submit: "Sign in",
+    },
+    register: {
+      lede: "One account, then a short case file about you. No personality tests.",
+      submit: "Create account",
+    },
+  },
+  onboarding: {
+    eyebrow: "Your case file",
+    title: "Tell us what you're into.",
+    lede: "We use this to find you a good table. No scores, no personality tests, and you can change it any time.",
+    loading: "Opening your case file…",
+    loadError: "We couldn't open your case file.",
+    counter: "{count} of {max} chosen",
+    minimum: "Choose at least {min}.",
+    chooseOne: "Choose one.",
+    optional: "Optional",
+    sections: {
+      interests: { title: "Interests", hint: "Pick what you'd happily talk about for an evening." },
+      genres: { title: "Story genres", hint: "Which kinds of cases pull you in?" },
+      activities: { title: "Things you'd do after a case", hint: "Only used if you and someone both choose to stay in touch." },
+      interaction_style: { title: "How you play", hint: "There's no best answer; good tables mix all three." },
+      preferred_roles: { title: "Roles you'd enjoy", hint: "Up to two. You may not always get them." },
+      availability: { title: "When you're free", hint: "Rough windows are enough." },
+      visibility: { title: "Who sees this", hint: "You're in control. Private is the default." },
+      shareable_summary: { title: "A line about you", hint: "Shown only to people you choose to connect with." },
+    },
+    summaryCounter: "{count} / {max}",
+    submitNew: "Save and continue",
+    submitEdit: "Save changes",
+    saved: "Case file saved.",
+  },
+  lobby: {
+    eyebrow: "The lobby",
+    welcome: "Welcome, {name}.",
+    soonLabel: "Case catalogue",
+    soonTitle: "Cases open soon.",
+    soonBody: "The catalogue of mysteries arrives in the next build. Your case file is saved, and you can edit it any time.",
+    editProfile: "Edit your case file",
   },
 });
 
-export function t(key) {
+// t("lobby.welcome", { name }) fills {name}-style placeholders.
+export function t(key, params) {
   const value = key.split(".").reduce((node, part) => (node == null ? node : node[part]), STRINGS);
   if (typeof value !== "string") {
     console.warn(`Missing string: ${key}`);
     return key;
   }
-  return value;
+  if (!params) return value;
+  return value.replace(/\{(\w+)\}/g, (match, name) => (name in params ? String(params[name]) : match));
 }
