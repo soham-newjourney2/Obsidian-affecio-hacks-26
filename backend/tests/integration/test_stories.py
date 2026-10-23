@@ -1,7 +1,6 @@
 import sqlite3
 from pathlib import Path
 
-import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.services.stories import SeedResult, load_story_files
@@ -10,12 +9,6 @@ from backend.tests.conftest import seed, sqlite_url
 
 def run_seed(db_path: Path, stories=None) -> SeedResult:
     return seed(sqlite_url(db_path), stories)
-
-
-@pytest.fixture
-def seeded(db_path: Path) -> Path:
-    run_seed(db_path)
-    return db_path
 
 
 def test_seed_is_idempotent(db_path: Path) -> None:

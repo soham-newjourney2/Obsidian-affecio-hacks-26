@@ -41,13 +41,64 @@
         <a class="lobby__profile-link" href="/onboarding.html" data-s="lobby.editProfile"></a>
       </header>
 
-      <section class="catalogue" aria-labelledby="catalogue-title">
-        <div class="catalogue__head">
-          <h2 id="catalogue-title" class="catalogue__title" data-s="lobby.catalogueTitle"></h2>
-          <p class="catalogue__lede" data-s="lobby.catalogueLede"></p>
+      <section id="room" class="panel room" aria-labelledby="room-title" hidden>
+        <p class="eyebrow" data-s="lobby.room.eyebrow"></p>
+        <h2 id="room-title" class="room__title"></h2>
+
+        <div id="invite" class="room__invite">
+          <div id="invite-known">
+            <p class="label" id="invite-label" data-s="lobby.room.inviteLabel"></p>
+            <div class="room__code-row">
+              <output id="invite-code" class="room__code" aria-labelledby="invite-label"></output>
+              <button class="btn btn--ghost btn--sm" type="button" id="copy-code" data-s="lobby.room.copy"></button>
+            </div>
+            <p class="hint" data-s="lobby.room.inviteHint"></p>
+          </div>
+          <p id="invite-unknown" class="hint" data-s="lobby.room.inviteUnknown" hidden></p>
         </div>
-        <ul id="catalogue" class="catalogue__grid"></ul>
+
+        <div class="room__members">
+          <h3 id="members-title" class="room__subtitle"></h3>
+          <ul id="members" class="room__member-list"></ul>
+        </div>
+
+        <p id="room-status" class="room__status" role="status" aria-live="polite"></p>
+
+        <div id="room-actions" class="room__actions">
+          <button class="btn btn--ghost" type="button" id="ready-toggle" aria-pressed="false"></button>
+          <button class="btn btn--seal" type="button" id="start" data-s="lobby.room.start"></button>
+          <button class="btn btn--ghost btn--sm room__leave" type="button" id="leave" data-s="lobby.room.leave"></button>
+        </div>
+
+        <div id="room-started" class="room__started" hidden>
+          <h3 class="room__subtitle" data-s="lobby.room.startedTitle"></h3>
+          <p id="started-body"></p>
+          <button class="btn btn--ghost" type="button" id="back-to-catalogue" data-s="lobby.room.backToLobby"></button>
+        </div>
       </section>
+
+      <div id="home" class="lobby__home">
+        <section class="panel join" aria-labelledby="join-title">
+          <h2 id="join-title" class="join__title" data-s="lobby.join.title"></h2>
+          <form id="join-form" class="join__form" method="post" novalidate>
+            <div class="field">
+              <label class="label" for="join-code" data-s="lobby.join.label"></label>
+              <input class="input join__input" id="join-code" name="code" type="text" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="join-code-hint join-code-error">
+              <p class="hint" id="join-code-hint" data-s="lobby.join.hint"></p>
+              <p class="field-error" id="join-code-error" hidden></p>
+            </div>
+            <button class="btn btn--primary" type="submit" disabled data-s="lobby.join.submit"></button>
+          </form>
+        </section>
+
+        <section class="catalogue" aria-labelledby="catalogue-title">
+          <div class="catalogue__head">
+            <h2 id="catalogue-title" class="catalogue__title" data-s="lobby.catalogueTitle"></h2>
+            <p class="catalogue__lede" data-s="lobby.catalogueLede"></p>
+          </div>
+          <ul id="catalogue" class="catalogue__grid"></ul>
+        </section>
+      </div>
     </div>
   </main>
 
@@ -61,10 +112,11 @@
         <h3 class="story-modal__heading" data-s="lobby.detail.roles"></h3>
         <ul class="story-modal__roles" id="story-roles"></ul>
       </div>
-      <p class="hint" data-s="lobby.detail.roomsSoon"></p>
+      <p class="hint" data-s="lobby.detail.createHint"></p>
       <div class="modal__actions">
         <a class="btn btn--ghost" id="story-source" target="_blank" rel="noopener noreferrer"></a>
-        <button class="btn btn--primary" type="button" id="story-close" data-s="common.close"></button>
+        <button class="btn btn--ghost" type="button" id="story-close" data-s="common.close"></button>
+        <button class="btn btn--seal" type="button" id="story-create" data-s="lobby.detail.create"></button>
       </div>
     </div>
   </dialog>

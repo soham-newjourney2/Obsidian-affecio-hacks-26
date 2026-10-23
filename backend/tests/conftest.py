@@ -57,6 +57,13 @@ def db_path(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def seeded(db_path: Path) -> Path:
+    """The test database with every story file seeded."""
+    seed(sqlite_url(db_path))
+    return db_path
+
+
+@pytest.fixture
 def settings(db_path: Path) -> Settings:
     return Settings(
         _env_file=None, app_env="test", log_level="WARNING", database_url=sqlite_url(db_path)
