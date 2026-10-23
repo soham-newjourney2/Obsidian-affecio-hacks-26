@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.v1 import auth, health, meta, users
+from backend.app.api.v1 import auth, health, meta, stories, users
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
@@ -56,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth.router, prefix=API_PREFIX)
     app.include_router(users.router, prefix=API_PREFIX)
     app.include_router(meta.router, prefix=API_PREFIX)
+    app.include_router(stories.router, prefix=API_PREFIX)
     # Mounted last so API routes take precedence.
     app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="frontend")
     return app

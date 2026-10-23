@@ -1,0 +1,309 @@
+{
+  "story_id": "blackthorn_manor",
+  "version": 1,
+  "title": "Blackthorn Manor",
+  "description": "The 1890s. A whistle in the night, a room no one should sleep in, and one night to find the danger before it finds Elinor Vance.",
+  "genres": ["mystery", "gothic"],
+  "min_players": 3,
+  "max_players": 4,
+  "est_minutes": 30,
+  "playable": true,
+  "rights": {
+    "inspiration_title": "The Adventure of the Speckled Band",
+    "inspiration_author": "Arthur Conan Doyle",
+    "author_death_year": 1930,
+    "publication_year": 1892,
+    "original_language": "English",
+    "source_url": "https://www.gutenberg.org/ebooks/1661",
+    "status": "verified_public_domain",
+    "notes": "Doyle died in 1930; the story was first published in 1892. Public domain in India (author's life + 60 years, expired 1990) and in the US (published before 1931). Adaptation uses original names and plot, no detective branding and no source passages. The original's ethnic caricature is replaced by a travelling performers' camp.",
+    "reviewed_at": "2026-10-23"
+  },
+  "content": {
+    "premise": "Two years ago Marian Vance fell gravely ill after nights of a low whistle she could not explain. Last night her sister Elinor, moved into Marian's old room while repairs are made, heard the same whistle. She has one night left in that room, and she has come to you.",
+    "roles": [
+      { "id": "investigator", "name": "The Investigator", "focus": "Physical evidence: rooms, objects and traces." },
+      { "id": "archivist", "name": "The Archivist", "focus": "Letters, wills, ledgers and invoices." },
+      { "id": "listener", "name": "The Listener", "focus": "Testimony, rumours and sounds in the night." },
+      { "id": "strategist", "name": "The Strategist", "focus": "Timelines and the floor plan." }
+    ],
+    "optional_role": "strategist",
+    "redistribution": {
+      "c_floorplan": "archivist",
+      "c_timeline": "listener"
+    },
+    "variants": [
+      {
+        "id": "v1",
+        "solution_summary": "Dr. Edmund Thorne, the stepfather, bought a trained creature from the travelling performers. On nights he sent the servants to bed early, he let it down the bell-pull through the vent from his study and whistled it back before dawn. The sisters' marriages would have cut his income."
+      },
+      {
+        "id": "v2",
+        "solution_summary": "The steward, Mr. Hollis, inherits an annuity if both sisters die unmarried. On his nights of lamp duty he opened the gas tap in the lamp store so the fumes drifted through the shared vent, then closed it before the house woke."
+      },
+      {
+        "id": "v3",
+        "solution_summary": "No one is to blame. The new gas pipe laid six weeks before Marian fell ill leaks at a badly made joint behind the vent. On the coldest nights, with every lamp turned up, gas gathers in the closed room. Dr. Thorne's temper and secrets were a red herring."
+      }
+    ],
+    "start_scene": "s1_visit",
+    "scenes": [
+      {
+        "id": "s1_visit",
+        "title": "The Visit",
+        "narration_base": "Rain streaks the windows of your rooms in town. Elinor Vance sits very straight, gloves twisted in her hands. Two years ago her sister Marian fell gravely ill after nights of a strange low whistle. Last night, moved into Marian's old room while the house is repaired, Elinor heard it again. Her stepfather does not know she has come to you.",
+        "objective": "Hear Elinor out, then share what each of you noticed in her account.",
+        "reveals": ["c_whistle", "c_will", "c_sounds", "c_floorplan"],
+        "decision_id": "d1_start"
+      },
+      {
+        "id": "s2_grounds",
+        "title": "The Grounds",
+        "narration_base": "Blackthorn Manor squats at the end of a long, wet drive, half its windows shuttered. Beyond the kitchen garden, smoke rises from a camp of travelling performers. Somewhere in the shrubbery, a large dog is barking.",
+        "objective": "Decide what out here is connected to the danger, and what is only noise.",
+        "reveals": ["c_circus", "c_hound"],
+        "next": "s3_room"
+      },
+      {
+        "id": "s3_room",
+        "title": "The Room",
+        "narration_base": "Marian's room is small and far too tidy. The bed is pushed hard against one wall, a bell-pull hangs beside it, and high above, a small vent opens into the next room. Elinor waits in the doorway while you look.",
+        "objective": "Work out what could reach a sleeper through that vent.",
+        "reveals": ["c_bellpull", "c_bed", "c_vent", "c_invoice", "c_maid", "c_timeline"],
+        "decision_id": "d2_vent"
+      },
+      {
+        "id": "s4_vigil",
+        "title": "The Vigil",
+        "narration_base": "Night falls over Blackthorn Manor. Elinor will do whatever you decide, but she must not spend tonight alone in that room. The house settles into silence, and somewhere below, a clock strikes eleven.",
+        "objective": "Agree on one plan for the night. It has to stop what really comes through the vent.",
+        "reveals": [],
+        "decision_id": "d3_plan"
+      }
+    ],
+    "clues": [
+      {
+        "id": "c_whistle",
+        "text": "Elinor heard a low, clear whistle at about three in the morning: the same sound Marian described the night before she fell ill.",
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_will",
+        "text": "A copy of their late mother's will: while the sisters are unmarried, Dr. Thorne controls their income. Each marriage would cut it by a third, and Elinor is now engaged.",
+        "text_by_variant": {
+          "v2": "A copy of their late mother's will: if both sisters die unmarried, a generous annuity passes to the steward, Mr. Hollis, 'for long and faithful service'.",
+          "v3": "A copy of their late mother's will: the money is held in trust and passes to distant cousins whatever happens. On paper, no one in the house gains from the sisters' misfortune."
+        },
+        "owner_role": "archivist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_sounds",
+        "text": "After the whistle, Elinor heard a soft metallic clang, like the lid of a heavy box falling shut.",
+        "text_by_variant": {
+          "v2": "After the whistle, Elinor heard slow footsteps in the corridor, then the creak of the lamp-store door.",
+          "v3": "After the whistle, Elinor heard ticking and knocking inside the wall, the way pipes complain as a house cools."
+        },
+        "owner_role": "listener",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_floorplan",
+        "text": "The floor plan shows the vent does not lead outside. It opens into Dr. Thorne's study, which shares a wall with the lamp store where the new gas pipe runs.",
+        "owner_role": "strategist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_circus",
+        "text": "The performers keep a dancing bear, two goats and a parrot. All are accounted for, and none of the troupe has been near the house.",
+        "text_by_variant": {
+          "v1": "One of the performers grumbles that their rarest animal was sold last spring 'to a gentleman from the big house, who paid in gold'."
+        },
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "true", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_hound",
+        "text": "A great shaggy hound roams the grounds at night. The gardener swears it is gentle, and it has never once climbed the stairs.",
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "red_herring", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_bellpull",
+        "text": "The bell-pull rings nothing. The gardener says it was hung only for show when the room was redecorated.",
+        "text_by_variant": {
+          "v1": "The bell-pull rings nothing. It is tied to a hook beside the vent, and the rope is worn smooth near the top, as if something has climbed it."
+        },
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "true", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_bed",
+        "text": "The bed is bolted to the floor, so whoever sleeps in it lies directly beneath the vent.",
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_vent",
+        "text": "On the study side of the vent, a saucer of milk sits on the floor, and the dust beneath the vent has been disturbed.",
+        "text_by_variant": {
+          "v2": "The vent's edge is ringed with fresh soot, and the air near it smells faintly of lamp oil.",
+          "v3": "A faint sweet smell lingers near the skirting board under the vent, strongest where the new pipe runs behind the plaster."
+        },
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_invoice",
+        "text": "A gasfitter's invoice: a new pipe was laid to the east wing six weeks before Marian fell ill, joined just behind the study wall.",
+        "owner_role": "archivist",
+        "meaning_by_variant": { "v1": "red_herring", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_maid",
+        "text": "The maid says Dr. Thorne keeps a locked iron safe in his study and lets no one dust near it.",
+        "text_by_variant": {
+          "v2": "The maid says Mr. Hollis walks the east corridor with a lamp every night after the house is asleep.",
+          "v3": "The maid says the east-wing lamps have burned blue and sputtered ever since the new pipe went in."
+        },
+        "owner_role": "listener",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_timeline",
+        "text": "Both nights of trouble came when Dr. Thorne had dined alone and sent the servants to bed early.",
+        "text_by_variant": {
+          "v2": "Both nights of trouble fell on Mr. Hollis's nights for lamp duty.",
+          "v3": "Both nights of trouble were the coldest of their month, when every gas lamp in the house was turned up high."
+        },
+        "owner_role": "strategist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      }
+    ],
+    "decisions": [
+      {
+        "id": "d1_start",
+        "prompt": "Where do you begin at Blackthorn Manor?",
+        "choices": [
+          {
+            "id": "c_grounds",
+            "label": "Walk the grounds before going in",
+            "next_by_variant": { "v1": "s2_grounds", "v2": "s2_grounds", "v3": "s2_grounds" }
+          },
+          {
+            "id": "c_room",
+            "label": "Go straight to Marian's room",
+            "next_by_variant": { "v1": "s3_room", "v2": "s3_room", "v3": "s3_room" }
+          }
+        ]
+      },
+      {
+        "id": "d2_vent",
+        "prompt": "What do you think reaches the sleeper through the vent?",
+        "choices": [
+          {
+            "id": "c_creature",
+            "label": "Something living is sent through it",
+            "next_by_variant": { "v1": "s4_vigil", "v2": "s4_vigil", "v3": "s4_vigil" }
+          },
+          {
+            "id": "c_lamp_gas",
+            "label": "Someone feeds lamp gas through it",
+            "next_by_variant": { "v1": "s4_vigil", "v2": "s4_vigil", "v3": "s4_vigil" }
+          },
+          {
+            "id": "c_leak",
+            "label": "The new gas pipe leaks into it",
+            "next_by_variant": { "v1": "s4_vigil", "v2": "s4_vigil", "v3": "s4_vigil" }
+          }
+        ]
+      },
+      {
+        "id": "d3_plan",
+        "prompt": "What is the plan for tonight?",
+        "choices": [
+          {
+            "id": "c_watch",
+            "label": "Sit up in the dark beside the bed, lamp shuttered, and watch the vent and the bell-pull",
+            "next_by_variant": { "v1": "ending_success", "v2": "ending_partial", "v3": "ending_partial" }
+          },
+          {
+            "id": "c_lamp_store",
+            "label": "Hide in the lamp store and catch whoever touches the gas tap",
+            "next_by_variant": { "v1": "ending_partial", "v2": "ending_success", "v3": "ending_partial" }
+          },
+          {
+            "id": "c_gas_main",
+            "label": "Shut the gas at the main, open the windows and bring the gasfitter at first light",
+            "next_by_variant": { "v1": "ending_partial", "v2": "ending_partial", "v3": "ending_success" }
+          },
+          {
+            "id": "c_inn",
+            "label": "Take Elinor to the village inn for the night",
+            "next_by_variant": { "v1": "ending_safe", "v2": "ending_safe", "v3": "ending_safe" }
+          }
+        ]
+      }
+    ],
+    "hints": [
+      {
+        "scene_id": "s1_visit",
+        "levels": [
+          "Every sound Elinor describes might matter tonight. Compare what each of you heard in her story.",
+          "The Listener and the Archivist may each hold part of why this is happening now.",
+          "Both starting points work: the grounds add context, and Marian's room holds the core evidence."
+        ]
+      },
+      {
+        "scene_id": "s2_grounds",
+        "levels": [
+          "Not everything strange at Blackthorn Manor is connected to the danger.",
+          "Weigh the camp and the hound against what the Listener and the Archivist already know.",
+          "The hound cannot reach an upstairs room. The performers matter only if something of theirs found its way into the house."
+        ]
+      },
+      {
+        "scene_id": "s3_room",
+        "levels": [
+          "Look at how the bed, the bell-pull and the vent fit together.",
+          "The Investigator and the Archivist should compare what the room shows with what the papers say.",
+          "Something reaches the sleeper through the vent. Ask which clues point to only one cause: a living thing, lamp gas from the next room, or a leaking pipe."
+        ]
+      },
+      {
+        "scene_id": "s4_vigil",
+        "levels": [
+          "The plan has to stop what actually comes through the vent, not just what seems most frightening.",
+          "The Strategist's timeline, or whoever holds it now, says when and why the danger comes.",
+          "Match the plan to the cause: watch the vent for a living thing, the lamp store for a person, or shut the main for a leak. If you cannot agree, the inn keeps Elinor safe."
+        ]
+      }
+    ],
+    "endings": [
+      {
+        "id": "ending_success",
+        "kind": "success",
+        "title": "Case solved",
+        "text": "Before dawn the danger shows itself exactly where you said it would, and you are ready for it. Elinor is safe, the cause is in plain sight, and for the first time in two years the house is quiet for the right reason."
+      },
+      {
+        "id": "ending_partial",
+        "kind": "partial",
+        "title": "The night is survived",
+        "text": "Elinor comes through the night unharmed; you made sure she was never alone. But the true cause slipped past you, and Blackthorn Manor keeps its secret a little longer."
+      },
+      {
+        "id": "ending_safe",
+        "kind": "safe",
+        "title": "A safe retreat",
+        "text": "You spend the night at the village inn, taking turns by the fire. Elinor is safe and grateful, though the house keeps its secret. Sometimes the right call is simply to step away from the danger."
+      }
+    ],
+    "safety_notes": [
+      "No one dies or is shown being hurt; every ending keeps Elinor safe.",
+      "The original's ethnic caricature is replaced by a travelling performers' camp, who are never the villains.",
+      "Danger is implied (illness, gas, a creature) rather than described in detail."
+    ]
+  }
+}

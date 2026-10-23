@@ -38,17 +38,35 @@
       <header class="lobby__intro">
         <p class="eyebrow" data-s="lobby.eyebrow"></p>
         <h1 id="welcome" class="lobby__title"></h1>
+        <a class="lobby__profile-link" href="/onboarding.html" data-s="lobby.editProfile"></a>
       </header>
 
-      <article class="case-card lobby__soon">
-        <span class="case-card__label" data-s="lobby.soonLabel"></span>
-        <h2 class="case-card__title" data-s="lobby.soonTitle"></h2>
-        <p class="case-card__body" data-s="lobby.soonBody"></p>
-        <p class="lobby__soon-actions">
-          <a class="btn btn--seal" href="/onboarding.html" data-s="lobby.editProfile"></a>
-        </p>
-      </article>
+      <section class="catalogue" aria-labelledby="catalogue-title">
+        <div class="catalogue__head">
+          <h2 id="catalogue-title" class="catalogue__title" data-s="lobby.catalogueTitle"></h2>
+          <p class="catalogue__lede" data-s="lobby.catalogueLede"></p>
+        </div>
+        <ul id="catalogue" class="catalogue__grid"></ul>
+      </section>
     </div>
   </main>
+
+  <dialog id="story-dialog" class="modal story-modal" aria-labelledby="story-title">
+    <div class="modal__inner">
+      <p class="eyebrow" id="story-number"></p>
+      <h2 class="modal__title" id="story-title"></h2>
+      <p class="story-modal__inspiration" id="story-inspiration"></p>
+      <p class="story-modal__premise typewriter" id="story-premise"></p>
+      <div>
+        <h3 class="story-modal__heading" data-s="lobby.detail.roles"></h3>
+        <ul class="story-modal__roles" id="story-roles"></ul>
+      </div>
+      <p class="hint" data-s="lobby.detail.roomsSoon"></p>
+      <div class="modal__actions">
+        <a class="btn btn--ghost" id="story-source" target="_blank" rel="noopener noreferrer"></a>
+        <button class="btn btn--primary" type="button" id="story-close" data-s="common.close"></button>
+      </div>
+    </div>
+  </dialog>
 </body>
 </html>

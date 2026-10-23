@@ -1,47 +1,11 @@
 import re
-import uuid
 
 import pytest
-from playwright.sync_api import APIRequestContext, Browser, Page, expect
+from playwright.sync_api import Browser, Page, expect
+
+from backend.tests.e2e.helpers import PASSWORD, create_user, sign_in, unique_email
 
 pytestmark = pytest.mark.e2e
-
-PASSWORD = "correct horse battery"
-PROFILE = {
-    "interests": ["books", "puzzles", "coffee_tea"],
-    "interaction_style": "playful",
-    "availability": ["weekend_evenings"],
-}
-
-
-def unique_email() -> str:
-    return f"e2e-{uuid.uuid4().hex[:10]}@example.com"
-
-
-def create_user(request: APIRequestContext, *, with_profile: bool) -> str:
-    """Creates an account over the API (no browser session) and returns its email."""
-    email = unique_email()
-    res = request.post(
-        "/api/v1/auth/register",
-        data={"email": email, "password": PASSWORD, "display_name": "Wren", "age_confirmed": True},
-    )
-    assert res.ok
-    if with_profile:
-        token = res.json()["access_token"]
-        put = request.put(
-            "/api/v1/users/me/profile",
-            data=PROFILE,
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        assert put.ok
-    return email
-
-
-def sign_in(page: Page, email: str, password: str = PASSWORD) -> None:
-    page.locator("#login-email").fill(email)
-    page.locator("#login-password").fill(password)
-    page.get_by_role("button", name="Sign in", exact=True).click()
-
 
 def test_register_onboard_lobby(page: Page, console_errors: list[str]) -> None:
     page.goto("/")

@@ -1,0 +1,24 @@
+{
+  "story_id": "wizard_of_oz",
+  "version": 1,
+  "title": "The Road of Yellow Brick",
+  "description": "From a grey Kansas farm to an emerald city: four unlikely companions, each certain they are missing something. Adapted from the 1900 book.",
+  "genres": [
+    "fantasy",
+    "adventure"
+  ],
+  "min_players": 3,
+  "max_players": 4,
+  "playable": false,
+  "rights": {
+    "inspiration_title": "The Wonderful Wizard of Oz",
+    "inspiration_author": "L. Frank Baum",
+    "author_death_year": 1919,
+    "publication_year": 1900,
+    "original_language": "English",
+    "source_url": "https://www.gutenberg.org/ebooks/55",
+    "notes": "Baum died in 1919; the book was published in 1900. Public domain in India and the US. Book only: nothing from the 1939 film (for example, the shoes are silver in the book, not ruby).",
+    "status": "verified_public_domain",
+    "reviewed_at": "2026-10-23"
+  }
+}

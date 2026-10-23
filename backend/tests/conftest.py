@@ -1,6 +1,8 @@
+import asyncio
 import os
 import secrets
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 # Tests never use a real key: generate one before the app module (and its settings) loads.
@@ -12,7 +14,13 @@ from alembic.config import Config  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from backend.app.core.config import ROOT_DIR, Settings  # noqa: E402
+from backend.app.db.session import create_engine, create_sessionmaker  # noqa: E402
 from backend.app.main import create_app  # noqa: E402
+from backend.app.services.stories import (  # noqa: E402
+    SeedResult,
+    load_story_files,
+    seed_stories,
+)
 
 
 def migrate(database_url: str) -> None:
@@ -24,6 +32,21 @@ def migrate(database_url: str) -> None:
 
 def sqlite_url(path: Path) -> str:
     return f"sqlite+aiosqlite:///{path.as_posix()}"
+
+
+def seed(database_url: str, stories=None) -> SeedResult:
+    """Seeds stories on a worker thread (safe even when an event loop is running)."""
+
+    async def run() -> SeedResult:
+        engine = create_engine(database_url)
+        try:
+            async with create_sessionmaker(engine)() as session:
+                return await seed_stories(session, stories or load_story_files())
+        finally:
+            await engine.dispose()
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(asyncio.run, run()).result()
 
 
 @pytest.fixture
