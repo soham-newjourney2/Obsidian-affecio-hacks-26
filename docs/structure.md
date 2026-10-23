@@ -22,22 +22,22 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories)
-│   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members)
+│   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms)
 │   │   ├── game/           # story_schema (story file model + structural validator)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
-│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories)
+│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories, rooms)
 │   └── tests/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
 │       ├── unit/           # security, rate limiter, settings, schemas, story validator
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, migrations
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms (incl. concurrency), migrations
 │       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
     ├── auth.html           # sign in / create account (tabs)
     ├── onboarding.html     # profile case file (create or edit)
-    ├── lobby.html          # signed-in home: case catalogue + case-file dialog
+    ├── lobby.html          # signed-in home: catalogue, case-file dialog, join by code, room panel
     ├── css/                # tokens (palette, type, space, motion), base, components, effects, pages/
     ├── js/core/            # strings (all UI text), api (bearer, errors), auth (session, guards), ui, fx
     ├── js/pages/           # one module per page
@@ -81,6 +81,12 @@ uv run ruff check .
 | GET | `/meta/interests` | – | all profile option lists + limits |
 | GET | `/stories` | – | catalogue cards, playable first (rights-excluded stories hidden) |
 | GET | `/stories/{slug}` | – | premise, roles, inspiration + source link; never solutions or clues |
+| POST | `/rooms` | bearer | create a room for a playable story; returns the invite code once |
+| POST | `/rooms/join` | bearer | join by code (normalized; 20 tries / 15 min per user) |
+| GET | `/rooms/{id}` | member | room view: story, members (display names), can_start |
+| POST | `/rooms/{id}/ready` | member | `{ready: bool}` while waiting |
+| POST | `/rooms/{id}/start` | host | needs 3–4 present members, all ready; revokes the invite |
+| POST | `/rooms/{id}/leave` | member | host hands over to the longest-present member; empty room is abandoned |
 
 - Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
 - Browser session lives in `sessionStorage` (per tab). Signed-in pages redirect to `/auth.html?next=…`;
@@ -94,3 +100,11 @@ uv run ruff check .
   full graph: no unreachable nodes, dead ends or cycles; a success path in every variant; every role
   holds a private clue in every variant; the 3-player redistribution keeps all optional-role clues.
 - Clue wording can vary per variant (`text_by_variant`) so each replay is deducible.
+
+## Rooms
+
+- Invite codes: 8 chars of base32 from `secrets`, stored only as sha256, valid 2 hours, revoked on
+  start. Unknown, expired and revoked codes all return the same `INVITE_INVALID`.
+- Each room mutation first takes the room's write lock (no-op `UPDATE … RETURNING`), so capacity and
+  start checks are atomic (SQLite write lock now, row lock on Postgres).
+- The lobby polls `GET /rooms/{id}` every 3 s while waiting (replaced by WebSocket updates in P07).

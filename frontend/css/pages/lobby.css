@@ -160,6 +160,175 @@
   color: var(--text-muted);
 }
 
+/* Join by code */
+.lobby__home {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.join {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 34rem;
+}
+
+.join__title {
+  font-size: var(--fs-lg);
+  color: var(--parchment-50);
+}
+
+.join__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.join__form .btn {
+  margin-top: calc(var(--fs-sm) * 1.6 + var(--space-2));
+}
+
+.join__input {
+  font-family: var(--font-type);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Room panel */
+.room {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 44rem;
+}
+
+.room__title {
+  font-size: var(--fs-2xl);
+  color: var(--parchment-50);
+}
+
+.room__subtitle {
+  font-size: var(--fs-lg);
+  color: var(--parchment-50);
+}
+
+.room__invite > div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.room__code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.room__code {
+  padding: var(--space-2) var(--space-4);
+  border: 1px dashed var(--gold-500);
+  border-radius: var(--radius-md);
+  background: rgb(6 8 13 / 0.5);
+  color: var(--gold-200);
+  font-family: var(--font-type);
+  font-size: var(--fs-xl);
+  letter-spacing: 0.18em;
+  user-select: all;
+}
+
+.room__members {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.room__member-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.room__member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(6 8 13 / 0.35);
+}
+
+.room__member.is-ready {
+  border-color: rgb(143 199 154 / 0.45);
+}
+
+.room__member-name {
+  font-weight: 600;
+}
+
+.room__badge {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.room__badge--host {
+  border-color: var(--gold-500);
+  color: var(--gold-300);
+}
+
+.room__state {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.room__member.is-ready .room__state {
+  color: var(--success);
+}
+
+.room__status {
+  min-height: 1.6em;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.room__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.room__leave {
+  margin-left: auto;
+}
+
+.room__started {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-md);
+  background: rgb(217 178 106 / 0.08);
+}
+
+@media (max-width: 600px) {
+  .join__form {
+    grid-template-columns: 1fr;
+  }
+
+  .join__form .btn {
+    margin-top: 0;
+  }
+
+  .room__leave {
+    margin-left: 0;
+  }
+}
+
 @media (max-width: 600px) {
   .page-lobby .site-nav__link {
     display: none;
