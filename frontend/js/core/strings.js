@@ -128,10 +128,22 @@ export const STRINGS = Object.freeze({
   lobby: {
     eyebrow: "The lobby",
     welcome: "Welcome, {name}.",
-    soonLabel: "Case catalogue",
-    soonTitle: "Cases open soon.",
-    soonBody: "The catalogue of mysteries arrives in the next build. Your case file is saved, and you can edit it any time.",
     editProfile: "Edit your case file",
+    catalogueTitle: "Choose a case",
+    catalogueLede: "One case is open tonight. More are being written.",
+    catalogueError: "We couldn't load the case catalogue.",
+    catalogueEmpty: "No cases are open yet. Check back soon.",
+    caseNumber: "Case No. {n}",
+    players: "{min}–{max} players",
+    minutes: "About {n} minutes",
+    inspiredBy: "Inspired by {title}, {author} ({year})",
+    comingSoon: "Coming soon",
+    openCase: "Open the case file",
+    detail: {
+      roles: "The roles",
+      original: "Read the original ({language})",
+      roomsSoon: "Rooms open in the next build. Gather three or four people in the meantime.",
+    },
   },
 });
 

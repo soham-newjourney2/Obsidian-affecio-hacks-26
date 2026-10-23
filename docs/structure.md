@@ -11,6 +11,8 @@ echo/
 ├── LICENSE
 ├── README.md               # short intro (full version in P20)
 ├── alembic.ini             # migrations config (URL comes from DATABASE_URL)
+├── scripts/
+│   └── seed.py             # validate story files and upsert them (idempotent)
 ├── pyproject.toml          # deps, pytest and ruff config (uv-managed)
 ├── uv.lock
 ├── docs/
@@ -20,21 +22,22 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles)
-│   │   ├── schemas/        # Pydantic I/O (auth, profile)
-│   │   ├── services/       # business logic (auth, profiles)
-│   │   ├── content/        # curated data: profile options (interests, genres, roles, …)
-│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories)
+│   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding)
+│   │   ├── game/           # story_schema (story file model + structural validator)
+│   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
+│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories)
 │   └── tests/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
-│       ├── unit/           # security, rate limiter, settings, schemas
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, migrations
-│       └── e2e/            # Playwright browser tests against a live uvicorn (marker: e2e)
+│       ├── unit/           # security, rate limiter, settings, schemas, story validator
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, migrations
+│       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
     ├── auth.html           # sign in / create account (tabs)
     ├── onboarding.html     # profile case file (create or edit)
-    ├── lobby.html          # signed-in home (catalogue arrives in P05)
+    ├── lobby.html          # signed-in home: case catalogue + case-file dialog
     ├── css/                # tokens (palette, type, space, motion), base, components, effects, pages/
     ├── js/core/            # strings (all UI text), api (bearer, errors), auth (session, guards), ui, fx
     ├── js/pages/           # one module per page
@@ -56,6 +59,7 @@ cp .env.example .env        # then set SECRET_KEY to 32+ random bytes
 uv sync
 uv run playwright install chromium
 uv run alembic upgrade head
+uv run python scripts/seed.py
 uv run uvicorn backend.app.main:app --reload
 uv run pytest -q            # unit + integration
 uv run pytest -q -m e2e     # browser tests (needs network for CDN fonts/GSAP)
@@ -75,8 +79,18 @@ uv run ruff check .
 | GET | `/users/me/profile` | bearer | own profile; 404 `PROFILE_NOT_FOUND` until onboarding |
 | PUT | `/users/me/profile` | bearer | create/replace profile (curated ids only, bounded lists) |
 | GET | `/meta/interests` | – | all profile option lists + limits |
+| GET | `/stories` | – | catalogue cards, playable first (rights-excluded stories hidden) |
+| GET | `/stories/{slug}` | – | premise, roles, inspiration + source link; never solutions or clues |
 
 - Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
 - Browser session lives in `sessionStorage` (per tab). Signed-in pages redirect to `/auth.html?next=…`;
   `next` accepts same-origin paths only.
 - All errors use `{"error": {"code", "message", "request_id"}}`; every response carries `X-Request-ID`.
+
+## Stories
+
+- One JSON file per story in `backend/app/content/stories/`; `story_id` must match the file name.
+- `game/story_schema.py` validates metadata and rights for every story, and for playable ones the
+  full graph: no unreachable nodes, dead ends or cycles; a success path in every variant; every role
+  holds a private clue in every variant; the 3-player redistribution keeps all optional-role clues.
+- Clue wording can vary per variant (`text_by_variant`) so each replay is deducible.

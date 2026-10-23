@@ -1,0 +1,24 @@
+{
+  "story_id": "hungry_stones",
+  "version": 1,
+  "title": "The Palace of Hungry Stones",
+  "description": "A cotton-tax collector lodges in an abandoned marble palace beside the river. Each night, the palace remembers more than it should.",
+  "genres": [
+    "ghost_story",
+    "gothic"
+  ],
+  "min_players": 3,
+  "max_players": 4,
+  "playable": false,
+  "rights": {
+    "inspiration_title": "Kshudhita Pashan (The Hungry Stones)",
+    "inspiration_author": "Rabindranath Tagore",
+    "author_death_year": 1941,
+    "publication_year": 1895,
+    "original_language": "Bengali",
+    "source_url": "https://bn.wikisource.org/wiki/গল্প-দশক/ক্ষুধিত_পাষাণ",
+    "notes": "Tagore died in 1941; the story was first published in Bengali in 1895 (collected in Golpo-Doshok). Public domain in India (life + 60 years, expired 2001) and in the US (published before 1931). Adapt from the Bengali original, not an English translation.",
+    "status": "verified_public_domain",
+    "reviewed_at": "2026-10-23"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "story_id": "rue_morgue",
+  "version": 1,
+  "title": "The Locked Room on the Rue Morgue",
+  "description": "Paris, the 1840s. Neighbours heard two voices, one in a language none of them could name, and the door was locked from the inside.",
+  "genres": [
+    "mystery"
+  ],
+  "min_players": 3,
+  "max_players": 4,
+  "playable": false,
+  "rights": {
+    "inspiration_title": "The Murders in the Rue Morgue",
+    "inspiration_author": "Edgar Allan Poe",
+    "author_death_year": 1849,
+    "publication_year": 1841,
+    "original_language": "English",
+    "source_url": "https://www.gutenberg.org/ebooks/2147",
+    "notes": "Poe died in 1849; the story was first published in 1841 in Graham's Magazine. Public domain in India and the US. Source is The Works of Edgar Allan Poe, Volume 1.",
+    "status": "verified_public_domain",
+    "reviewed_at": "2026-10-23"
+  }
+}

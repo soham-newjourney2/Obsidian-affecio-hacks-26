@@ -1,0 +1,24 @@
+{
+  "story_id": "time_machine",
+  "version": 1,
+  "title": "The Traveller's Return",
+  "description": "A Thursday dinner, a host who arrives late and dishevelled, and a machine that should not work. Piece together where he went, and when.",
+  "genres": [
+    "science_fiction",
+    "adventure"
+  ],
+  "min_players": 3,
+  "max_players": 4,
+  "playable": false,
+  "rights": {
+    "inspiration_title": "The Time Machine",
+    "inspiration_author": "H. G. Wells",
+    "author_death_year": 1946,
+    "publication_year": 1895,
+    "original_language": "English",
+    "source_url": "https://www.gutenberg.org/ebooks/35",
+    "notes": "Wells died in 1946; the novel was published in 1895. Public domain in India (life + 60 years, expired 2006) and in the US (published before 1931).",
+    "status": "verified_public_domain",
+    "reviewed_at": "2026-10-23"
+  }
+}
