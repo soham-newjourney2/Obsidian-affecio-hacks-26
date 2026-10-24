@@ -208,3 +208,21 @@ async def start_room(session: AsyncSession, user: User, room_id: uuid.UUID) -> R
     await session.commit()
     return room
 
+
+async def members_with_names(session: AsyncSession, room: Room) -> list[tuple[RoomMember, str]]:
+    """Present human members (seat order) with display names, for room views."""
+    rows = await session.execute(
+        select(RoomMember, User.display_name)
+        .join(User, User.id == RoomMember.user_id)
+        .where(RoomMember.room_id == room.id, RoomMember.status.in_(PRESENT_STATUSES))
+        .order_by(RoomMember.joined_at, RoomMember.id)
+    )
+    return [(member, name) for member, name in rows.all()]
+
+
+async def member_of(
+    session: AsyncSession, room_id: uuid.UUID, user_id: uuid.UUID
+) -> RoomMember | None:
+    return await session.scalar(
+        select(RoomMember).where(RoomMember.room_id == room_id, RoomMember.user_id == user_id)
+    )

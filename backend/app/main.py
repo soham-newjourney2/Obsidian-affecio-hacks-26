@@ -11,9 +11,11 @@ from backend.app.api.v1 import auth, health, meta, rooms, stories, users
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
-from backend.app.core.ratelimit import RateLimiter
+from backend.app.core.ratelimit import RateLimiter, TokenBucket
 from backend.app.core.security import TokenDenylist
 from backend.app.db.session import create_engine, create_sessionmaker
+from backend.app.ws import handlers as ws_handlers
+from backend.app.ws.manager import ConnectionManager
 
 API_PREFIX = "/api/v1"
 
@@ -50,6 +52,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # Invite-code attempts per user: keeps guessing 32^8 codes impractical.
         "join": RateLimiter(limit=20, window_s=15 * 60),
     }
+    app.state.ws = ConnectionManager()
+    app.state.chat_bucket = TokenBucket(rate=1, burst=5)  # chat: 1/s, burst 5 per member
 
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
@@ -60,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(meta.router, prefix=API_PREFIX)
     app.include_router(stories.router, prefix=API_PREFIX)
     app.include_router(rooms.router, prefix=API_PREFIX)
+    app.include_router(ws_handlers.router, prefix=API_PREFIX)
     # Mounted last so API routes take precedence.
     app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="frontend")
     return app

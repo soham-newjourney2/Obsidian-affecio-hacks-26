@@ -1,0 +1,295 @@
+/* TEMPORARY styles for pages built while teammates own the UI (plan rule 17).
+   Scoped to new pages; teammates will merge these into their theme and remove this file.
+   Uses only base tokens from tokens.css. */
+
+/* ---- room.html ---------------------------------------------------------------------- */
+.page-room .room-page {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--gutter) var(--space-8);
+}
+
+.room-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* Connection pill: dot + word, never colour alone */
+.room-conn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.room-conn__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.room-conn[data-state="connected"] .room-conn__dot {
+  background: var(--success);
+}
+
+.room-conn[data-state="reconnecting"] .room-conn__dot,
+.room-conn[data-state="connecting"] .room-conn__dot {
+  background: var(--gold-400);
+}
+
+.room-conn[data-state="offline"] .room-conn__dot,
+.room-conn[data-state="closed"] .room-conn__dot {
+  background: var(--danger);
+}
+
+/* Gate: start or join */
+.room-gate {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.room-gate__intro {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 40rem;
+}
+
+.room-gate__title {
+  font-size: var(--fs-2xl);
+}
+
+.room-gate__lede {
+  color: var(--text-muted);
+}
+
+.room-gate__panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-5);
+}
+
+.room-gate__panel {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.room-gate__panel-title {
+  font-size: var(--fs-lg);
+}
+
+.room-code-input {
+  font-family: var(--font-type);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Table: side column (story, invite, members) + chat */
+.room-table {
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.room-table__side {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.room-card {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.room-card__title {
+  font-size: var(--fs-xl);
+}
+
+.room-card__subtitle {
+  font-size: var(--fs-lg);
+}
+
+.room-invite > div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.room-invite__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.room-invite__code {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--gold-500);
+  border-radius: var(--radius-md);
+  font-family: var(--font-type);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.16em;
+  user-select: all;
+}
+
+.room-members {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.room-member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+}
+
+.room-member.is-ready {
+  border-color: var(--success);
+}
+
+.room-member.is-away .room-member__name {
+  opacity: 0.7;
+}
+
+.room-member__name {
+  font-weight: 600;
+}
+
+.room-member__presence,
+.room-member__state {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.room-member__presence {
+  margin-left: auto;
+}
+
+.room-badge {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+}
+
+.room-badge--host {
+  border-color: var(--gold-500);
+}
+
+.room-hint {
+  min-height: 1.5em;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+.room-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.room-started {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-md);
+}
+
+/* Chat */
+.room-chat {
+  display: grid;
+  grid-template-rows: auto minmax(16rem, 1fr) auto auto;
+  gap: var(--space-3);
+  min-height: 28rem;
+}
+
+.room-chat__log {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: var(--space-2);
+}
+
+.room-chat__empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.room-msg {
+  display: grid;
+  gap: 2px;
+  max-width: 85%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.room-msg--mine {
+  justify-self: end;
+  border-color: var(--gold-500);
+}
+
+.room-msg.is-pending {
+  opacity: 0.65;
+}
+
+.room-msg__meta {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.room-msg__who {
+  font-weight: 600;
+}
+
+.room-msg__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.room-chat__form {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.room-chat__input {
+  min-height: 4rem;
+  resize: vertical;
+}
+
+.room-chat__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.room-chat__form .btn {
+  justify-self: end;
+}
+
+@media (max-width: 900px) {
+  .room-table {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ECHO</title>
+  <meta name="theme-color" content="#10251b">
+  <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/storybook-theme.css">
+  <link rel="stylesheet" href="/css/temp.css">
+  <script type="module" src="/js/pages/room.js"></script>
+</head>
+<body class="page-room">
+  <a class="skip-link" href="#main" data-st="common.skip"></a>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand brand--light sidebar__brand" href="/lobby.html" data-st-label="common.lobby">
+        <img class="brand__mark" src="/assets/brand/emblem.svg" alt="" width="48" height="64">
+        <span class="brand__name" data-st="common.brand"></span>
+      </a>
+      <nav class="sidebar__nav" data-st-label="common.navLabel">
+        <a class="sidebar__link" href="/lobby.html">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg>
+          <span data-st="common.lobby"></span>
+        </a>
+        <a class="sidebar__link" href="/room.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
+          <span data-st="common.table"></span>
+        </a>
+        <a class="sidebar__link" href="/onboarding.html">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
+          <span data-st="common.profile"></span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <button class="sidebar__link" type="button" id="sign-out">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-logout"></use></svg>
+          <span data-st="common.signOut"></span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-main room-main">
+      <header class="app-topbar room-topbar">
+        <p class="room-conn" id="conn-status" role="status" aria-live="polite" data-state="connecting">
+          <span class="room-conn__dot" aria-hidden="true"></span>
+          <span id="conn-text"></span>
+        </p>
+        <a class="user-chip" href="/onboarding.html">
+          <span class="avatar" id="user-initial" aria-hidden="true"></span>
+          <span class="app-header__user" id="user-name"></span>
+        </a>
+      </header>
+
+      <main id="main" class="room-page">
+        <div id="page-state" class="state" role="status" aria-live="polite"></div>
+
+        <!-- No table yet: start one or join with a code -->
+        <section id="gate" class="room-gate" aria-labelledby="gate-title" hidden>
+          <header class="room-gate__intro">
+            <p class="eyebrow" data-st="room.gate.eyebrow"></p>
+            <h1 id="gate-title" class="room-gate__title" data-st="room.gate.title"></h1>
+            <p class="room-gate__lede" data-st="room.gate.lede"></p>
+          </header>
+          <div class="room-gate__panels">
+            <form id="create-form" class="panel room-gate__panel" method="post" novalidate>
+              <h2 class="room-gate__panel-title" data-st="room.gate.createTitle"></h2>
+              <div class="field">
+                <label class="label" for="story-select" data-st="room.gate.storyLabel"></label>
+                <select class="input" id="story-select" name="story" required></select>
+                <p class="field-error" id="story-select-error" hidden></p>
+              </div>
+              <button class="btn btn--primary" type="submit" disabled data-st="room.gate.create"></button>
+            </form>
+            <form id="join-form" class="panel room-gate__panel" method="post" novalidate>
+              <h2 class="room-gate__panel-title" data-st="room.gate.joinTitle"></h2>
+              <div class="field">
+                <label class="label" for="join-code" data-st="room.gate.codeLabel"></label>
+                <input class="input room-code-input" id="join-code" name="code" type="text" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="join-code-hint join-code-error">
+                <p class="hint" id="join-code-hint" data-st="room.gate.codeHint"></p>
+                <p class="field-error" id="join-code-error" hidden></p>
+              </div>
+              <button class="btn btn--primary" type="submit" disabled data-st="room.gate.join"></button>
+            </form>
+          </div>
+        </section>
+
+        <!-- At a table -->
+        <section id="table" class="room-table" aria-labelledby="table-title" hidden>
+          <div class="room-table__side">
+            <header class="panel room-card">
+              <p class="eyebrow" data-st="room.title"></p>
+              <h1 id="table-title" class="room-card__title"></h1>
+              <div id="invite" class="room-invite">
+                <div id="invite-known">
+                  <p class="label" id="invite-label" data-st="room.invite.label"></p>
+                  <div class="room-invite__row">
+                    <output id="invite-code" class="room-invite__code" aria-labelledby="invite-label"></output>
+                    <button class="btn btn--ghost btn--sm" type="button" id="copy-code" data-st="room.invite.copy"></button>
+                  </div>
+                  <p class="hint" data-st="room.invite.hint"></p>
+                </div>
+                <p id="invite-unknown" class="hint" data-st="room.invite.unknown" hidden></p>
+              </div>
+            </header>
+
+            <section class="panel room-card" aria-labelledby="members-title">
+              <h2 id="members-title" class="room-card__subtitle"></h2>
+              <ul id="members" class="room-members"></ul>
+              <p id="table-hint" class="room-hint" aria-live="polite"></p>
+              <div id="table-actions" class="room-actions">
+                <button class="btn btn--primary" type="button" id="ready-toggle" aria-pressed="false"></button>
+                <button class="btn btn--seal" type="button" id="start" data-st="room.actions.start"></button>
+                <button class="btn btn--ghost btn--sm" type="button" id="leave" data-st="room.actions.leave"></button>
+              </div>
+              <div id="started" class="room-started" hidden>
+                <h3 class="room-card__subtitle" data-st="room.started.title"></h3>
+                <p data-st="room.started.body"></p>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel room-chat" aria-labelledby="chat-title">
+            <h2 id="chat-title" class="room-card__subtitle" data-st="room.chat.title"></h2>
+            <ol id="chat-log" class="room-chat__log" role="log" aria-live="polite" aria-relevant="additions" tabindex="0"></ol>
+            <p id="chat-empty" class="room-chat__empty" data-st="room.chat.empty"></p>
+            <form id="chat-form" class="room-chat__form" method="post" novalidate>
+              <label class="visually-hidden" for="chat-input" data-st="room.chat.label"></label>
+              <textarea class="input room-chat__input" id="chat-input" name="body" rows="2" maxlength="1000" aria-describedby="chat-hint chat-error"></textarea>
+              <div class="room-chat__meta">
+                <p class="hint" id="chat-hint" data-st="room.chat.placeholderHint"></p>
+                <span class="counter" id="chat-counter" aria-hidden="true"></span>
+              </div>
+              <p class="field-error" id="chat-error" role="alert" hidden></p>
+              <button class="btn btn--primary" type="submit" id="chat-send" disabled data-st="room.chat.send"></button>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
