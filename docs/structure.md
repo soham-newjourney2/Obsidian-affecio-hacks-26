@@ -22,24 +22,26 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat)
+│   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
 │   │   ├── game/           # story_schema (story file model + structural validator)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
 │   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories, rooms)
 │   └── tests/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
 │       ├── unit/           # security, rate limiter, settings, schemas, story validator
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms (incl. concurrency), migrations
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms (incl. concurrency), ws, migrations
 │       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
     ├── auth.html           # sign in / create account (tabs)
     ├── onboarding.html     # profile case file (create or edit)
-    ├── lobby.html          # signed-in home: catalogue, case-file dialog, join by code, room panel
-    ├── css/                # tokens (palette, type, space, motion), base, components, effects, pages/
-    ├── js/core/            # strings (all UI text), api (bearer, errors), auth (session, guards), ui, fx
+    ├── lobby.html          # signed-in home (teammate-owned)
+    ├── room.html           # start a table / join by code, live waiting room + chat over WebSocket
+    ├── css/                # tokens, base, components, effects, pages/ (teammate-owned); temp.css (new pages, to be merged)
+    ├── js/core/            # strings, api, auth, ui, fx; ws (room socket client); strings-temp (new pages, to be merged)
     ├── js/pages/           # one module per page
     └── assets/brand/       # logo.svg (wordmark, ripple "O"), favicon.svg
 ```
@@ -107,4 +109,17 @@ uv run ruff check .
   start. Unknown, expired and revoked codes all return the same `INVITE_INVALID`.
 - Each room mutation first takes the room's write lock (no-op `UPDATE … RETURNING`), so capacity and
   start checks are atomic (SQLite write lock now, row lock on Postgres).
-- The lobby polls `GET /rooms/{id}` every 3 s while waiting (replaced by WebSocket updates in P07).
+- Room changes made over REST (join, ready, start, leave) are pushed to connected sockets.
+
+## WebSocket (`/api/v1/ws/rooms/{room_id}`)
+
+- First frame must be `auth {token}` within 5 s, else close 4401. Non-members (or anyone who has
+  left) get 4403. Membership, token expiry and revocation are re-checked on every frame.
+- Client → server: `presence.ping`, `chat.send{client_message_id, body}`, `player.ready{ready}`, `room.leave`.
+- Server → client: `room.snapshot` (room view, you, online, last 50 messages) on every (re)connect,
+  `room.member{event, member_id, online, room?}` (state events carry each viewer's own room view;
+  presence events `online`/`offline` carry only the online list), `chat.message`, `error{code, ref_id}`.
+- Limits: frames ≤ 8 KB; chat 1/s with burst 5 per member; body 1–1000 chars. A retried
+  `client_message_id` is stored once and echoed only to the sender.
+- `js/core/ws.js`: auth-first connect, 20 s heartbeat, backoff reconnect (1–15 s), resync from the
+  snapshot; chat sent while offline is resent with the same client id.

@@ -3,11 +3,14 @@ import re
 import pytest
 from playwright.sync_api import Browser, Page, expect
 
+from backend.tests.e2e.helpers import teammate_ui
+
 pytestmark = pytest.mark.e2e
 
 GSAP_CHILDREN = "() => window.gsap.globalTimeline.getChildren(true, true, true).length"
 
 
+@teammate_ui
 def test_landing_renders_without_console_errors(page: Page, console_errors: list[str]) -> None:
     page.goto("/", wait_until="networkidle")
 

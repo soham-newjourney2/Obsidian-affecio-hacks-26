@@ -3,7 +3,7 @@ import re
 import pytest
 from playwright.sync_api import Page, expect
 
-from backend.tests.e2e.helpers import create_user, sign_in
+from backend.tests.e2e.helpers import create_user, sign_in, teammate_ui
 
 pytestmark = pytest.mark.e2e
 
@@ -17,6 +17,7 @@ def lobby(page: Page) -> Page:
     return page
 
 
+@teammate_ui
 def test_catalogue_shows_one_playable_and_four_coming_soon(
     lobby: Page, console_errors: list[str]
 ) -> None:
@@ -38,6 +39,7 @@ def test_catalogue_shows_one_playable_and_four_coming_soon(
     assert console_errors == []
 
 
+@teammate_ui
 def test_open_case_file_dialog(lobby: Page) -> None:
     lobby.get_by_role("button", name="Open the case file").click()
     dialog = lobby.locator("#story-dialog")
@@ -55,6 +57,7 @@ def test_open_case_file_dialog(lobby: Page) -> None:
     expect(dialog).to_be_hidden()
 
 
+@teammate_ui
 def test_tagore_story_links_bengali_original(lobby: Page) -> None:
     card = lobby.locator('[data-slug="hungry_stones"]')
     expect(card).to_contain_text("Rabindranath Tagore (1895)")

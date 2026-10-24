@@ -3,10 +3,12 @@ import re
 import pytest
 from playwright.sync_api import Browser, Page, expect
 
-from backend.tests.e2e.helpers import PASSWORD, create_user, sign_in, unique_email
+from backend.tests.e2e.helpers import PASSWORD, create_user, sign_in, teammate_ui, unique_email
 
 pytestmark = pytest.mark.e2e
 
+
+@teammate_ui
 def test_register_onboard_lobby(page: Page, console_errors: list[str]) -> None:
     page.goto("/")
     page.locator("#cta-start").click()
@@ -62,6 +64,7 @@ def test_duplicate_email_shown_on_field(page: Page) -> None:
     expect(page.locator("#register-email-error")).to_contain_text("already exists")
 
 
+@teammate_ui
 def test_onboarding_enforces_limits(page: Page) -> None:
     email = create_user(page.request, with_profile=False)
     page.goto("/auth.html")
@@ -93,6 +96,7 @@ def test_login_error_is_generic(page: Page) -> None:
     expect(page.locator("#panel-login .form-error")).to_have_text("Incorrect email or password.")
 
 
+@teammate_ui
 def test_guard_redirects_then_returns(page: Page) -> None:
     email = create_user(page.request, with_profile=True)
     page.goto("/lobby.html")
@@ -109,6 +113,7 @@ def test_next_param_cannot_leave_site(page: Page) -> None:
     expect(page).to_have_url(re.compile(r"/lobby\.html$"))
 
 
+@teammate_ui
 def test_session_is_per_tab_and_sign_out_works(browser: Browser, base_url: str) -> None:
     context = browser.new_context(base_url=base_url)
     page = context.new_page()

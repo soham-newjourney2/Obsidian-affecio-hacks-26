@@ -37,3 +37,28 @@ class RateLimiter:
                 "Too many attempts. Please wait and try again.",
                 headers={"Retry-After": str(max(1, math.ceil(retry_after)))},
             )
+
+
+class TokenBucket:
+    """Per-key token bucket: `rate` tokens per second, up to `burst` saved (chat: 1/s, burst 5)."""
+
+    def __init__(
+        self, rate: float, burst: int, clock: Callable[[], float] = time.monotonic
+    ) -> None:
+        self.rate = rate
+        self.burst = burst
+        self._clock = clock
+        self._state: dict[str, tuple[float, float]] = {}  # key -> (tokens, updated_at)
+
+    def take(self, key: str) -> bool:
+        now = self._clock()
+        tokens, updated = self._state.get(key, (float(self.burst), now))
+        tokens = min(self.burst, tokens + (now - updated) * self.rate)
+        if tokens < 1:
+            self._state[key] = (tokens, now)
+            return False
+        self._state[key] = (tokens - 1, now)
+        return True
+
+    def forget(self, key: str) -> None:
+        self._state.pop(key, None)
