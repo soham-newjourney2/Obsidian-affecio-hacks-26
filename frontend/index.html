@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ECHO</title>
   <meta name="description" content="Cooperative mysteries that turn solving together into real connection.">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#faf1df">
   <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime&family=Inter:wght@400;500;600&display=swap">
+  <link rel="preload" href="/assets/storybook/scene.jpg" as="image">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/storybook-theme.css">
   <link rel="stylesheet" href="/css/pages/landing.css">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js" integrity="sha512-oJ8QbaQThQoJZ7oEv+29jfPM6CcP+zUxh3PKJs1vyOhx0UraUrE7PQgeItu3dOuCJyrzWpoYMsVjkkPEBzbUqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script type="module" src="/js/pages/landing.js"></script>
@@ -22,39 +24,72 @@
   <a class="skip-link" href="#main" data-s="common.skip"></a>
 
   <header class="site-header">
-    <div class="container site-header__inner">
+    <div class="site-header__inner landing-wrap">
       <a class="brand" href="/" data-s-label="common.home">
-        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
+        <img class="brand__mark" src="/assets/brand/emblem.svg" alt="" width="48" height="64">
+        <span class="brand__text">
+          <span class="brand__name" data-s="common.brand"></span>
+          <span class="brand__tagline" data-s="common.tagline"></span>
+        </span>
       </a>
       <nav class="site-nav" data-s-label="landing.nav.label">
-        <a class="site-nav__link" href="#how" data-s="landing.nav.how"></a>
-        <a class="site-nav__link" href="/auth.html" data-s="landing.nav.signIn"></a>
-        <a class="btn btn--ghost btn--sm" href="/auth.html#register" data-s="landing.nav.start"></a>
+        <div class="site-nav__links">
+          <a class="site-nav__link" href="#main" aria-current="page" data-s="landing.nav.home"></a>
+          <a class="site-nav__link" href="#features" data-s="landing.nav.features"></a>
+          <a class="site-nav__link" href="#how" data-s="landing.nav.how"></a>
+          <a class="site-nav__link" href="#stories" data-s="landing.nav.stories"></a>
+          <a class="site-nav__link" href="#community" data-s="landing.nav.community"></a>
+        </div>
+        <a class="btn btn--ghost btn--sm" href="/auth.html" data-s="landing.nav.signIn"></a>
+        <a class="btn btn--primary btn--sm" href="/auth.html#register" data-s="landing.nav.start"></a>
       </nav>
     </div>
   </header>
 
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
-      <svg class="hero__mark" viewBox="-250 -250 500 500" aria-hidden="true" focusable="false">
-        <circle class="hero__ring" r="230"></circle>
-        <circle class="hero__ring" r="180"></circle>
-        <circle class="hero__ring" r="130"></circle>
-        <circle class="hero__ring" r="80"></circle>
-      </svg>
-      <div class="container hero__content gaslight">
-        <p class="eyebrow" data-reveal data-s="landing.hero.eyebrow"></p>
-        <h1 id="hero-title" class="hero__title" data-reveal data-s="landing.hero.title"></h1>
+      <div class="hero__art" aria-hidden="true"></div>
+      <img class="hero__vines" src="/assets/storybook/vines.png" alt="" aria-hidden="true">
+      <div class="hero__content landing-wrap">
+        <h1 id="hero-title" class="hero__title" data-reveal>
+          <span data-s="landing.hero.titleLead"></span>
+          <em data-s="landing.hero.titleAccent"></em>
+        </h1>
+        <p class="hero__tagline" data-reveal data-s="landing.hero.tagline"></p>
         <p class="hero__lede" data-reveal data-s="landing.hero.lede"></p>
         <div class="hero__actions" data-reveal>
-          <a id="cta-start" class="btn btn--primary" href="/auth.html#register" data-s="landing.hero.cta"></a>
-          <a class="btn btn--ghost" href="#how" data-s="landing.hero.secondary"></a>
+          <a id="cta-start" class="btn btn--primary btn--lg" href="/auth.html#register">
+            <span data-s="landing.hero.cta"></span>
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
+          </a>
+          <a class="btn btn--ghost btn--lg" href="#how" data-s="landing.hero.secondary"></a>
         </div>
+      </div>
+
+      <div class="landing-wrap hero__features-wrap">
+        <ul id="features" class="features" data-s-label="landing.features.label">
+          <li class="feature" data-feature>
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-book"></use></svg>
+            <span data-s="landing.features.story"></span>
+          </li>
+          <li class="feature" data-feature>
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
+            <span data-s="landing.features.people"></span>
+          </li>
+          <li class="feature" data-feature>
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-bot"></use></svg>
+            <span data-s="landing.features.gm"></span>
+          </li>
+          <li class="feature" data-feature>
+            <svg class="icon feature__heart" aria-hidden="true"><use href="/assets/icons.svg#i-heart"></use></svg>
+            <span data-s="landing.features.connect"></span>
+          </li>
+        </ul>
       </div>
     </section>
 
     <section id="how" class="how" aria-labelledby="how-title">
-      <div class="container">
+      <div class="landing-wrap">
         <p class="eyebrow" data-s="landing.how.eyebrow"></p>
         <h2 id="how-title" class="section-title" data-s="landing.how.title"></h2>
         <ol class="steps">
@@ -77,18 +112,48 @@
       </div>
     </section>
 
-    <section class="audience" aria-labelledby="audience-title">
-      <div class="container audience__inner">
-        <h2 id="audience-title" class="section-title" data-s="landing.audience.title"></h2>
-        <p class="audience__body" data-s="landing.audience.body"></p>
-        <a class="btn btn--seal" href="/auth.html#register" data-s="landing.audience.cta"></a>
+    <section id="stories" class="stories" aria-labelledby="stories-title">
+      <div class="landing-wrap">
+        <p class="eyebrow" data-s="landing.stories.eyebrow"></p>
+        <h2 id="stories-title" class="section-title" data-s="landing.stories.title"></h2>
+        <p class="section-lede" data-s="landing.stories.lede"></p>
+        <ul class="story-grid">
+          <li class="story-card story-card--manor" data-card>
+            <h3 class="story-card__title" data-s="stories.manor.title"></h3>
+            <p class="story-card__tags"><span class="tag" data-s="stories.manor.genre"></span><span class="tag" data-s="stories.manor.players"></span></p>
+          </li>
+          <li class="story-card story-card--expedition" data-card>
+            <h3 class="story-card__title" data-s="stories.expedition.title"></h3>
+            <p class="story-card__tags"><span class="tag" data-s="stories.expedition.genre"></span><span class="tag" data-s="stories.expedition.players"></span></p>
+          </li>
+          <li class="story-card story-card--archive" data-card>
+            <h3 class="story-card__title" data-s="stories.archive.title"></h3>
+            <p class="story-card__tags"><span class="tag" data-s="stories.archive.genre"></span><span class="tag" data-s="stories.archive.players"></span></p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="community" class="audience" aria-labelledby="audience-title">
+      <div class="landing-wrap">
+        <div class="audience__inner">
+          <h2 id="audience-title" class="section-title" data-s="landing.audience.title"></h2>
+          <p class="audience__body" data-s="landing.audience.body"></p>
+          <a class="btn btn--gold btn--lg" href="/auth.html#register">
+            <span data-s="landing.audience.cta"></span>
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
+          </a>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container site-footer__inner">
-      <img src="/assets/brand/logo.svg" alt="" width="72" height="22">
+    <div class="landing-wrap site-footer__inner">
+      <a class="brand brand--sm" href="/" data-s-label="common.home">
+        <img class="brand__mark" src="/assets/brand/emblem.svg" alt="" width="48" height="64">
+        <span class="brand__name" data-s="common.brand"></span>
+      </a>
       <p data-s="landing.footer.stories"></p>
       <p data-s="landing.footer.age"></p>
     </div>
