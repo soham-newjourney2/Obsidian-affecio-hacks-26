@@ -1,0 +1,324 @@
+{
+  "story_id": "orchard_theatre",
+  "version": 1,
+  "title": "The Letter at the Orchard Theatre",
+  "description": "The 1890s. Opening night ends in applause and disaster: one letter has vanished, the trustees meet at noon, and the answer may be sitting in plain sight.",
+  "genres": ["mystery", "period drama"],
+  "min_players": 3,
+  "max_players": 4,
+  "est_minutes": 30,
+  "playable": true,
+  "rights": {
+    "inspiration_title": "The Purloined Letter",
+    "inspiration_author": "Edgar Allan Poe",
+    "author_death_year": 1849,
+    "publication_year": 1844,
+    "original_language": "English",
+    "source_url": "https://en.wikisource.org/wiki/The_Purloined_Letter",
+    "status": "verified_public_domain",
+    "notes": "Poe died in 1849; the story was first published in 1844. Public domain in India (author's life + 60 years, expired 1909) and in the US (published before 1931). Adaptation borrows only the idea of a stolen letter hidden where everyone can see it. All names, setting, plot and characters are original; no detective branding and no source passages.",
+    "reviewed_at": "2026-10-24"
+  },
+  "content": {
+    "premise": "Opening night at the Orchard Theatre ended with applause and a disaster. The one letter that proves the Hale family's right to the theatre has vanished from young manager Imogen Hale's dressing room. The trustees meet at noon tomorrow, and without the letter the theatre will be sold. She has one night to get it back, and she has come to you.",
+    "roles": [
+      { "id": "investigator", "name": "The Investigator", "focus": "Physical evidence: rooms, objects and traces." },
+      { "id": "archivist", "name": "The Archivist", "focus": "Letters, leases, ledgers and accounts." },
+      { "id": "listener", "name": "The Listener", "focus": "Testimony, gossip and sounds backstage." },
+      { "id": "strategist", "name": "The Strategist", "focus": "Timelines and the floor plan." }
+    ],
+    "optional_role": "strategist",
+    "redistribution": {
+      "c_floorplan": "archivist",
+      "c_timeline": "listener"
+    },
+    "variants": [
+      {
+        "id": "v1",
+        "solution_summary": "Lord Ravensworth, the patron, took the letter from the dressing room while his box stood empty during Act I. He turned the envelope inside out, re-addressed and re-sealed it, and left it among his own post in the letter rack of his retiring room, where the inspector's men saw it and thought nothing of it. If the letter is not produced by noon, the lease clause hands him the building."
+      },
+      {
+        "id": "v2",
+        "solution_summary": "Mr. Quill, the stage manager, was promised a post by the rival manager Mr. Dacre, who has bought the theatre's lease debt. During Act I, while an assistant held the prompt book, Quill took the letter and pasted it behind the endpaper of the prompt book, the one object every searcher saw and nobody opened."
+      },
+      {
+        "id": "v3",
+        "solution_summary": "No one is to blame. Imogen, flustered before the curtain, slipped the letter into the pocket of her heroine's cloak and forgot. It slid under a torn lining, and the wardrobe mistress collected the cloak for pressing during Act I. Lord Ravensworth's temper and Mr. Quill's secrets were red herrings."
+      }
+    ],
+    "start_scene": "s1_drawer",
+    "scenes": [
+      {
+        "id": "s1_drawer",
+        "title": "The Empty Drawer",
+        "narration_base": "The last carriage has gone and the gas lamps along the foyer are being turned down. Imogen Hale stands in the doorway of your lodgings, still in her stage paint, a shawl pulled tight. Her father's letter, the only proof of the Hale family's claim to the Orchard Theatre, was in her dressing room before the curtain. At the interval it was gone. The trustees meet at noon, and the inspector's search has found nothing.",
+        "objective": "Hear Imogen out, then share what each of you noticed in her account.",
+        "reveals": ["c_vanish", "c_lease", "c_sounds", "c_floorplan"],
+        "decision_id": "d1_start"
+      },
+      {
+        "id": "s2_house",
+        "title": "The Front of House",
+        "narration_base": "The Orchard Theatre is quiet now: velvet seats in shadow, programmes drifting along the aisles. Inspector Dunmore's men are packing up, a doorkeeper is sweeping, and somewhere above, a gentleman is still complaining about his unpaid box bill.",
+        "objective": "Decide what out here is connected to the missing letter, and what is only noise.",
+        "reveals": ["c_inspector", "c_nephew", "c_temper"],
+        "next": "s3_corridor"
+      },
+      {
+        "id": "s3_corridor",
+        "title": "The Backstage Corridor",
+        "narration_base": "The corridor behind the stage is narrow and smells of grease paint and gas. Three doors stand within thirty steps of Imogen's dressing room: the patron's retiring room, the wardrobe, and the prompt corner. Every one of them was searched tonight. Imogen waits at the end of the passage while you look.",
+        "objective": "Work out where a letter could be that a whole search party looked at and missed.",
+        "reveals": ["c_retiring", "c_promptbook", "c_coat", "c_docket", "c_gossip", "c_timeline"],
+        "decision_id": "d2_hiding"
+      },
+      {
+        "id": "s4_dawn",
+        "title": "Before the Trustees",
+        "narration_base": "The clock over the stage door strikes two. The trustees meet in ten hours, and you have time for one real move before the house wakes. Imogen will do whatever you decide, but you cannot be in three places at once.",
+        "objective": "Agree on one plan. It has to find the letter where it really is.",
+        "reveals": [],
+        "decision_id": "d3_plan"
+      }
+    ],
+    "clues": [
+      {
+        "id": "c_vanish",
+        "text": "Imogen kept the letter in her dressing-room drawer. She went to check it at the interval and the drawer was empty. The door was never locked.",
+        "text_by_variant": {
+          "v3": "Imogen believes she kept the letter in her dressing-room drawer, but admits she was flustered before the curtain and cannot swear to it. At the interval the drawer was empty."
+        },
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_lease",
+        "text": "A copy of the theatre's lease: if the Hale letter cannot be produced at the trustees' meeting, a forfeit clause passes the building to the patron, Lord Ravensworth.",
+        "text_by_variant": {
+          "v2": "A copy of the theatre's lease debt: it has quietly been bought by the rival manager, Mr. Dacre, who would take the building if the Hale letter is not produced at the trustees' meeting.",
+          "v3": "A copy of the theatre's lease: the building is held in trust for the Hale family's founding gift, and no one is named as gaining if the letter is lost. On paper, the meeting is only a formality."
+        },
+        "owner_role": "archivist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_sounds",
+        "text": "During Act I, Imogen heard a cane tapping softly along the corridor, then a door closing and a low, pleased laugh.",
+        "text_by_variant": {
+          "v2": "During Act I, Imogen heard a drawer slide in the prompt corner and a whispered voice: 'It's done.'",
+          "v3": "During Act I, Imogen heard a woman humming in the corridor and the thump of a heavy pressing iron being set down."
+        },
+        "owner_role": "listener",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_floorplan",
+        "text": "The floor plan shows the patron's retiring room, the wardrobe and the prompt corner all open onto the same passage, none more than thirty steps from Imogen's dressing room.",
+        "owner_role": "strategist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_inspector",
+        "text": "Inspector Dunmore's men searched the dressing room, the stage and every trunk and cupboard. The inspector is sure the letter has been hidden somewhere clever, and has stopped looking at things that seem ordinary.",
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_nephew",
+        "text": "The doorkeeper's restless nephew was seen in the corridor during Act I. He says he was only after a sweet from the cast table, and the doorkeeper vouches for him.",
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "red_herring", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_temper",
+        "text": "Lord Ravensworth shouted at the box office about unpaid bills, but then sat in full view of a dozen friends through all of Act I.",
+        "text_by_variant": {
+          "v1": "Lord Ravensworth shouted at the box office about unpaid bills, and his box stood empty for most of Act I. His friends say he 'went to see about the draught'."
+        },
+        "owner_role": "public",
+        "meaning_by_variant": { "v1": "true", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_retiring",
+        "text": "Lord Ravensworth's retiring room is thick with cigar smoke and unpaid bills. His letter rack holds only the evening's invitations, all in his clerk's neat hand.",
+        "text_by_variant": {
+          "v1": "Lord Ravensworth's letter rack holds one envelope turned inside out and re-sealed in plain wax, its address freshly written in a stiff, unfamiliar hand. It sits among his invitations as if it belonged there."
+        },
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "true", "v2": "red_herring", "v3": "red_herring" }
+      },
+      {
+        "id": "c_promptbook",
+        "text": "The prompt book sits open on its stand, its pages in order and its binding old and cracked. It has plainly been searched and set back.",
+        "text_by_variant": {
+          "v2": "The prompt book's spine is cracked and fresh paste is still tacky beneath the marbled endpaper, which has been lifted and pressed down again. The book is too thick for its page count."
+        },
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "red_herring", "v2": "true", "v3": "red_herring" }
+      },
+      {
+        "id": "c_coat",
+        "text": "The wardrobe racks are in neat rows. Every coat is tagged for pressing and every pocket is empty.",
+        "text_by_variant": {
+          "v3": "Imogen's blue heroine's cloak hangs tagged for pressing. Its pocket lining is torn, and a cream corner shows through the gap."
+        },
+        "owner_role": "investigator",
+        "meaning_by_variant": { "v1": "red_herring", "v2": "red_herring", "v3": "true" }
+      },
+      {
+        "id": "c_docket",
+        "text": "The clerk's book shows Lord Ravensworth re-addresses and re-seals his own post each evening, to put curious servants off the scent of his affairs.",
+        "text_by_variant": {
+          "v2": "A bundle of correspondence shows Mr. Dacre offered Mr. Quill a place at his own house, starting the week the Orchard closes.",
+          "v3": "Imogen's father's letter is in a plain cream envelope marked only 'Hale', easily taken for a costume docket or a laundry slip."
+        },
+        "owner_role": "archivist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_gossip",
+        "text": "The doorkeeper says Lord Ravensworth carried a fat bundle of post out of his box during Act I, chuckling to himself.",
+        "text_by_variant": {
+          "v2": "The call-boy says Mr. Quill handed the prompt book to an assistant for the whole of Act I, which he has never done before.",
+          "v3": "The dresser says the wardrobe mistress swept every dressing room for coats to press during Act I, humming as she went."
+        },
+        "owner_role": "listener",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      },
+      {
+        "id": "c_timeline",
+        "text": "The letter was last seen at the half-hour call and was gone by the interval. For the length of Act I the corridor was empty of players, and Lord Ravensworth's box was empty too.",
+        "text_by_variant": {
+          "v2": "The letter was last seen at the half-hour call and was gone by the interval. For the length of Act I the prompt book was out of Mr. Quill's hands, the only time it has been all season.",
+          "v3": "The letter was last seen at the half-hour call and was gone by the interval. For the length of Act I the wardrobe mistress made her usual round, collecting coats for pressing from every room."
+        },
+        "owner_role": "strategist",
+        "meaning_by_variant": { "v1": "true", "v2": "true", "v3": "true" }
+      }
+    ],
+    "decisions": [
+      {
+        "id": "d1_start",
+        "prompt": "Where do you begin at the Orchard Theatre?",
+        "choices": [
+          {
+            "id": "c_house",
+            "label": "Walk the front of house and hear the gossip first",
+            "next_by_variant": { "v1": "s2_house", "v2": "s2_house", "v3": "s2_house" }
+          },
+          {
+            "id": "c_corridor",
+            "label": "Go straight to the backstage corridor",
+            "next_by_variant": { "v1": "s3_corridor", "v2": "s3_corridor", "v3": "s3_corridor" }
+          }
+        ]
+      },
+      {
+        "id": "d2_hiding",
+        "prompt": "Where is the letter, and why did a whole search miss it?",
+        "choices": [
+          {
+            "id": "c_patron_post",
+            "label": "Disguised among the patron's own post",
+            "next_by_variant": { "v1": "s4_dawn", "v2": "s4_dawn", "v3": "s4_dawn" }
+          },
+          {
+            "id": "c_prompt_book",
+            "label": "Hidden inside the prompt book everyone saw",
+            "next_by_variant": { "v1": "s4_dawn", "v2": "s4_dawn", "v3": "s4_dawn" }
+          },
+          {
+            "id": "c_never_stolen",
+            "label": "Never stolen, only mislaid by accident",
+            "next_by_variant": { "v1": "s4_dawn", "v2": "s4_dawn", "v3": "s4_dawn" }
+          }
+        ]
+      },
+      {
+        "id": "d3_plan",
+        "prompt": "What is the plan before the trustees meet?",
+        "choices": [
+          {
+            "id": "c_letter_rack",
+            "label": "Call on Lord Ravensworth's retiring room at first light and examine every envelope in his letter rack",
+            "next_by_variant": { "v1": "ending_success", "v2": "ending_partial", "v3": "ending_partial" }
+          },
+          {
+            "id": "c_open_prompt",
+            "label": "Take the prompt book from its stand before Mr. Quill arrives and open it along its spine",
+            "next_by_variant": { "v1": "ending_partial", "v2": "ending_success", "v3": "ending_partial" }
+          },
+          {
+            "id": "c_wardrobe_sweep",
+            "label": "Go through every pocket and lining in the wardrobe room before the coats are pressed",
+            "next_by_variant": { "v1": "ending_partial", "v2": "ending_partial", "v3": "ending_success" }
+          },
+          {
+            "id": "c_postpone",
+            "label": "Ask the trustees to postpone the meeting for a day while the search goes on",
+            "next_by_variant": { "v1": "ending_safe", "v2": "ending_safe", "v3": "ending_safe" }
+          }
+        ]
+      }
+    ],
+    "hints": [
+      {
+        "scene_id": "s1_drawer",
+        "levels": [
+          "Every sound and detail Imogen describes might matter. Compare what each of you heard in her account.",
+          "The Listener and the Archivist may each hold part of why this is happening now.",
+          "Both starting points work: the front of house adds context, and the corridor holds the core evidence."
+        ]
+      },
+      {
+        "scene_id": "s2_house",
+        "levels": [
+          "Not everything odd at the Orchard Theatre is connected to the letter.",
+          "Weigh what the inspector and the doorkeeper say against what the Listener and the Archivist already know.",
+          "The doorkeeper's nephew is only a boy with a sweet tooth. Pay attention to who was missing from their seat, not who was seen in the corridor."
+        ]
+      },
+      {
+        "scene_id": "s3_corridor",
+        "levels": [
+          "A thing that has been searched and set back may still be the thing you are looking for.",
+          "The Investigator and the Archivist should compare what each room shows with what the papers say.",
+          "The letter is in one of three ordinary places. Ask which clues point to only one: the patron's post, the prompt book, or a pocket in the wardrobe."
+        ]
+      },
+      {
+        "scene_id": "s4_dawn",
+        "levels": [
+          "The plan has to go where the letter really is, not where it would be most dramatic to look.",
+          "The Strategist's timeline, or whoever holds it now, says who was out of place during Act I and why.",
+          "Match the plan to the cause: the patron's letter rack, the prompt book, or the wardrobe. If you cannot agree, asking the trustees for a day buys time."
+        ]
+      }
+    ],
+    "endings": [
+      {
+        "id": "ending_success",
+        "kind": "success",
+        "title": "Case solved",
+        "text": "Before the trustees take their seats, the letter is in Imogen's hands, found exactly where you said it would be. The Orchard keeps its name, the Hale family keeps its theatre, and for the first time all night the foyer is quiet for the right reason."
+      },
+      {
+        "id": "ending_partial",
+        "kind": "partial",
+        "title": "A day's grace",
+        "text": "You do not find the letter, but you find enough to make the trustees hesitate, and Imogen wins a week's grace. The true hiding place slips past you, and the Orchard keeps its secret a little longer."
+      },
+      {
+        "id": "ending_safe",
+        "kind": "safe",
+        "title": "Time bought",
+        "text": "The trustees agree to postpone by a day, and you spend it sorting through the evidence together over strong tea. The letter is still missing, but the theatre is still standing. Sometimes the right call is to slow the clock rather than race it."
+      }
+    ],
+    "safety_notes": [
+      "No one is harmed or threatened; the stakes are a theatre, a lease and a family's good name.",
+      "Every ending keeps Imogen and the Orchard Theatre safe for at least another day.",
+      "The red herrings (a doorkeeper's nephew, a blustering patron) are never treated as villains without evidence."
+    ]
+  }
+}
