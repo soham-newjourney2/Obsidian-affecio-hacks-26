@@ -32,6 +32,24 @@ function wireTabs() {
   }
   const initial = location.hash === "#register" ? "tab-register" : "tab-login";
   selectTab(document.getElementById(initial), { remember: false });
+
+  // "Already have an account? Sign in" style links under each form.
+  for (const link of document.querySelectorAll("[data-switch]")) {
+    link.addEventListener("click", () => selectTab(document.getElementById(link.dataset.switch), { focus: true }));
+  }
+}
+
+// Eye button next to password fields: toggles between hidden and visible text.
+function wirePasswordToggles() {
+  for (const toggle of document.querySelectorAll(".pw-toggle")) {
+    const input = document.getElementById(toggle.getAttribute("aria-controls"));
+    toggle.addEventListener("click", () => {
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      toggle.setAttribute("aria-pressed", String(show));
+      input.focus();
+    });
+  }
 }
 
 // Browser constraint validation, shown with our own messages. Returns true when valid.
@@ -39,7 +57,8 @@ function validate(form) {
   clearFormErrors(form);
   let firstInvalid = null;
   for (const input of form.querySelectorAll("input")) {
-    if (input.type !== "checkbox") input.value = input.type === "password" ? input.value : input.value.trim();
+    // Passwords are never trimmed, even while shown as text by the eye toggle.
+    if (input.type !== "checkbox" && input.name !== "password") input.value = input.value.trim();
     if (input.checkValidity()) continue;
     setFieldError(input, t(input.dataset.invalid));
     firstInvalid ??= input;
@@ -91,6 +110,7 @@ function wireForm(form, submit) {
 
 function wireForms() {
   wireTabs();
+  wirePasswordToggles();
   wireForm(document.querySelector("#panel-login"), (form) =>
     api("/auth/login", {
       method: "POST",
