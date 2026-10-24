@@ -93,9 +93,18 @@
           </div>
         </section>
 
-        <!-- At a table -->
-        <section id="table" class="room-table" aria-labelledby="table-title" hidden>
-          <div class="room-table__side">
+        <!-- At a table: waiting room, then the case itself -->
+        <section id="table" class="room-table" data-mode="waiting" aria-labelledby="table-title" hidden>
+          <!-- Mobile tabs (game mode) -->
+          <div class="game-tabs" role="tablist" data-st-label="game.tabs.label">
+            <button class="game-tabs__tab" type="button" role="tab" id="tab-story" aria-controls="game-story" aria-selected="true" data-st="game.tabs.story"></button>
+            <button class="game-tabs__tab" type="button" role="tab" id="tab-clues" aria-controls="game-clues" aria-selected="false" tabindex="-1" data-st="game.tabs.clues"></button>
+            <button class="game-tabs__tab" type="button" role="tab" id="tab-board" aria-controls="game-board" aria-selected="false" tabindex="-1" data-st="game.tabs.board"></button>
+            <button class="game-tabs__tab" type="button" role="tab" id="tab-chat" aria-controls="chat-panel" aria-selected="false" tabindex="-1" data-st="game.tabs.chat"></button>
+          </div>
+
+          <!-- Waiting room -->
+          <div class="room-table__side" id="waiting">
             <header class="panel room-card">
               <p class="eyebrow" data-st="room.title"></p>
               <h1 id="table-title" class="room-card__title"></h1>
@@ -121,14 +130,64 @@
                 <button class="btn btn--seal" type="button" id="start" data-st="room.actions.start"></button>
                 <button class="btn btn--ghost btn--sm" type="button" id="leave" data-st="room.actions.leave"></button>
               </div>
-              <div id="started" class="room-started" hidden>
-                <h3 class="room-card__subtitle" data-st="room.started.title"></h3>
-                <p data-st="room.started.body"></p>
-              </div>
             </section>
           </div>
 
-          <section class="panel room-chat" aria-labelledby="chat-title">
+          <!-- Game: private clues -->
+          <section id="game-clues" class="panel game-clues" role="tabpanel" aria-labelledby="clues-title">
+            <h2 id="clues-title" class="room-card__subtitle" data-st="game.clues.title"></h2>
+            <div class="game-role" id="game-role"></div>
+            <ul id="private-clues" class="game-clue-list"></ul>
+            <p id="private-empty" class="game-empty" data-st="game.clues.empty"></p>
+          </section>
+
+          <!-- Game: the story -->
+          <section id="game-story" class="panel game-story" role="tabpanel" aria-labelledby="chapter-title">
+            <div class="game-progress">
+              <p class="eyebrow" id="chapter-label"></p>
+              <ol class="game-progress__dots" id="chapter-dots" aria-hidden="true"></ol>
+            </div>
+            <h1 id="chapter-title" class="game-story__title"></h1>
+            <div class="game-narration">
+              <p id="narration" class="game-narration__text typewriter" aria-hidden="true"></p>
+              <p id="narration-sr" class="visually-hidden" aria-live="polite"></p>
+              <button class="btn btn--ghost btn--sm" type="button" id="narration-skip" data-st="game.story.skip" hidden></button>
+            </div>
+            <p class="game-objective"><strong data-st="game.story.objective"></strong> <span id="objective"></span></p>
+
+            <div id="decision" class="game-decision">
+              <h2 id="decision-prompt" class="game-decision__prompt"></h2>
+              <p id="decision-status" class="game-decision__status" aria-live="polite"></p>
+              <ul id="choices" class="game-choices"></ul>
+            </div>
+
+            <div class="game-hints">
+              <button class="btn btn--ghost btn--sm" type="button" id="hint-request"></button>
+              <ol id="hints" class="game-hint-list" aria-live="polite"></ol>
+            </div>
+
+            <div id="ending" class="game-ending" hidden>
+              <p id="ending-stamp" class="game-stamp" aria-hidden="true"></p>
+              <h2 id="ending-title" class="game-ending__title"></h2>
+              <p id="ending-text" class="game-ending__text"></p>
+              <h3 class="room-card__subtitle" data-st="game.ending.solution"></h3>
+              <p id="ending-solution" class="game-ending__solution"></p>
+              <p class="hint" data-st="game.ending.next"></p>
+            </div>
+          </section>
+
+          <!-- Game: the evidence board -->
+          <section id="game-board" class="panel game-board" role="tabpanel" aria-labelledby="board-title">
+            <h2 id="board-title" class="room-card__subtitle" data-st="game.board.title"></h2>
+            <div class="game-board__surface" id="board-surface">
+              <svg class="game-board__strings" id="board-strings" aria-hidden="true" focusable="false"></svg>
+              <ul id="board" class="game-board__pins"></ul>
+            </div>
+            <p id="board-empty" class="game-empty" data-st="game.board.empty"></p>
+          </section>
+
+          <!-- Chat (both modes) -->
+          <section id="chat-panel" class="panel room-chat" role="tabpanel" aria-labelledby="chat-title">
             <h2 id="chat-title" class="room-card__subtitle" data-st="room.chat.title"></h2>
             <ol id="chat-log" class="room-chat__log" role="log" aria-live="polite" aria-relevant="additions" tabindex="0"></ol>
             <p id="chat-empty" class="room-chat__empty" data-st="room.chat.empty"></p>
@@ -144,6 +203,15 @@
             </form>
           </section>
         </section>
+
+        <!-- Reconnect overlay (game mode) -->
+        <div id="reconnect" class="game-reconnect" role="alertdialog" aria-modal="false" aria-labelledby="reconnect-title" hidden>
+          <div class="panel game-reconnect__card">
+            <div class="spinner" aria-hidden="true"></div>
+            <p id="reconnect-title" class="game-reconnect__title" data-st="game.reconnect.title"></p>
+            <p class="hint" data-st="game.reconnect.body"></p>
+          </div>
+        </div>
       </main>
     </div>
   </div>

@@ -1,57 +1,11 @@
 """room.html: start/join a table and talk live over WebSocket (3 browser contexts)."""
 
-import re
-from collections.abc import Callable, Iterator
-
 import pytest
-from playwright.sync_api import Browser, Page, expect
+from playwright.sync_api import expect
 
-from backend.tests.e2e.helpers import session_page, watch_console
+from backend.tests.e2e.helpers import LIVE, join_table, say, start_table
 
 pytestmark = pytest.mark.e2e
-
-LIVE = 3_000  # no polling on this page: anything slower than this would mean WS isn't working
-
-
-@pytest.fixture
-def person(browser: Browser, base_url: str) -> Iterator[Callable[[str], Page]]:
-    """Factory: each call is a separate person (own context, own sessionStorage)."""
-    contexts = []
-
-    def make(name: str) -> Page:
-        context = browser.new_context(base_url=base_url)
-        contexts.append(context)
-        page = session_page(context.new_page(), name)
-        page.errors = watch_console(page)
-        page.goto("/room.html")
-        expect(page.locator("#gate")).to_be_visible()
-        return page
-
-    yield make
-    for context in contexts:
-        context.close()
-
-
-def start_table(host: Page) -> str:
-    expect(host.locator("#story-select")).to_have_value("blackthorn_manor")
-    host.get_by_role("button", name="Start the table").click()
-    expect(host.locator("#table")).to_be_visible()
-    expect(host.locator("#conn-text")).to_have_text("Live")
-    code = host.locator("#invite-code")
-    expect(code).to_have_text(re.compile(r"^[A-Z2-7]{4}-[A-Z2-7]{4}$"))
-    return code.inner_text()
-
-
-def join_table(page: Page, code: str) -> None:
-    page.locator("#join-code").fill(code.lower())
-    page.get_by_role("button", name="Join the table").click()
-    expect(page.locator("#table")).to_be_visible()
-    expect(page.locator("#conn-text")).to_have_text("Live")
-
-
-def say(page: Page, text: str) -> None:
-    page.locator("#chat-input").fill(text)
-    page.locator("#chat-input").press("Enter")
 
 
 def test_three_people_gather_and_talk_live(person) -> None:
@@ -87,8 +41,9 @@ def test_three_people_gather_and_talk_live(person) -> None:
         "Waiting for Ada to start the case.", timeout=LIVE
     )
     start.click()
-    for page in (ada, bo, cy):
-        expect(page.locator("#started")).to_be_visible(timeout=LIVE)
+    for page in (ada, bo, cy):  # the case begins: everyone moves into the story room
+        expect(page.locator("#table")).to_have_attribute("data-mode", "game", timeout=LIVE)
+        expect(page.locator("#game-story")).to_be_visible()
     say(bo, "Still talking after the start")
     expect(ada.locator("#chat-log .room-msg").last).to_contain_text("Still talking", timeout=LIVE)
 

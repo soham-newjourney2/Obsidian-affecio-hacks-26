@@ -98,10 +98,13 @@ export function connectRoom(roomId, { getToken, onFrame, onStatus }) {
   }
 
   function onOnline() {
-    if (!stopped && !live) {
-      attempt = 0;
-      open();
+    if (stopped) return;
+    if (live) {
+      setStatus("connected"); // the socket survived the blip
+      return;
     }
+    attempt = 0;
+    open();
   }
   function onOffline() {
     if (!stopped) setStatus("offline");
