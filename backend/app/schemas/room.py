@@ -52,6 +52,7 @@ class RoomOut(BaseModel):
     invite_expires_at: datetime | None
     created_at: datetime
     started_at: datetime | None
+    session_id: uuid.UUID | None  # the game, once the case has started
 
 
 class CreatedRoomOut(RoomOut):
@@ -60,7 +61,11 @@ class CreatedRoomOut(RoomOut):
 
 
 def room_view(
-    room: Room, story: Story, members: list[tuple[RoomMember, str]], viewer_id: uuid.UUID
+    room: Room,
+    story: Story,
+    members: list[tuple[RoomMember, str]],
+    viewer_id: uuid.UUID,
+    session_id: uuid.UUID | None = None,
 ) -> RoomOut:
     you_are_host = room.host_user_id == viewer_id
     ready_count = sum(m.status == "ready" for m, _ in members)
@@ -93,4 +98,5 @@ def room_view(
         invite_expires_at=room.expires_at if room.invite_hash else None,
         created_at=room.created_at,
         started_at=room.started_at,
+        session_id=session_id,
     )

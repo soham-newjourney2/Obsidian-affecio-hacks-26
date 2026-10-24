@@ -17,22 +17,28 @@ from pydantic import ValidationError
 from backend.app.core.errors import AppError
 from backend.app.core.security import InvalidToken, decode_access_token
 from backend.app.db.base import utcnow
+from backend.app.game import engine
+from backend.app.game.engine import GameError
 from backend.app.models import Room, RoomMember, Story, User
 from backend.app.models.room import PRESENT_STATUSES
 from backend.app.schemas.room import room_view
 from backend.app.services import chat
+from backend.app.services import game as game_service
 from backend.app.services import rooms as room_service
 from backend.app.ws.events import (
     MAX_FRAME_BYTES,
     AuthIn,
     ChatSendIn,
     ClientFrame,
+    GameHintIn,
+    GameShareIn,
+    GameVoteIn,
     ReadyIn,
     envelope,
     error,
 )
 from backend.app.ws.manager import Connection
-from backend.app.ws.notify import notify_presence, notify_room
+from backend.app.ws.notify import deliver_game, notify_presence, notify_room
 
 router = APIRouter()
 
@@ -87,11 +93,17 @@ async def _snapshot(app: FastAPI, conn: Connection) -> dict:
         story = await session.get(Story, room.story_id)
         members = await room_service.members_with_names(session, room)
         history = await chat.recent_messages(session, conn.room_id)
+        game = await game_service.session_for_room(session, conn.room_id)
+    view = room_view(room, story, members, conn.user_id, session_id=game.id if game else None)
     return {
-        "room": room_view(room, story, members, conn.user_id).model_dump(mode="json"),
+        "room": view.model_dump(mode="json"),
         "you": str(conn.member_id),
         "online": sorted(str(m) for m in app.state.ws.online_members(conn.room_id)),
         "messages": [chat.message_out(m, name) for m, name in history],
+        # Reconnect resync: this member's own projection only.
+        "game": engine.view(story.config["content"], game.canonical_state, str(conn.member_id))
+        if game
+        else None,
     }
 
 
@@ -138,10 +150,50 @@ async def _on_leave(app: FastAPI, conn: Connection, session) -> None:
     user = await session.get(User, conn.user_id)
     await room_service.leave_room(session, user, conn.room_id)
     conn.open = False  # stop receiving; tell the others before the socket goes away
+    freed = await game_service.leave_game(app, conn.room_id, conn.member_id)
+    if freed:
+        await deliver_game(app, freed)
     await notify_room(app, conn.room_id, "left", conn.member_id)
     await app.state.ws.close_member(conn.room_id, conn.member_id, 1000)
     await _close(conn.ws, 1000)
     raise _Closed
+
+
+GAME_ACTIONS = {
+    "game.vote": (GameVoteIn, "vote"),
+    "game.hint.request": (GameHintIn, "hint"),
+    "game.clue.share": (GameShareIn, "share"),
+}
+
+
+async def _on_game(app: FastAPI, conn: Connection, frame: ClientFrame, session) -> None:
+    manager = app.state.ws
+    model, kind = GAME_ACTIONS[frame.type]
+    data = model.model_validate(frame.payload)
+    if not app.state.game_bucket.take(str(conn.member_id)):
+        await manager.send(conn, error(conn.room_id, "RATE_LIMITED", frame.id))
+        return
+    game = await game_service.session_for_room(session, conn.room_id)
+    if game is None:
+        await manager.send(conn, error(conn.room_id, "NO_SESSION", frame.id))
+        return
+    action = {
+        "type": kind,
+        "member_id": str(conn.member_id),  # identity comes from the socket, never the payload
+        "action_id": data.client_action_id,
+        **data.model_dump(exclude={"client_action_id"}),
+    }
+    try:
+        applied = await game_service.apply_action(app, game.id, action)
+    except GameError as exc:
+        await manager.send(conn, error(conn.room_id, exc.code, frame.id))
+        if exc.code == "STALE_STATE":  # plus a fresh snapshot to resync from
+            await manager.send(
+                conn, envelope("room.snapshot", conn.room_id, await _snapshot(app, conn))
+            )
+        return
+    if applied.events:
+        await deliver_game(app, applied)
 
 
 async def _handle(app: FastAPI, conn: Connection, raw: str) -> None:
@@ -174,6 +226,8 @@ async def _handle(app: FastAPI, conn: Connection, raw: str) -> None:
                 await _on_ready(app, conn, frame, session)
             elif frame.type == "room.leave":
                 await _on_leave(app, conn, session)
+            elif frame.type in GAME_ACTIONS:
+                await _on_game(app, conn, frame, session)
             else:
                 await manager.send(conn, error(conn.room_id, "UNKNOWN_TYPE", frame.id))
         except ValidationError:

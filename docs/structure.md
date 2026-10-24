@@ -22,17 +22,18 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers)
 │   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
-│   │   ├── game/           # story_schema (story file model + structural validator)
+│   │   ├── game/           # story_schema (story file model + validator), engine (pure start/apply/view)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
-│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories, rooms)
+│   │   └── api/            # deps (session, current user), v1/ routers (health, auth, users, meta, stories, rooms, sessions)
 │   └── tests/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
-│       ├── unit/           # security, rate limiter, settings, schemas, story validator
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms (incl. concurrency), ws, migrations
+│       ├── wsutil.py       # WebSocket test helpers
+│       ├── unit/           # security, rate limiter, settings, schemas, story validator, engine
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), migrations
 │       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
@@ -89,6 +90,7 @@ uv run ruff check .
 | POST | `/rooms/{id}/ready` | member | `{ready: bool}` while waiting |
 | POST | `/rooms/{id}/start` | host | needs 3–4 present members, all ready; revokes the invite |
 | POST | `/rooms/{id}/leave` | member | host hands over to the longest-present member; empty room is abandoned |
+| GET | `/sessions/{id}` | member | the caller's own game projection (never others' private clues) |
 
 - Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
 - Browser session lives in `sessionStorage` (per tab). Signed-in pages redirect to `/auth.html?next=…`;
@@ -115,7 +117,9 @@ uv run ruff check .
 
 - First frame must be `auth {token}` within 5 s, else close 4401. Non-members (or anyone who has
   left) get 4403. Membership, token expiry and revocation are re-checked on every frame.
-- Client → server: `presence.ping`, `chat.send{client_message_id, body}`, `player.ready{ready}`, `room.leave`.
+- Client → server: `presence.ping`, `chat.send{client_message_id, body}`, `player.ready{ready}`, `room.leave`,
+  `game.vote{turn, state_version, choice_id, client_action_id}`, `game.hint.request{client_action_id}`,
+  `game.clue.share{clue_id, client_action_id}` (game actions 2/s per member).
 - Server → client: `room.snapshot` (room view, you, online, last 50 messages) on every (re)connect,
   `room.member{event, member_id, online, room?}` (state events carry each viewer's own room view;
   presence events `online`/`offline` carry only the online list), `chat.message`, `error{code, ref_id}`.
@@ -123,3 +127,19 @@ uv run ruff check .
   `client_message_id` is stored once and echoed only to the sender.
 - `js/core/ws.js`: auth-first connect, 20 s heartbeat, backoff reconnect (1–15 s), resync from the
   snapshot; chat sent while offline is resent with the same client id.
+
+## Game engine
+
+- `game/engine.py` is pure: `start(content, members, seed, now)`, `apply(content, state, action, now)`,
+  `view(content, state, member)`. The variant and seat order come from a seeded RNG (seed from `secrets`).
+- With 3 players the optional role (Strategist) is unseated and its clues move to the roles named in
+  `redistribution`. Private clues reach their owner when their scene is entered; public clues go
+  straight to the board; owners can pin (share) their clues to the board.
+- Votes resolve when every active seat has voted, or 45 s after a majority (a server timer sends a
+  `tick`); a tie gives the level-1 hint and a revote. Scenes without a decision are a "continue" vote.
+- Actions carry an `action_id` (idempotent). A vote for an earlier turn, or from before the current
+  turn began, is `STALE_STATE` (the server then sends a fresh `room.snapshot`).
+- `services/game.py` applies actions under a per-session lock and a compare-and-swap on
+  `state_version`; events go to `game_events` (seq per session), votes to `votes`.
+- Game events reach each socket only if public or addressed to that member, each with that member's
+  own `view`. The room snapshot carries the same `game` view for reconnects.

@@ -42,7 +42,10 @@ def test_story_detail_hides_solutions(client: TestClient, seeded: Path) -> None:
     assert res.status_code == 200
     body = res.json()
     assert [r["name"] for r in body["roles"]] == [
-        "The Investigator", "The Archivist", "The Listener", "The Strategist",
+        "The Investigator",
+        "The Archivist",
+        "The Listener",
+        "The Strategist",
     ]
     assert body["premise"].startswith("Two years ago")
     story = next(s for s in load_story_files() if s.story_id == "blackthorn_manor")

@@ -42,9 +42,7 @@ class RoomMember(Base):
     __table_args__ = (
         UniqueConstraint("room_id", "user_id", name="uq_room_members_room_user"),
         CheckConstraint(f"status IN {MEMBER_STATUSES}", name="status"),
-        CheckConstraint(
-            "(user_id IS NULL) <> (companion_key IS NULL)", name="human_xor_companion"
-        ),
+        CheckConstraint("(user_id IS NULL) <> (companion_key IS NULL)", name="human_xor_companion"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)

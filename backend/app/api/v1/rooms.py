@@ -12,15 +12,18 @@ from backend.app.schemas.room import (
     RoomOut,
     room_view,
 )
+from backend.app.services import game as game_service
 from backend.app.services import rooms as svc
-from backend.app.ws.notify import notify_room
+from backend.app.ws.notify import deliver_game, notify_room
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
 
 async def _view(session: SessionDep, room: Room, viewer: User) -> RoomOut:
     story = await session.get(Story, room.story_id)
-    return room_view(room, story, await svc.members_with_names(session, room), viewer.id)
+    game = await game_service.session_for_room(session, room.id)
+    members = await svc.members_with_names(session, room)
+    return room_view(room, story, members, viewer.id, session_id=game.id if game else None)
 
 
 async def _notify(
@@ -67,7 +70,9 @@ async def start(
     request: Request, room_id: uuid.UUID, user: CurrentUser, session: SessionDep
 ) -> RoomOut:
     room = await svc.start_room(session, user, room_id)
-    await _notify(request, session, room, user, "started")
+    started = await game_service.start_game(request.app, room.id)
+    await _notify(request, session, room, user, "started")  # room view now carries session_id
+    await deliver_game(request.app, started)
     return await _view(session, room, user)
 
 
@@ -77,6 +82,9 @@ async def leave(
 ) -> Response:
     await svc.leave_room(session, user, room_id)
     member = await svc.member_of(session, room_id, user.id)
+    freed = await game_service.leave_game(request.app, room_id, member.id)
+    if freed:
+        await deliver_game(request.app, freed)
     await notify_room(request.app, room_id, "left", member.id)
     await request.app.state.ws.close_member(room_id, member.id, 1000)
     return Response(status_code=204)
