@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ECHO</title>
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#faf1df">
   <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,21 +13,35 @@
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/storybook-theme.css">
   <link rel="stylesheet" href="/css/pages/auth.css">
   <script type="module" src="/js/pages/auth.js"></script>
 </head>
 <body class="page-auth">
   <a class="skip-link" href="#main" data-s="common.skip"></a>
-  <header class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="/" data-s-label="common.home">
-        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
-      </a>
-    </div>
-  </header>
+  <div class="auth-bg" aria-hidden="true">
+    <div class="auth-bg__art"></div>
+    <img class="auth-bg__vines auth-bg__vines--left" src="/assets/storybook/vines.png" alt="">
+    <img class="auth-bg__vines auth-bg__vines--right" src="/assets/storybook/vines.png" alt="">
+  </div>
 
-  <main id="main" class="container auth-main">
-    <section class="panel auth-panel gaslight" aria-labelledby="auth-title">
+  <main id="main" class="auth-main">
+    <section class="auth-story" data-s-label="auth.story.label">
+      <a class="brand brand--lg" href="/" data-s-label="common.home">
+        <img class="brand__mark" src="/assets/brand/emblem.svg" alt="" width="48" height="64">
+        <span class="brand__text">
+          <span class="brand__name" data-s="common.brand"></span>
+          <span class="brand__tagline" data-s="common.tagline"></span>
+        </span>
+      </a>
+      <div class="auth-story__copy">
+        <p class="auth-story__title"><span data-s="auth.story.titleLead"></span> <em data-s="auth.story.titleAccent"></em></p>
+        <p class="auth-story__tagline" data-s="auth.story.tagline"></p>
+        <p class="auth-story__body" data-s="auth.story.body"></p>
+      </div>
+    </section>
+
+    <section class="panel auth-panel" aria-labelledby="auth-title">
       <h1 id="auth-title" class="visually-hidden" data-s="auth.title"></h1>
 
       <div class="tabs" role="tablist" data-s-label="auth.tabs.label">
@@ -36,38 +50,74 @@
       </div>
 
       <form id="panel-login" class="form" method="post" role="tabpanel" aria-labelledby="tab-login" novalidate>
-        <p class="auth-lede" data-s="auth.login.lede"></p>
+        <div class="auth-intro">
+          <h2 class="auth-heading" data-s="auth.login.heading"></h2>
+          <p class="auth-lede" data-s="auth.login.lede"></p>
+        </div>
         <p class="form-error" role="alert" hidden></p>
         <div class="field">
           <label class="label" for="login-email" data-s="auth.fields.email"></label>
-          <input class="input" id="login-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="login-email-error" data-invalid="auth.invalid.email">
+          <div class="field__control">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-mail"></use></svg>
+            <input class="input" id="login-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="login-email-error" data-invalid="auth.invalid.email" data-s-placeholder="auth.fields.emailPlaceholder">
+          </div>
           <p class="field-error" id="login-email-error" hidden></p>
         </div>
         <div class="field">
           <label class="label" for="login-password" data-s="auth.fields.password"></label>
-          <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128" aria-describedby="login-password-error" data-invalid="auth.invalid.password">
+          <div class="field__control field__control--toggle">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-lock"></use></svg>
+            <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128" aria-describedby="login-password-error" data-invalid="auth.invalid.password" data-s-placeholder="auth.fields.passwordPlaceholder">
+            <button class="pw-toggle" type="button" aria-controls="login-password" aria-pressed="false" data-s-label="auth.fields.showPassword">
+              <svg class="icon icon--show" aria-hidden="true"><use href="/assets/icons.svg#i-eye"></use></svg>
+              <svg class="icon icon--hide" aria-hidden="true"><use href="/assets/icons.svg#i-eye-off"></use></svg>
+            </button>
+          </div>
           <p class="field-error" id="login-password-error" hidden></p>
         </div>
-        <button class="btn btn--primary" type="submit" disabled data-s="auth.login.submit"></button>
+        <button class="btn btn--primary btn--lg" type="submit" disabled>
+          <span data-s="auth.login.submit"></span>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
+        </button>
+        <p class="auth-switch">
+          <span data-s="auth.login.switchPrompt"></span>
+          <button class="auth-switch__link" type="button" data-switch="tab-register" data-s="auth.login.switchAction"></button>
+        </p>
       </form>
 
       <form id="panel-register" class="form" method="post" role="tabpanel" aria-labelledby="tab-register" novalidate hidden>
-        <p class="auth-lede" data-s="auth.register.lede"></p>
+        <div class="auth-intro">
+          <h2 class="auth-heading" data-s="auth.register.heading"></h2>
+          <p class="auth-lede" data-s="auth.register.lede"></p>
+        </div>
         <p class="form-error" role="alert" hidden></p>
         <div class="field">
           <label class="label" for="register-name" data-s="auth.fields.displayName"></label>
-          <input class="input" id="register-name" name="display_name" type="text" autocomplete="nickname" required minlength="2" maxlength="24" pattern="[\p{L}\p{N}_][\p{L}\p{N}_ .'\-]*" aria-describedby="register-name-hint register-name-error" data-invalid="auth.invalid.displayName">
+          <div class="field__control">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
+            <input class="input" id="register-name" name="display_name" type="text" autocomplete="nickname" required minlength="2" maxlength="24" pattern="[\p{L}\p{N}_][\p{L}\p{N}_ .'\-]*" aria-describedby="register-name-hint register-name-error" data-invalid="auth.invalid.displayName" data-s-placeholder="auth.fields.displayNamePlaceholder">
+          </div>
           <p class="hint" id="register-name-hint" data-s="auth.fields.displayNameHint"></p>
           <p class="field-error" id="register-name-error" hidden></p>
         </div>
         <div class="field">
           <label class="label" for="register-email" data-s="auth.fields.email"></label>
-          <input class="input" id="register-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="register-email-error" data-invalid="auth.invalid.email">
+          <div class="field__control">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-mail"></use></svg>
+            <input class="input" id="register-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="register-email-error" data-invalid="auth.invalid.email" data-s-placeholder="auth.fields.emailPlaceholder">
+          </div>
           <p class="field-error" id="register-email-error" hidden></p>
         </div>
         <div class="field">
           <label class="label" for="register-password" data-s="auth.fields.password"></label>
-          <input class="input" id="register-password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" aria-describedby="register-password-hint register-password-error" data-invalid="auth.invalid.newPassword">
+          <div class="field__control field__control--toggle">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-lock"></use></svg>
+            <input class="input" id="register-password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" aria-describedby="register-password-hint register-password-error" data-invalid="auth.invalid.newPassword" data-s-placeholder="auth.fields.newPasswordPlaceholder">
+            <button class="pw-toggle" type="button" aria-controls="register-password" aria-pressed="false" data-s-label="auth.fields.showPassword">
+              <svg class="icon icon--show" aria-hidden="true"><use href="/assets/icons.svg#i-eye"></use></svg>
+              <svg class="icon icon--hide" aria-hidden="true"><use href="/assets/icons.svg#i-eye-off"></use></svg>
+            </button>
+          </div>
           <p class="hint" id="register-password-hint" data-s="auth.fields.passwordHint"></p>
           <p class="field-error" id="register-password-error" hidden></p>
         </div>
@@ -78,7 +128,14 @@
           </label>
           <p class="field-error" id="register-age-error" hidden></p>
         </div>
-        <button class="btn btn--seal" type="submit" disabled data-s="auth.register.submit"></button>
+        <button class="btn btn--primary btn--lg" type="submit" disabled>
+          <span data-s="auth.register.submit"></span>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
+        </button>
+        <p class="auth-switch">
+          <span data-s="auth.register.switchPrompt"></span>
+          <button class="auth-switch__link" type="button" data-switch="tab-login" data-s="auth.register.switchAction"></button>
+        </p>
       </form>
     </section>
   </main>
