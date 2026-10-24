@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ECHO</title>
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#10251b">
   <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,112 +13,129 @@
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/effects.css">
+  <link rel="stylesheet" href="/css/storybook-theme.css">
   <link rel="stylesheet" href="/css/pages/lobby.css">
   <script type="module" src="/js/pages/lobby.js"></script>
 </head>
 <body class="page-lobby">
   <a class="skip-link" href="#main" data-s="common.skip"></a>
-  <header class="site-header app-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="/lobby.html" data-s-label="nav.lobby">
-        <img src="/assets/brand/logo.svg" alt="" width="112" height="34">
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand brand--light sidebar__brand" href="/lobby.html" data-s-label="nav.lobby">
+        <img class="brand__mark" src="/assets/brand/emblem.svg" alt="" width="48" height="64">
+        <span class="brand__name" data-s="common.brand"></span>
       </a>
-      <nav class="site-nav" data-s-label="nav.label">
-        <span class="app-header__user" id="user-name"></span>
-        <a class="site-nav__link" href="/onboarding.html" data-s="nav.profile"></a>
-        <button class="btn btn--ghost btn--sm" type="button" id="sign-out" data-s="nav.signOut"></button>
+
+      <nav class="sidebar__nav" data-s-label="lobby.navLabel">
+        <a class="sidebar__link" href="/lobby.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg>
+          <span data-s="lobby.nav.home"></span>
+        </a>
+        <button class="sidebar__link" type="button" data-soon>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-compass"></use></svg>
+          <span data-s="lobby.nav.find"></span>
+        </button>
+        <button class="sidebar__link" type="button" data-soon>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-layers"></use></svg>
+          <span data-s="lobby.nav.games"></span>
+        </button>
+        <button class="sidebar__link" type="button" data-soon>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
+          <span data-s="lobby.nav.community"></span>
+        </button>
+        <button class="sidebar__link" type="button" data-soon>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-message"></use></svg>
+          <span data-s="lobby.nav.messages"></span>
+        </button>
+        <a class="sidebar__link" href="/onboarding.html">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
+          <span data-s="lobby.nav.profile"></span>
+        </a>
       </nav>
-    </div>
-  </header>
 
-  <main id="main" class="container lobby">
-    <div id="page-state" class="state" role="status" aria-live="polite"></div>
+      <div class="sidebar__art" aria-hidden="true"></div>
+      <div class="sidebar__footer">
+        <button class="sidebar__link" type="button" id="sign-out">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-logout"></use></svg>
+          <span data-s="nav.signOut"></span>
+        </button>
+      </div>
+    </aside>
 
-    <div id="lobby-content" class="lobby__content" hidden>
-      <header class="lobby__intro">
-        <p class="eyebrow" data-s="lobby.eyebrow"></p>
-        <h1 id="welcome" class="lobby__title"></h1>
-        <a class="lobby__profile-link" href="/onboarding.html" data-s="lobby.editProfile"></a>
+    <div class="app-main lobby-main">
+      <header class="app-topbar lobby-topbar">
+        <form class="search" role="search" id="search">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>
+          <input class="search__input" type="search" name="q" autocomplete="off" data-s-label="lobby.searchLabel" data-s-placeholder="lobby.searchPlaceholder">
+        </form>
+        <button class="icon-btn" type="button" id="notifications" data-s-label="lobby.notifications">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-bell"></use></svg>
+        </button>
+        <a class="user-chip" href="/onboarding.html">
+          <span class="avatar" data-user-initial aria-hidden="true"></span>
+          <span class="app-header__user" id="user-name"></span>
+        </a>
       </header>
 
-      <section id="room" class="panel room" aria-labelledby="room-title" hidden>
-        <p class="eyebrow" data-s="lobby.room.eyebrow"></p>
-        <h2 id="room-title" class="room__title"></h2>
+      <main id="main" class="lobby">
+        <div id="page-state" class="state" role="status" aria-live="polite"></div>
 
-        <div id="invite" class="room__invite">
-          <div id="invite-known">
-            <p class="label" id="invite-label" data-s="lobby.room.inviteLabel"></p>
-            <div class="room__code-row">
-              <output id="invite-code" class="room__code" aria-labelledby="invite-label"></output>
-              <button class="btn btn--ghost btn--sm" type="button" id="copy-code" data-s="lobby.room.copy"></button>
+        <div id="lobby-content" class="lobby__content" hidden>
+          <section class="lobby-hero" aria-labelledby="lobby-hero-title">
+            <p id="welcome" class="lobby-hero__welcome"></p>
+            <h1 id="lobby-hero-title" class="lobby-hero__title" data-s="lobby.hero.title"></h1>
+            <p class="lobby-hero__body" data-s="lobby.hero.body"></p>
+            <div class="lobby-hero__actions">
+              <button class="btn btn--primary" type="button" data-soon>
+                <span data-s="lobby.hero.cta"></span>
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
+              </button>
+              <a class="btn btn--glass" href="/onboarding.html" data-s="lobby.editProfile"></a>
             </div>
-            <p class="hint" data-s="lobby.room.inviteHint"></p>
+          </section>
+
+          <section class="lobby-section" aria-labelledby="recommended-title">
+            <header class="lobby-section__head">
+              <h2 id="recommended-title" class="lobby-section__title" data-s="lobby.recommended"></h2>
+              <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
+            </header>
+            <ul class="game-grid">
+              <li class="game-card game-card--manor">
+                <h3 class="game-card__title" data-s="stories.manor.title"></h3>
+                <p class="game-card__tags"><span class="tag" data-s="stories.manor.genre"></span><span class="tag" data-s="stories.manor.players"></span><span class="tag" data-s="stories.manor.level"></span></p>
+              </li>
+              <li class="game-card game-card--expedition">
+                <h3 class="game-card__title" data-s="stories.expedition.title"></h3>
+                <p class="game-card__tags"><span class="tag" data-s="stories.expedition.genre"></span><span class="tag" data-s="stories.expedition.players"></span><span class="tag" data-s="stories.expedition.level"></span></p>
+              </li>
+              <li class="game-card game-card--archive">
+                <h3 class="game-card__title" data-s="stories.archive.title"></h3>
+                <p class="game-card__tags"><span class="tag" data-s="stories.archive.genre"></span><span class="tag" data-s="stories.archive.players"></span><span class="tag" data-s="stories.archive.level"></span></p>
+              </li>
+            </ul>
+          </section>
+
+          <div class="lobby-row">
+            <section class="lobby-section" aria-labelledby="people-title">
+              <header class="lobby-section__head">
+                <h2 id="people-title" class="lobby-section__title" data-s="lobby.people"></h2>
+                <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
+              </header>
+              <ul class="people" id="people"></ul>
+            </section>
+
+            <section class="lobby-section active-card" aria-labelledby="active-title">
+              <header class="lobby-section__head">
+                <h2 id="active-title" class="lobby-section__title" data-s="lobby.active"></h2>
+                <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
+              </header>
+              <ul class="active-list" id="active"></ul>
+            </section>
           </div>
-          <p id="invite-unknown" class="hint" data-s="lobby.room.inviteUnknown" hidden></p>
         </div>
-
-        <div class="room__members">
-          <h3 id="members-title" class="room__subtitle"></h3>
-          <ul id="members" class="room__member-list"></ul>
-        </div>
-
-        <p id="room-status" class="room__status" role="status" aria-live="polite"></p>
-
-        <div id="room-actions" class="room__actions">
-          <button class="btn btn--ghost" type="button" id="ready-toggle" aria-pressed="false"></button>
-          <button class="btn btn--seal" type="button" id="start" data-s="lobby.room.start"></button>
-          <button class="btn btn--ghost btn--sm room__leave" type="button" id="leave" data-s="lobby.room.leave"></button>
-        </div>
-
-        <div id="room-started" class="room__started" hidden>
-          <h3 class="room__subtitle" data-s="lobby.room.startedTitle"></h3>
-          <p id="started-body"></p>
-          <button class="btn btn--ghost" type="button" id="back-to-catalogue" data-s="lobby.room.backToLobby"></button>
-        </div>
-      </section>
-
-      <div id="home" class="lobby__home">
-        <section class="panel join" aria-labelledby="join-title">
-          <h2 id="join-title" class="join__title" data-s="lobby.join.title"></h2>
-          <form id="join-form" class="join__form" method="post" novalidate>
-            <div class="field">
-              <label class="label" for="join-code" data-s="lobby.join.label"></label>
-              <input class="input join__input" id="join-code" name="code" type="text" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="join-code-hint join-code-error">
-              <p class="hint" id="join-code-hint" data-s="lobby.join.hint"></p>
-              <p class="field-error" id="join-code-error" hidden></p>
-            </div>
-            <button class="btn btn--primary" type="submit" disabled data-s="lobby.join.submit"></button>
-          </form>
-        </section>
-
-        <section class="catalogue" aria-labelledby="catalogue-title">
-          <div class="catalogue__head">
-            <h2 id="catalogue-title" class="catalogue__title" data-s="lobby.catalogueTitle"></h2>
-            <p class="catalogue__lede" data-s="lobby.catalogueLede"></p>
-          </div>
-          <ul id="catalogue" class="catalogue__grid"></ul>
-        </section>
-      </div>
+      </main>
     </div>
-  </main>
-
-  <dialog id="story-dialog" class="modal story-modal" aria-labelledby="story-title">
-    <div class="modal__inner">
-      <p class="eyebrow" id="story-number"></p>
-      <h2 class="modal__title" id="story-title"></h2>
-      <p class="story-modal__inspiration" id="story-inspiration"></p>
-      <p class="story-modal__premise typewriter" id="story-premise"></p>
-      <div>
-        <h3 class="story-modal__heading" data-s="lobby.detail.roles"></h3>
-        <ul class="story-modal__roles" id="story-roles"></ul>
-      </div>
-      <p class="hint" data-s="lobby.detail.createHint"></p>
-      <div class="modal__actions">
-        <a class="btn btn--ghost" id="story-source" target="_blank" rel="noopener noreferrer"></a>
-        <button class="btn btn--ghost" type="button" id="story-close" data-s="common.close"></button>
-        <button class="btn btn--seal" type="button" id="story-create" data-s="lobby.detail.create"></button>
-      </div>
-    </div>
-  </dialog>
+  </div>
 </body>
 </html>
