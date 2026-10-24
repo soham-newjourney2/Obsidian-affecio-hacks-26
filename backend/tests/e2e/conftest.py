@@ -1,16 +1,16 @@
 import socket
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 import pytest
 import uvicorn
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, Page, expect
 
 from backend.app.core.config import Settings
 from backend.app.main import create_app
 from backend.tests.conftest import migrate, seed, sqlite_url
-from backend.tests.e2e.helpers import watch_console
+from backend.tests.e2e.helpers import session_page, watch_console
 
 
 def _free_port() -> int:
@@ -63,3 +63,28 @@ def base_url(live_server: str) -> str:
 def console_errors(page: Page) -> list[str]:
     """Collects console errors and uncaught page errors for the test's page."""
     return watch_console(page)
+
+
+@pytest.fixture
+def person(browser: Browser, base_url: str) -> Iterator[Callable[[str], Page]]:
+    """Factory: each call is a separate person (own context and sessionStorage) on room.html.
+    Each page records console errors (`page.errors`) and WebSocket frames (`page.ws_frames`)."""
+    contexts = []
+
+    def make(name: str) -> Page:
+        context = browser.new_context(base_url=base_url)
+        contexts.append(context)
+        page = session_page(context.new_page(), name)
+        page.errors = watch_console(page)
+        page.ws_frames = []
+        page.on(
+            "websocket",
+            lambda ws: ws.on("framereceived", lambda payload: page.ws_frames.append(str(payload))),
+        )
+        page.goto("/room.html")
+        expect(page.locator("#gate")).to_be_visible()
+        return page
+
+    yield make
+    for context in contexts:
+        context.close()

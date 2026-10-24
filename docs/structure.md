@@ -40,10 +40,10 @@ echo/
     ├── auth.html           # sign in / create account (tabs)
     ├── onboarding.html     # profile case file (create or edit)
     ├── lobby.html          # signed-in home (teammate-owned)
-    ├── room.html           # start a table / join by code, live waiting room + chat over WebSocket
+    ├── room.html           # start/join a table, live waiting room + chat, then the story room (game mode)
     ├── css/                # tokens, base, components, effects, pages/ (teammate-owned); temp.css (new pages, to be merged)
     ├── js/core/            # strings, api, auth, ui, fx; ws (room socket client); strings-temp (new pages, to be merged)
-    ├── js/pages/           # one module per page
+    ├── js/pages/           # one module per page (room.js + room-game.js for the story room)
     └── assets/brand/       # logo.svg (wordmark, ripple "O"), favicon.svg
 ```
 
@@ -143,3 +143,13 @@ uv run ruff check .
   `state_version`; events go to `game_events` (seq per session), votes to `votes`.
 - Game events reach each socket only if public or addressed to that member, each with that member's
   own `view`. The room snapshot carries the same `game` view for reconnects.
+
+## Story room (room.html, game mode)
+
+- Desktop: private clues | narrative | evidence board + chat; mobile: Story / Your clues / Board / Chat tabs.
+- Renders only from the member's own `view` (snapshot or game event), so refresh and reconnect just
+  re-render; votes are never re-sent. A reconnect overlay shows while the socket is down.
+- Typewriter narration (screen readers get the full text at once; reduced motion shows it whole),
+  "clue unlocked" highlight, pin-to-board with red-string SVG, wax-seal vote cards with live tally and
+  grace countdown, 3-level hints, chapter progress, ending stamp + solution.
+- Private vs shared clues differ by icon and label, not colour.

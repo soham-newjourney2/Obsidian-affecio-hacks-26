@@ -69,10 +69,6 @@ export const TEMP_STRINGS = Object.freeze({
       waitingHost: "Waiting for {name} to start the case.",
       canStart: "Everyone's ready.",
     },
-    started: {
-      title: "The case has begun.",
-      body: "The story room opens in the next build. Keep talking here in the meantime.",
-    },
     chat: {
       title: "Table talk",
       empty: "No messages yet. Say hello.",
@@ -93,6 +89,67 @@ export const TEMP_STRINGS = Object.freeze({
       generic: "Something went wrong. Please try again.",
     },
     gone: "You're no longer at that table.",
+  },
+  game: {
+    tabs: { label: "Case views", story: "Story", clues: "Your clues", board: "Board", chat: "Chat" },
+    story: {
+      chapter: "Chapter {index} of {total}",
+      objective: "Objective:",
+      skip: "Show all",
+    },
+    clues: {
+      title: "Your clues",
+      role: "You are {role}",
+      roleFocus: "{focus}",
+      empty: "No clues yet. New ones appear as the story moves.",
+      private: "Private",
+      shared: "Shared",
+      share: "Pin to board",
+      unlocked: "Clue unlocked: only you can see it until you pin it.",
+    },
+    board: {
+      title: "Evidence board",
+      empty: "Nothing pinned yet. Pin a clue to share it with the table.",
+      public: "Found by everyone",
+      sharedBy: "Pinned by {name}",
+      pinned: "{name} pinned a clue to the board.",
+    },
+    decision: {
+      continuePrompt: "Ready to move on?",
+      continueLabel: "Continue",
+      status: "{voted} of {seats} voted",
+      deadline: "Deciding in {seconds}s unless everyone votes sooner.",
+      votes: "{count} vote(s)",
+      yourVote: "Your vote",
+      vote: "Vote",
+      change: "Change vote",
+      resolved: "The table chose: {label}",
+      tie: "It's a tie. Here's a nudge, then vote again.",
+    },
+    hints: {
+      request: "Ask for a hint ({left} left)",
+      none: "No hints left for this chapter",
+      level: "Hint {level}",
+    },
+    ending: {
+      success: "Case solved",
+      partial: "Night survived",
+      safe: "Safe retreat",
+      abandoned: "Case closed",
+      solution: "What really happened",
+      next: "Your reflection and results arrive in the next build.",
+    },
+    reconnect: {
+      title: "Reconnecting…",
+      body: "Your place at the table is kept. Everything will catch up when you're back.",
+    },
+    errors: {
+      STALE_STATE: "The table moved on; here's where things stand now.",
+      ALREADY_SHARED: "That clue is already on the board.",
+      NO_MORE_HINTS: "No hints left for this chapter.",
+      GAME_OVER: "This case is closed.",
+      RATE_LIMITED: "One moment; too many actions at once.",
+    },
   },
 });
 

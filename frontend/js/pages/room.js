@@ -1,10 +1,11 @@
-// Table page: start a table or join with a code, then a live waiting room with chat over WebSocket.
+// Table page: start a table or join with a code, a live waiting room with chat, then the case itself.
 import { ApiError, api, signOut } from "../core/api.js";
 import { getToken, redirectToLogin, requireSession } from "../core/auth.js";
 import { initAtmosphere } from "../core/fx.js";
 import { applyTempStrings, tt } from "../core/strings-temp.js";
 import { mountAppHeader, openModal, setBusy, setFieldError, setPageState, toast } from "../core/ui.js";
 import { connectRoom, newId } from "../core/ws.js";
+import { createGame } from "./room-game.js";
 
 const ROOM_KEY = "echo.room"; // { id, code } per tab; the code is known only to the creating tab
 const MAX_CHAT = 1000;
@@ -23,6 +24,24 @@ const pending = new Map(); // client_message_id -> body, until the server echoes
 const sentFrames = new Map(); // frame id -> client_message_id, to retry rate-limited sends
 const RETRY_MS = 1200;
 
+const game = createGame({
+  onVote: (choiceId) => {
+    const g = game.current();
+    sendGame("game.vote", { turn: g.turn, state_version: g.version, choice_id: choiceId });
+  },
+  onShare: (clueId) => sendGame("game.clue.share", { clue_id: clueId }),
+  onHint: () => sendGame("game.hint.request", {}),
+});
+
+// Identity comes from the socket on the server; the client only says what it wants to do.
+function sendGame(type, payload) {
+  if (!socket?.send(type, { ...payload, client_action_id: newId() })) toast(tt("room.status.reconnecting"));
+}
+
+function setMode(hasGame) {
+  table.dataset.mode = hasGame ? "game" : "waiting";
+}
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -38,8 +57,10 @@ const KNOWN_ERRORS = new Set([
   "NOT_A_MEMBER",
   "ROOM_NOT_WAITING",
 ]);
+const GAME_ERRORS = new Set(["STALE_STATE", "ALREADY_SHARED", "NO_MORE_HINTS", "GAME_OVER"]);
 
 function errorText(code) {
+  if (GAME_ERRORS.has(code)) return tt(`game.errors.${code}`);
   return tt(`room.errors.${KNOWN_ERRORS.has(code) ? code : "generic"}`);
 }
 
@@ -72,6 +93,8 @@ function showStatus(status) {
   const key = { connecting: "connecting", connected: "connected", reconnecting: "reconnecting", offline: "offline" }[status] ?? "closed";
   $("#conn-text").textContent = tt(`room.status.${key}`);
   $("#chat-send").disabled = status !== "connected";
+  // In the story, a dropped connection gets a clear overlay; your seat is kept.
+  $("#reconnect").hidden = !(table.dataset.mode === "game" && (status === "reconnecting" || status === "offline"));
   if (status === "connected") resendPending();
   if (status === "unauthorized") redirectToLogin();
   if (status === "forbidden") leaveLocally(tt("room.gone"));
@@ -130,7 +153,7 @@ function renderRoom() {
   const start = $("#start");
   start.hidden = !view.you_are_host;
   start.disabled = !view.can_start;
-  $("#started").hidden = waiting;
+  game.setNames(view.members);
 }
 
 function messageItem(message, { isPending = false } = {}) {
@@ -182,12 +205,17 @@ function onFrame(frame) {
     online = new Set(payload.online);
     renderHistory(payload.messages);
     renderRoom();
+    setMode(Boolean(payload.game));
+    if (payload.game) game.render(payload.game);
   } else if (type === "room.member") {
     online = new Set(payload.online);
     if (payload.room) view = payload.room;
     renderRoom();
   } else if (type === "chat.message") {
     addMessage(payload);
+  } else if (type.startsWith("game.")) {
+    setMode(true);
+    game.render(payload.view, { event: type, payload });
   } else if (type === "error") {
     const cid = sentFrames.get(payload.ref_id);
     sentFrames.delete(payload.ref_id);
@@ -195,7 +223,7 @@ function onFrame(frame) {
       setTimeout(() => sendChat(cid), RETRY_MS); // same client id: the server dedupes retries
       return;
     }
-    toast(errorText(payload.code), { kind: "error" });
+    toast(errorText(payload.code), { kind: payload.code === "STALE_STATE" ? "info" : "error" });
   }
 }
 
@@ -231,6 +259,8 @@ function leaveLocally(message) {
   remember(null);
   history.replaceState(null, "", "/room.html");
   table.hidden = true;
+  setMode(false);
+  $("#reconnect").hidden = true;
   showGate();
   if (message) toast(message);
 }

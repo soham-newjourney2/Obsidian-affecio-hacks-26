@@ -204,14 +204,6 @@
   gap: var(--space-3);
 }
 
-.room-started {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid var(--gold-500);
-  border-radius: var(--radius-md);
-}
-
 /* Chat */
 .room-chat {
   display: grid;
@@ -288,8 +280,437 @@
   justify-self: end;
 }
 
+/* ---- room.html: modes -------------------------------------------------------------- */
+.room-table[data-mode="waiting"] .game-tabs,
+.room-table[data-mode="waiting"] .game-clues,
+.room-table[data-mode="waiting"] .game-story,
+.room-table[data-mode="waiting"] .game-board,
+.room-table[data-mode="game"] #waiting {
+  display: none;
+}
+
+/* Game layout: private clues | narrative | board + chat */
+.room-table[data-mode="game"] {
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr) minmax(0, 21rem);
+  grid-template-areas:
+    "clues story board"
+    "clues story chat";
+}
+
+.room-table[data-mode="game"] .game-clues { grid-area: clues; }
+.room-table[data-mode="game"] .game-story { grid-area: story; }
+.room-table[data-mode="game"] .game-board { grid-area: board; }
+.room-table[data-mode="game"] .room-chat { grid-area: chat; min-height: 20rem; }
+
+.game-tabs {
+  display: none;
+}
+
+.game-empty {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+/* Private clues */
+.game-clues {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.game-role__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.game-role__focus {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.game-clue-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.game-clue {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--parchment-400);
+  border-radius: var(--radius-md);
+  background: linear-gradient(170deg, var(--parchment-100), var(--parchment-200));
+  color: var(--sepia-900);
+  box-shadow: var(--shadow-card);
+}
+
+.game-clue.is-shared {
+  opacity: 0.8;
+}
+
+.game-clue.is-new {
+  animation: game-unlock 1.2s var(--ease-out);
+}
+
+.game-clue__tag,
+.game-pin__by {
+  font-family: var(--font-type);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oxblood-600);
+}
+
+.game-clue__text,
+.game-pin__text {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.game-clue .btn {
+  justify-self: start;
+  color: var(--sepia-900);
+  border-color: var(--sepia-700);
+}
+
+@keyframes game-unlock {
+  0% { transform: scale(0.94) rotate(-1deg); opacity: 0; }
+  60% { transform: scale(1.02); opacity: 1; }
+  100% { transform: none; }
+}
+
+/* Story */
+.game-story {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.game-story.is-entering {
+  animation: game-enter 0.6s var(--ease-out);
+}
+
+@keyframes game-enter {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+.game-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.game-progress__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.game-progress__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid var(--gold-500);
+  border-radius: 50%;
+}
+
+.game-progress__dot.is-done {
+  background: var(--gold-500);
+}
+
+.game-progress__dot.is-current {
+  background: var(--gold-300);
+  box-shadow: 0 0 0 3px rgb(217 178 106 / 0.3);
+}
+
+.game-story__title {
+  font-size: var(--fs-2xl);
+}
+
+.game-narration {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-narration__text {
+  min-height: 6.5em;
+  font-size: var(--fs-md);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.game-narration .btn {
+  justify-self: start;
+}
+
+.game-objective {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--gold-500);
+  font-size: var(--fs-sm);
+}
+
+/* Decision: wax-seal vote cards */
+.game-decision {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.game-decision[hidden] {
+  display: none;
+}
+
+.game-decision__prompt {
+  font-size: var(--fs-xl);
+}
+
+.game-decision__status {
+  min-height: 1.4em;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.game-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-3);
+}
+
+.game-seal {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--oxblood-600);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at 30% 20%, rgb(179 57 60 / 0.25), transparent 60%), var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.game-seal:hover {
+  transform: translateY(-2px);
+}
+
+.game-seal.is-mine {
+  border-width: 2px;
+  border-color: var(--gold-300);
+  box-shadow: 0 0 0 3px rgb(217 178 106 / 0.25);
+}
+
+.game-seal__label {
+  font-weight: 600;
+}
+
+.game-seal__meta {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* Hints */
+.game-hints {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-hints .btn {
+  justify-self: start;
+}
+
+.game-hint-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* Ending + stamp */
+.game-ending {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-lg);
+}
+
+.game-stamp {
+  justify-self: start;
+  padding: var(--space-1) var(--space-4);
+  border: 3px double var(--oxblood-500);
+  border-radius: var(--radius-sm);
+  color: var(--oxblood-400);
+  font-family: var(--font-type);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+  animation: game-stamp 0.5s var(--ease-out);
+}
+
+.game-stamp[data-kind="success"] {
+  border-color: var(--gold-400);
+  color: var(--gold-300);
+}
+
+@keyframes game-stamp {
+  from { transform: scale(1.6) rotate(-6deg); opacity: 0; }
+  to { transform: rotate(-6deg); opacity: 1; }
+}
+
+.game-ending__title {
+  font-size: var(--fs-xl);
+}
+
+.game-ending__solution {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* Evidence board with red string */
+.game-board__surface {
+  position: relative;
+  min-height: 8rem;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 0.05), transparent 60%),
+    repeating-linear-gradient(45deg, rgb(120 80 40 / 0.18) 0 2px, transparent 2px 9px),
+    #4a3622;
+}
+
+.game-board__strings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3; /* string runs over the pinned cards, like a real evidence board */
+}
+
+.game-string {
+  fill: none;
+  stroke: #b3393c;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.game-board__pins {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.game-pin {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--parchment-100);
+  color: var(--sepia-900);
+  box-shadow: var(--shadow-card);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.game-pin.is-new {
+  animation: game-unlock 0.8s var(--ease-out);
+}
+
+/* Reconnect overlay */
+.game-reconnect {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  background: rgb(6 8 13 / 0.6);
+}
+
+.game-reconnect__card {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-width: 24rem;
+  text-align: center;
+}
+
+.game-reconnect__title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-clue.is-new,
+  .game-pin.is-new,
+  .game-story.is-entering,
+  .game-stamp {
+    animation: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .room-table[data-mode="game"] {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    grid-template-areas:
+      "clues story"
+      "board story"
+      "chat chat";
+  }
+}
+
 @media (max-width: 900px) {
   .room-table {
     grid-template-columns: 1fr;
+  }
+
+  /* Mobile: one panel at a time behind tabs */
+  .room-table[data-mode="game"] {
+    grid-template-columns: 1fr;
+    grid-template-areas: "tabs" "panel";
+  }
+
+  .room-table[data-mode="game"] .game-tabs {
+    display: grid;
+    grid-area: tabs;
+    grid-auto-flow: column;
+    gap: var(--space-1);
+  }
+
+  .room-table[data-mode="game"] .game-clues,
+  .room-table[data-mode="game"] .game-story,
+  .room-table[data-mode="game"] .game-board,
+  .room-table[data-mode="game"] .room-chat {
+    grid-area: panel;
+    display: none;
+  }
+
+  .room-table[data-mode="game"] .is-tab-active {
+    display: grid;
+  }
+
+  .game-tabs__tab {
+    min-height: 40px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+  }
+
+  .game-tabs__tab[aria-selected="true"] {
+    background: var(--gold-400);
+    color: var(--on-accent);
   }
 }

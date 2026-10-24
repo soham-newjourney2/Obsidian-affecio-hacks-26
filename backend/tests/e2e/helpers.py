@@ -1,9 +1,10 @@
 """Shared e2e helpers: accounts created over the API, sign-in through the UI."""
 
+import re
 import uuid
 
 import pytest
-from playwright.sync_api import APIRequestContext, Page
+from playwright.sync_api import APIRequestContext, Page, expect
 
 # Teammate pages are incomplete in the repo (strings.js keys and storybook-theme.css not pushed,
 # lobby.js crashes on load). Tests of those pages are expected to fail until that lands.
@@ -111,3 +112,29 @@ def session_page(page: Page, name: str) -> Page:
         session,
     )
     return page
+
+
+LIVE = 3_000  # room.html has no polling: anything slower would mean the WebSocket isn't working
+
+
+def start_table(host: Page) -> str:
+    """Host starts a table on room.html; returns the invite code."""
+    expect(host.locator("#story-select")).to_have_value("blackthorn_manor")
+    host.get_by_role("button", name="Start the table").click()
+    expect(host.locator("#table")).to_be_visible()
+    expect(host.locator("#conn-text")).to_have_text("Live")
+    code = host.locator("#invite-code")
+    expect(code).to_have_text(re.compile(r"^[A-Z2-7]{4}-[A-Z2-7]{4}$"))
+    return code.inner_text()
+
+
+def join_table(page: Page, code: str) -> None:
+    page.locator("#join-code").fill(code.lower())
+    page.get_by_role("button", name="Join the table").click()
+    expect(page.locator("#table")).to_be_visible()
+    expect(page.locator("#conn-text")).to_have_text("Live")
+
+
+def say(page: Page, text: str) -> None:
+    page.locator("#chat-input").fill(text)
+    page.locator("#chat-input").press("Enter")
