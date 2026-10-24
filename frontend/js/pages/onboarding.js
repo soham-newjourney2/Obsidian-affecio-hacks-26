@@ -11,20 +11,26 @@ import {
   setPageState,
 } from "../core/ui.js";
 
-// Section order on the page; option lists and limits come from /meta/interests.
+// Section order and wizard step; option lists and limits come from /meta/interests.
+// Step 1 is the welcome screen and step 5 reviews everything before saving.
 const SECTIONS = [
-  { field: "interests", kind: "chips", options: "interests" },
-  { field: "interaction_style", kind: "choices", options: "interaction_styles" },
-  { field: "genres", kind: "chips", options: "genres" },
-  { field: "preferred_roles", kind: "cards", options: "roles" },
-  { field: "availability", kind: "chips", options: "availability" },
-  { field: "activities", kind: "chips", options: "activities" },
-  { field: "visibility", kind: "choices", options: "visibility" },
-  { field: "shareable_summary", kind: "text" },
+  { field: "interests", kind: "chips", options: "interests", step: 2 },
+  { field: "genres", kind: "chips", options: "genres", step: 2 },
+  { field: "activities", kind: "chips", options: "activities", step: 2 },
+  { field: "interaction_style", kind: "choices", options: "interaction_styles", step: 3 },
+  { field: "preferred_roles", kind: "cards", options: "roles", step: 3 },
+  { field: "availability", kind: "chips", options: "availability", step: 3 },
+  { field: "shareable_summary", kind: "text", step: 4 },
+  { field: "visibility", kind: "choices", options: "visibility", step: 4 },
 ];
+const TOTAL_STEPS = 5;
 
 const form = document.querySelector("#profile-form");
 const statePanel = document.querySelector("#page-state");
+const progress = document.querySelector("#progress");
+const stepButtons = [...document.querySelectorAll("[data-goto]")];
+
+const wizard = { current: 1, furthest: 1, editing: false, meta: null };
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -126,9 +132,11 @@ function readForm() {
   return body;
 }
 
-function validate(body) {
+// Validates the given sections (all by default). On failure, opens the step holding
+// the first invalid section and focuses it. Returns true when everything passes.
+function validate(body, sections = SECTIONS) {
   let firstInvalid = null;
-  for (const { field, kind } of SECTIONS) {
+  for (const { field, kind, step } of sections) {
     const section = form.querySelector(`#field-${field}`);
     let message = "";
     if (Array.isArray(body[field]) && body[field].length < Number(section.dataset.min)) {
@@ -137,14 +145,89 @@ function validate(body) {
       message = t("onboarding.chooseOne");
     }
     setFieldError(section, message);
-    if (message && !firstInvalid) firstInvalid = section;
+    if (message && !firstInvalid) firstInvalid = { section, step };
   }
-  firstInvalid?.querySelector("input:not(:disabled)")?.focus();
-  return firstInvalid === null;
+  if (!firstInvalid) return true;
+  if (firstInvalid.step !== wizard.current) showStep(firstInvalid.step);
+  firstInvalid.section.scrollIntoView({ block: "center", behavior: "smooth" });
+  firstInvalid.section.querySelector("input:not(:disabled), textarea")?.focus({ preventScroll: true });
+  return false;
+}
+
+// Step 5: a read-only summary of every section, each linking back to its step.
+function renderReview() {
+  const review = form.querySelector("#review");
+  const body = readForm();
+  const rows = [];
+  for (const { field, kind, options, step } of SECTIONS) {
+    if (field === "shareable_summary" && !body[field]) continue;
+    const row = el("div", "review__row");
+    const term = el("dt", "review__term");
+    const edit = el("button", "review__edit", t(`onboarding.sections.${field}.title`));
+    edit.type = "button";
+    edit.addEventListener("click", () => showStep(step, { focus: true }));
+    term.append(edit);
+    const detail = el("dd", "review__detail");
+    if (kind === "text") {
+      detail.append(el("p", "review__quote", body[field]));
+    } else {
+      const ids = new Set([body[field]].flat().filter(Boolean));
+      const labels = wizard.meta[options].filter((o) => ids.has(o.id)).map((o) => o.label.split(" — ")[0]);
+      if (labels.length === 0) detail.append(el("span", "review__empty", t("onboarding.nothingChosen")));
+      for (const label of labels) detail.append(el("span", "review__chip", label));
+    }
+    row.append(term, detail);
+    rows.push(row);
+  }
+  review.replaceChildren(...rows);
+}
+
+function showStep(step, { focus = false } = {}) {
+  wizard.current = step;
+  wizard.furthest = Math.max(wizard.furthest, step);
+  for (const section of form.querySelectorAll("[data-step]")) {
+    section.hidden = Number(section.dataset.step) !== step;
+  }
+  for (const button of stepButtons) {
+    const target = Number(button.dataset.goto);
+    button.classList.toggle("is-done", target < step || (target <= wizard.furthest && target !== step && wizard.editing));
+    button.disabled = !wizard.editing && target > wizard.furthest;
+    if (target === step) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  }
+
+  document.querySelector("#progress-label").textContent = t("onboarding.stepOf", { step, total: TOTAL_STEPS });
+  document.querySelector("#progress-fill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
+  progress.querySelector('[role="progressbar"]').setAttribute("aria-valuenow", String(step));
+
+  form.querySelector("#back").hidden = step === 1;
+  form.querySelector("#next").hidden = step === TOTAL_STEPS;
+  form.querySelector("#next-label").textContent = t(step === 1 ? "onboarding.start" : "onboarding.next");
+  form.querySelector("#save").hidden = !(wizard.editing || step === TOTAL_STEPS);
+  form.querySelector("#quote").hidden = step !== 1;
+  form.dataset.step = String(step);
+
+  if (step === TOTAL_STEPS) renderReview();
+  if (focus) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    form.querySelector(`#step-${step}-title`)?.focus({ preventScroll: true });
+  }
+}
+
+function goNext() {
+  setFormError(form, "");
+  const here = SECTIONS.filter((section) => section.step === wizard.current);
+  if (here.length && !validate(readForm(), here)) return;
+  showStep(Math.min(wizard.current + 1, TOTAL_STEPS), { focus: true });
 }
 
 async function save(event) {
   event.preventDefault();
+  // Enter inside a field moves forward while there are steps left (new case files only).
+  if (!wizard.editing && wizard.current < TOTAL_STEPS) {
+    goNext();
+    return;
+  }
   setFormError(form, "");
   const body = readForm();
   if (!validate(body)) return;
@@ -159,9 +242,18 @@ async function save(event) {
   }
 }
 
+function wireWizard() {
+  form.querySelector("#next").addEventListener("click", goNext);
+  form.querySelector("#back").addEventListener("click", () => showStep(Math.max(1, wizard.current - 1), { focus: true }));
+  for (const button of stepButtons) {
+    button.addEventListener("click", () => showStep(Number(button.dataset.goto), { focus: true }));
+  }
+}
+
 async function load() {
   setPageState(statePanel, "loading", { message: t("onboarding.loading") });
   form.hidden = true;
+  progress.hidden = true;
   try {
     const [meta, profile] = await Promise.all([
       api("/meta/interests", { auth: false }),
@@ -170,12 +262,21 @@ async function load() {
         throw error;
       }),
     ]);
-    const sections = form.querySelector("#sections");
-    sections.replaceChildren(...SECTIONS.map((section) => buildSection(section, meta)));
+    wizard.meta = meta;
+    wizard.editing = profile !== null;
+    for (const container of form.querySelectorAll("[data-sections]")) {
+      const step = Number(container.dataset.sections);
+      container.replaceChildren(...SECTIONS.filter((s) => s.step === step).map((s) => buildSection(s, meta)));
+    }
     fill(profile ?? { visibility: "private" });
-    form.querySelector("#save").textContent = t(profile ? "onboarding.submitEdit" : "onboarding.submitNew");
+    form.querySelector("#save").textContent = t(wizard.editing ? "onboarding.submitEdit" : "onboarding.submitNew");
+    form.querySelector("#done-lede").textContent = t(wizard.editing ? "onboarding.done.editLede" : "onboarding.done.lede");
+    // Editing an existing case file skips the welcome and lets every step be visited.
+    wizard.furthest = wizard.editing ? TOTAL_STEPS : 1;
     setPageState(statePanel, null);
     form.hidden = false;
+    progress.hidden = false;
+    showStep(wizard.editing ? 2 : 1);
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return; // redirecting to sign-in
     setPageState(statePanel, "error", { message: t("onboarding.loadError"), onRetry: load });
@@ -188,6 +289,7 @@ initAtmosphere();
 const user = requireSession();
 if (user) {
   mountAppHeader(user, signOut);
+  wireWizard();
   form.addEventListener("submit", save);
   load();
 }
