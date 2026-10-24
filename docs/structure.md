@@ -22,9 +22,9 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes, pulse_responses)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse)
 │   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
 │   │   ├── game/           # story_schema (story file model + validator), engine (pure start/apply/view)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
@@ -33,7 +33,7 @@ echo/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
 │       ├── wsutil.py       # WebSocket test helpers
 │       ├── unit/           # security, rate limiter, settings, schemas, story validator, engine
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), migrations
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), results, migrations
 │       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, how it works, audience, CTA
@@ -41,6 +41,7 @@ echo/
     ├── onboarding.html     # profile case file (create or edit)
     ├── lobby.html          # signed-in home (teammate-owned)
     ├── room.html           # start/join a table, live waiting room + chat, then the story room (game mode)
+    ├── results.html        # ending, solution, table recap, private reflection + badges, 2-question pulse
     ├── css/                # tokens, base, components, effects, pages/ (teammate-owned); temp.css (new pages, to be merged)
     ├── js/core/            # strings, api, auth, ui, fx; ws (room socket client); strings-temp (new pages, to be merged)
     ├── js/pages/           # one module per page (room.js + room-game.js for the story room)
@@ -91,6 +92,8 @@ uv run ruff check .
 | POST | `/rooms/{id}/start` | host | needs 3–4 present members, all ready; revokes the invite |
 | POST | `/rooms/{id}/leave` | member | host hands over to the longest-present member; empty room is abandoned |
 | GET | `/sessions/{id}` | member | the caller's own game projection (never others' private clues) |
+| GET | `/sessions/{id}/summary` | member | finished case: ending, solution, path, table recap, your reflection + badges (409 while active) |
+| POST | `/sessions/{id}/pulse` | member | `{play_again: yes|maybe|no, ease_of_talking: 1–5}`, once per person (409 after) |
 
 - Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
 - Browser session lives in `sessionStorage` (per tab). Signed-in pages redirect to `/auth.html?next=…`;
@@ -153,3 +156,12 @@ uv run ruff check .
   "clue unlocked" highlight, pin-to-board with red-string SVG, wax-seal vote cards with live tally and
   grace countdown, 3-level hints, chapter progress, ending stamp + solution.
 - Private vs shared clues differ by icon and label, not colour.
+
+## Results and reflection
+
+- Built only from recorded events (`game_events`, `votes`): chapters visited, decisions and the
+  chosen labels, clues pinned, hints asked, and votes that matched the table's choice. Never from the
+  live game state, and never inferences about people.
+- Private badges, never ranked: Clue Sharer (pinned ≥ 1 clue), Consensus Builder (vote matched the
+  table's choice ≥ 2 times), Theory Crafter (a theory of yours was mapped, from P13).
+- The pulse is the only impact data collected: two answers, once per person per case.

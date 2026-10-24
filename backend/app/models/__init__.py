@@ -3,6 +3,7 @@
 from backend.app.models.game import GameEvent, GameSession, Vote
 from backend.app.models.message import Message
 from backend.app.models.profile import Profile
+from backend.app.models.pulse import PulseResponse
 from backend.app.models.room import Room, RoomMember
 from backend.app.models.story import Story
 from backend.app.models.user import User
@@ -12,6 +13,7 @@ __all__ = [
     "GameSession",
     "Message",
     "Profile",
+    "PulseResponse",
     "Room",
     "RoomMember",
     "Story",
