@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64" width="48" height="64" aria-hidden="true">
+  <defs>
+    <linearGradient id="echo-gold" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#a8742a"/>
+      <stop offset=".55" stop-color="#e2ad4f"/>
+      <stop offset="1" stop-color="#f6d48a"/>
+    </linearGradient>
+    <linearGradient id="echo-wine" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#6e1d22"/>
+      <stop offset="1" stop-color="#a8363b"/>
+    </linearGradient>
+  </defs>
+  <!-- outer vane -->
+  <path d="M9 61C9 44 17 22 43 3c2 15-3 31-15 42-5 5-11 9-19 16Z" fill="url(#echo-gold)"/>
+  <!-- inner flame -->
+  <path d="M13 55c2-12 9-26 23-39-1 12-6 22-13 29-3 3-6 6-10 10Z" fill="url(#echo-wine)"/>
+  <!-- barbs -->
+  <path d="M24 41l7-3M27 33l7-4M31 25l6-5" stroke="#fbf3e2" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>
+  <!-- shaft -->
+  <path d="M6 63C14 45 25 25 43 3" fill="none" stroke="#5a3b1a" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
