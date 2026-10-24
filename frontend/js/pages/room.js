@@ -154,6 +154,7 @@ function renderRoom() {
   start.hidden = !view.you_are_host;
   start.disabled = !view.can_start;
   game.setNames(view.members);
+  if (view.session_id) $("#results-link").href = `/results.html?session=${encodeURIComponent(view.session_id)}`;
 }
 
 function messageItem(message, { isPending = false } = {}) {

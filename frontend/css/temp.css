@@ -714,3 +714,250 @@
     color: var(--on-accent);
   }
 }
+
+/* ---- results.html -------------------------------------------------------------------- */
+.page-results .results-page {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  gap: var(--space-5);
+  max-width: 52rem;
+  padding: var(--space-6) var(--gutter) var(--space-8);
+}
+
+.results {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.results-card {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.results-card__title {
+  font-size: var(--fs-2xl);
+}
+
+.results-card__subtitle {
+  font-size: var(--fs-xl);
+}
+
+.results-card__minor {
+  margin-top: var(--space-2);
+  font-size: var(--fs-lg);
+}
+
+.results-ending {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  border-color: var(--gold-500);
+}
+
+.results-stamp {
+  font-size: var(--fs-xl);
+}
+
+.results-ending__title {
+  font-size: var(--fs-2xl);
+}
+
+.results-ending__text {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+}
+
+.results-ending__solution {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--gold-500);
+  color: var(--text-muted);
+}
+
+.results-recap {
+  line-height: 1.6;
+}
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.results-stat {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.results-stat dt {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.results-stat dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+
+.results-chapters,
+.results-players,
+.results-facts,
+.results-badges {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.results-chapter {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border-left: 3px solid var(--oxblood-500);
+}
+
+.results-chapter__title {
+  font-weight: 600;
+}
+
+.results-chapter__prompt,
+.results-chapter__choice,
+.results-player__role {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.results-player {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.results-player__name {
+  font-weight: 600;
+}
+
+.results-facts {
+  padding-left: var(--space-4);
+  list-style: disc;
+}
+
+.results-badges {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.results-badge {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at 15% 0%, rgb(217 178 106 / 0.18), transparent 60%);
+}
+
+.results-badge__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.results-badge__why {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.results-pulse {
+  gap: var(--space-4);
+}
+
+.results-question {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.results-scale {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.results-scale__step {
+  position: relative;
+}
+
+.results-scale__step input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.results-scale__step span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.results-scale__step input:checked + span {
+  border-color: var(--gold-300);
+  background: rgb(217 178 106 / 0.18);
+}
+
+.results-scale__step input:focus-visible + span {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.results-scale__ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.results-thanks {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.game-ending__results {
+  justify-self: start;
+}
+
+/* Pulse answers: the generic .choice span uses height:100%, which overlaps inside a fieldset */
+.results-question .choices {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.results-question .choice {
+  min-width: 0;
+}
+
+.results-question .choice span {
+  display: flex;
+  align-items: center;
+  height: auto;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+}
+
+@media (max-width: 600px) {
+  .results-question .choices {
+    grid-template-columns: 1fr;
+  }
+}

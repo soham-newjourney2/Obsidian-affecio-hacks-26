@@ -5,45 +5,18 @@ import re
 import pytest
 from playwright.sync_api import Page, expect
 
-from backend.tests.e2e.helpers import LIVE, join_table, start_table
+from backend.tests.e2e.helpers import (
+    D1_ROOM,
+    D2_ANY,
+    D3_SAFE,
+    LIVE,
+    all_vote,
+    begin_case,
+    chapter_is,
+    vote,
+)
 
 pytestmark = pytest.mark.e2e
-
-D1_ROOM = "Go straight to Marian's room"
-D2_ANY = "Something living is sent through it"
-D3_SAFE = "Take Elinor to the village inn for the night"  # safe in every variant
-
-
-def begin_case(person) -> tuple[Page, Page, Page]:
-    ada, bo, cy = person("Ada"), person("Bo"), person("Cy")
-    code = start_table(ada)
-    join_table(bo, code)
-    join_table(cy, code)
-    expect(ada.locator("#members > li")).to_have_count(3, timeout=LIVE)
-    for page in (ada, bo, cy):
-        page.get_by_role("button", name="I'm ready").click()
-    start = ada.get_by_role("button", name="Start the case")
-    expect(start).to_be_enabled(timeout=LIVE)
-    start.click()
-    for page in (ada, bo, cy):
-        expect(page.locator("#table")).to_have_attribute("data-mode", "game", timeout=LIVE)
-        expect(page.locator("#chapter-label")).to_have_text("Chapter 1 of 4")
-    return ada, bo, cy
-
-
-def vote(page: Page, label: str) -> None:
-    page.locator("#choices").get_by_role("button", name=re.compile(re.escape(label))).click()
-
-
-def all_vote(pages, label: str) -> None:
-    for page in pages:
-        vote(page, label)
-
-
-def chapter_is(pages, index: int, title: str) -> None:
-    for page in pages:
-        expect(page.locator("#chapter-label")).to_have_text(f"Chapter {index} of 4", timeout=LIVE)
-        expect(page.locator("#chapter-title")).to_have_text(title)
 
 
 def private_clues(page: Page) -> dict[str, str]:

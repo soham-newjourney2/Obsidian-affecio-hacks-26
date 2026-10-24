@@ -259,6 +259,7 @@ def _resolve(story: _Story, state: State) -> list[Event]:
     top = max(tally.values())
     winners = sorted(c for c, n in tally.items() if n == top)
     decision = story.decision_for(state["scene"])
+    resolved_turn = state["turn"]
     state["votes"], state["majority_since"] = {}, None
     state["turn"] += 1
     state["turn_version"] = state["version"] + 1
@@ -288,7 +289,13 @@ def _resolve(story: _Story, state: State) -> list[Event]:
     events = [
         _event(
             "game.decision.resolved",
-            {"decision_id": decision["id"], "choice_id": choice_id, "tally": tally},
+            {
+                "decision_id": decision["id"],
+                "choice_id": choice_id,
+                "tally": tally,
+                "turn": resolved_turn,
+                "scene_id": state["scene"],
+            },
         )
     ]
     if target in story.endings:
