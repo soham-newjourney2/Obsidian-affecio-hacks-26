@@ -156,9 +156,11 @@ async def test_concurrent_joins_never_exceed_capacity(settings: Settings, seeded
     # Capacity 4 with the host seated: exactly 3 of the 5 simultaneous joins get in.
     assert statuses == [200, 200, 200, 409, 409]
     assert all(r.json()["error"]["code"] == "ROOM_FULL" for r in results if r.status_code == 409)
-    count = sqlite3.connect(seeded).execute(
-        "SELECT count(*) FROM room_members WHERE status = 'joined'"
-    ).fetchone()[0]
+    count = (
+        sqlite3.connect(seeded)
+        .execute("SELECT count(*) FROM room_members WHERE status = 'joined'")
+        .fetchone()[0]
+    )
     assert count == 4
 
 
@@ -260,9 +262,9 @@ def test_host_leaving_hands_over_then_last_out_abandons(
     assert body["you_are_host"] is True
     assert [m["display_name"] for m in body["members"]] == ["Player1"]
     act(client, guest, room["id"], "leave")
-    (status, invite) = sqlite3.connect(seeded).execute(
-        "SELECT status, invite_hash FROM rooms"
-    ).fetchone()
+    (status, invite) = (
+        sqlite3.connect(seeded).execute("SELECT status, invite_hash FROM rooms").fetchone()
+    )
     assert (status, invite) == ("abandoned", None)
 
 

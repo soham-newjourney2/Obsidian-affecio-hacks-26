@@ -35,10 +35,22 @@ def minimal_content() -> dict:
         ],
         "start_scene": "s1",
         "scenes": [
-            {"id": "s1", "title": "t", "narration_base": "n", "objective": "o",
-             "reveals": ["k_pub", "k_a"], "next": "s2"},
-            {"id": "s2", "title": "t", "narration_base": "n", "objective": "o",
-             "reveals": ["k_b", "k_c", "k_d"], "decision_id": "d1"},
+            {
+                "id": "s1",
+                "title": "t",
+                "narration_base": "n",
+                "objective": "o",
+                "reveals": ["k_pub", "k_a"],
+                "next": "s2",
+            },
+            {
+                "id": "s2",
+                "title": "t",
+                "narration_base": "n",
+                "objective": "o",
+                "reveals": ["k_b", "k_c", "k_d"],
+                "decision_id": "d1",
+            },
         ],
         "clues": [
             {"id": "k_pub", "text": "x", "owner_role": "public", "meaning_by_variant": both},
@@ -48,10 +60,22 @@ def minimal_content() -> dict:
             {"id": "k_d", "text": "x", "owner_role": "d", "meaning_by_variant": both},
         ],
         "decisions": [
-            {"id": "d1", "prompt": "?", "choices": [
-                {"id": "x1", "label": "one", "next_by_variant": {"v1": "e_win", "v2": "e_safe"}},
-                {"id": "x2", "label": "two", "next_by_variant": {"v1": "e_safe", "v2": "e_win"}},
-            ]},
+            {
+                "id": "d1",
+                "prompt": "?",
+                "choices": [
+                    {
+                        "id": "x1",
+                        "label": "one",
+                        "next_by_variant": {"v1": "e_win", "v2": "e_safe"},
+                    },
+                    {
+                        "id": "x2",
+                        "label": "two",
+                        "next_by_variant": {"v1": "e_safe", "v2": "e_win"},
+                    },
+                ],
+            },
         ],
         "hints": [{"scene_id": s, "levels": ["1", "2", "3"]} for s in ("s1", "s2")],
         "endings": [
@@ -75,8 +99,16 @@ def test_minimal_story_is_valid() -> None:
 
 
 def _unreachable_scene(c: dict) -> None:
-    c["scenes"].append({"id": "s3", "title": "t", "narration_base": "n", "objective": "o",
-                        "reveals": [], "next": "e_safe"})
+    c["scenes"].append(
+        {
+            "id": "s3",
+            "title": "t",
+            "narration_base": "n",
+            "objective": "o",
+            "reveals": [],
+            "next": "e_safe",
+        }
+    )
     c["hints"].append({"scene_id": "s3", "levels": ["1", "2", "3"]})
 
 
@@ -200,10 +232,15 @@ def test_stub_story_is_valid_without_content() -> None:
 
 # --- the shipped catalogue -------------------------------------------------------------
 
+
 def test_catalogue_files_are_valid() -> None:
     stories = {s.story_id: s for s in load_story_files()}
     assert set(stories) == {
-        "blackthorn_manor", "rue_morgue", "time_machine", "wizard_of_oz", "hungry_stones",
+        "blackthorn_manor",
+        "rue_morgue",
+        "time_machine",
+        "wizard_of_oz",
+        "hungry_stones",
     }
     assert [s.story_id for s in stories.values() if s.playable] == ["blackthorn_manor"]
     for story in stories.values():

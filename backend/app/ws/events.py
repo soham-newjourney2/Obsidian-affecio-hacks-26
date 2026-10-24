@@ -65,3 +65,28 @@ def envelope(type_: str, room_id: uuid.UUID, payload: dict[str, Any]) -> dict[st
 
 def error(room_id: uuid.UUID, code: str, ref_id: str | None = None) -> dict[str, Any]:
     return envelope("error", room_id, {"code": code, "ref_id": ref_id})
+
+
+ActionId = Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")
+
+
+class GameVoteIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    turn: int
+    state_version: int
+    choice_id: str = Field(max_length=40)
+    client_action_id: str = ActionId
+
+
+class GameHintIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    client_action_id: str = ActionId
+
+
+class GameShareIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    clue_id: str = Field(max_length=40)
+    client_action_id: str = ActionId
