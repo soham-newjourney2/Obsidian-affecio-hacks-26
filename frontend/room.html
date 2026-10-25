@@ -71,6 +71,17 @@
             <p class="room-gate__lede" data-st="room.gate.lede"></p>
           </header>
           <div class="room-gate__panels">
+            <section class="panel room-gate__panel" id="find-panel" aria-labelledby="find-title">
+              <h2 class="room-gate__panel-title" id="find-title" data-st="room.find.title"></h2>
+              <p class="hint" data-st="room.find.body"></p>
+              <div id="find-waiting" class="room-find" role="status" aria-live="polite" hidden>
+                <span class="room-find__pulse" aria-hidden="true"></span>
+                <p id="find-text"></p>
+                <p id="find-alternatives" class="hint" data-st="room.find.alternatives" hidden></p>
+              </div>
+              <button class="btn btn--seal" type="button" id="find-start" data-st="room.find.start"></button>
+              <button class="btn btn--ghost btn--sm" type="button" id="find-cancel" data-st="room.find.cancel" hidden></button>
+            </section>
             <form id="create-form" class="panel room-gate__panel" method="post" novalidate>
               <h2 class="room-gate__panel-title" data-st="room.gate.createTitle"></h2>
               <div class="field">
