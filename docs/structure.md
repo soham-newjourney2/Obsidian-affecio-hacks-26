@@ -187,3 +187,10 @@ uv run ruff check .
 - `game.theory.submit{text ≤ 280, client_action_id}` (1 per 5 s per member): the AI maps the text to
   one allowed choice of the current decision, or to none (low confidence, unknown ids, any failure).
   The table sees `game.theory.suggestion{by, choice_id}`; nobody's vote changes (D13).
+
+## AI companions (demo mode)
+
+- Only with `DEMO_MODE=true` (otherwise 404): the host fills empty seats with labelled AI companions.
+- A companion pins its own clue, says one line per scene (AI, with an authored fallback) and votes
+  with the humans' majority only once every human has voted, so it never decides for people.
+- No account: excluded from matching, connections, pulse and stats.

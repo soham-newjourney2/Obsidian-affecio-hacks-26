@@ -17,7 +17,7 @@ from backend.app.core.logging import RequestIdMiddleware, configure_logging
 from backend.app.core.ratelimit import RateLimiter, TokenBucket
 from backend.app.core.security import TokenDenylist
 from backend.app.db.session import create_engine, create_sessionmaker
-from backend.app.services import ai_hooks
+from backend.app.services import ai_hooks, companions
 from backend.app.ws import handlers as ws_handlers
 from backend.app.ws.manager import ConnectionManager
 
@@ -26,6 +26,13 @@ API_PREFIX = "/api/v1"
 # The Windows registry can map these to text/plain, which breaks ES modules and stylesheets.
 for _type, _ext in (("text/javascript", ".js"), ("text/css", ".css"), ("image/svg+xml", ".svg")):
     mimetypes.add_type(_type, _ext)
+
+
+def _game_hooks(app: FastAPI, applied) -> None:
+    """After each delivered game change: AI rewrites, then (demo mode) companions."""
+    ai_hooks.schedule(app, applied)
+    if app.state.settings.demo_mode:
+        companions.schedule(app, applied)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -72,7 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.game_timers = {}
     app.state.ai = build_chain(settings, app.state.sessionmaker)
     app.state.ai_tasks = set()
-    app.state.on_game_change = ai_hooks.schedule
+    app.state.on_game_change = _game_hooks
 
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)

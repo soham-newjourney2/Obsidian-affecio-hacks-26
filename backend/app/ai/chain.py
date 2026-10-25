@@ -22,7 +22,7 @@ from backend.app.models import AILog
 
 log = logging.getLogger("echo.ai")
 
-MAX_WORDS = {"narrate": 90, "hint": 60, "summary": 80}
+MAX_WORDS = {"narrate": 90, "hint": 60, "summary": 80, "companion": 60}
 THEORY_MIN_CONFIDENCE = 0.6
 BREAKER_FAILURES = 3
 BREAKER_COOLDOWN_S = 60.0

@@ -13,6 +13,7 @@ from datetime import timedelta
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.content.companions import companion_name
 from backend.app.core.errors import AppError
 from backend.app.db.base import utcnow
 from backend.app.models import Room, RoomMember, Story, User
@@ -210,14 +211,14 @@ async def start_room(session: AsyncSession, user: User, room_id: uuid.UUID) -> R
 
 
 async def members_with_names(session: AsyncSession, room: Room) -> list[tuple[RoomMember, str]]:
-    """Present human members (seat order) with display names, for room views."""
+    """Present members (seat order) with display names; companions get their labelled name."""
     rows = await session.execute(
         select(RoomMember, User.display_name)
-        .join(User, User.id == RoomMember.user_id)
+        .outerjoin(User, User.id == RoomMember.user_id)
         .where(RoomMember.room_id == room.id, RoomMember.status.in_(PRESENT_STATUSES))
         .order_by(RoomMember.joined_at, RoomMember.id)
     )
-    return [(member, name) for member, name in rows.all()]
+    return [(m, name or companion_name(m.companion_key)) for m, name in rows.all()]
 
 
 async def member_of(

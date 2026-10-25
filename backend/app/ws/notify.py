@@ -32,7 +32,10 @@ async def notify_room(app: FastAPI, room_id: uuid.UUID, event: str, member_id: u
         game_id = await session.scalar(select(GameSession.id).where(GameSession.room_id == room_id))
     online = sorted(str(m) for m in manager.online_members(room_id))
     for conn in connections:
-        view = room_view(room, story, members, conn.user_id, session_id=game_id)
+        view = room_view(
+            room, story, members, conn.user_id, session_id=game_id,
+            demo=app.state.settings.demo_mode,
+        )  # fmt: skip
         await manager.send(
             conn,
             envelope(
