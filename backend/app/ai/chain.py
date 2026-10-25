@@ -9,7 +9,7 @@ import json
 import logging
 import time
 import uuid
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -22,6 +22,41 @@ from backend.app.models import AILog
 log = logging.getLogger("echo.ai")
 
 MAX_WORDS = {"narrate": 90, "hint": 60, "summary": 80}
+BREAKER_FAILURES = 3
+BREAKER_COOLDOWN_S = 60.0
+
+
+class CircuitBreaker:
+    """Skips a provider for `cooldown_s` after `failures` consecutive failures (§9). When the
+    cooldown ends it gets one trial call: success closes the breaker, failure reopens it."""
+
+    def __init__(
+        self,
+        failures: int = BREAKER_FAILURES,
+        cooldown_s: float = BREAKER_COOLDOWN_S,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        self.failures = failures
+        self.cooldown_s = cooldown_s
+        self._clock = clock
+        self._fails: dict[str, int] = {}
+        self._open_until: dict[str, float] = {}
+
+    def allow(self, name: str) -> bool:
+        until = self._open_until.get(name)
+        return until is None or self._clock() >= until
+
+    def record(self, name: str, ok: bool) -> None:
+        if ok:
+            self._fails.pop(name, None)
+            self._open_until.pop(name, None)
+            return
+        self._fails[name] = self._fails.get(name, 0) + 1
+        if self._fails[name] >= self.failures:
+            self._open_until[name] = self._clock() + self.cooldown_s
+
+    def is_open(self, name: str) -> bool:
+        return not self.allow(name)
 
 
 class TextOut(BaseModel):
@@ -68,8 +103,10 @@ class AIChain:
         max_output_tokens: int,
         max_calls_per_session: int,
         timeout_s: float,
+        breaker: CircuitBreaker | None = None,
     ) -> None:
         self.providers = providers
+        self.breaker = breaker or CircuitBreaker()
         self._sessionmaker = sessionmaker
         self._max_tokens = max_output_tokens
         self._cap = max_calls_per_session
@@ -93,6 +130,9 @@ class AIChain:
             return AIResult(fallback, "fallback")
 
         for provider in self.providers:
+            if not self.breaker.allow(provider.name):
+                log.info("ai %s: skipping %s (circuit open)", purpose, provider.name)
+                continue
             started = time.perf_counter()
             status, result = "success", None
             try:
@@ -118,6 +158,7 @@ class AIChain:
                 result.tokens_in if result else None,
                 result.tokens_out if result else None,
             )
+            self.breaker.record(provider.name, status == "success")
             if status == "success":
                 return AIResult(text, provider.name)
             log.info("ai %s via %s failed: %s", purpose, provider.name, status)

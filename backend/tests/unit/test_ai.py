@@ -13,8 +13,6 @@ from backend.app.ai.base import load_prompt
 from backend.app.ai.chain import AIChain, build_user_message
 from backend.app.ai.groq import GROQ_URL, GroqProvider
 from backend.app.ai.mock import MockProvider
-from backend.app.db.session import create_engine, create_sessionmaker
-from backend.tests.conftest import sqlite_url
 
 FAKE_KEY = "gsk_" + "x" * 20  # never a real key
 SOLUTION = "The steward, Mr. Hollis, inherits an annuity"
@@ -43,13 +41,6 @@ class Recorder:
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
         return self.handler(request)
-
-
-@pytest.fixture
-async def maker(db_path: Path):
-    engine = create_engine(sqlite_url(db_path))
-    yield create_sessionmaker(engine)
-    await engine.dispose()
 
 
 def chain(maker, handler, *, cap: int = 30, timeout: float = 8.0) -> tuple[AIChain, Recorder]:

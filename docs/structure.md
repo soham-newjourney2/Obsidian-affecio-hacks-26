@@ -25,7 +25,7 @@ echo/
 │   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes, pulse_responses, ai_logs)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
 │   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse, ai_hooks: background AI rewrites)
-│   │   ├── ai/             # base, mock, groq (httpx), chain (validate, cap, timeout, fallback), factory, prompts/*.v1.txt
+│   │   ├── ai/             # base, mock, groq + gemini (httpx), chain (validate, cap, timeout, breaker, fallback), factory, prompts/*.v1.txt
 │   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
 │   │   ├── game/           # story_schema (story file model + validator), engine (pure start/apply/view)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
@@ -169,8 +169,10 @@ uv run ruff check .
 
 ## AI (narration, hints, recap)
 
-- `AI_PROVIDER=mock` (tests, offline) returns the authored text; `AI_PROVIDER=chain` uses Groq
-  (`GROQ_API_KEY`, `GROQ_MODEL`, e.g. `openai/gpt-oss-120b`) and falls back to the authored text.
+- `AI_PROVIDER=mock` (tests, offline) returns the authored text; `AI_PROVIDER=chain` tries Groq
+  (`GROQ_API_KEY`, `GROQ_MODEL`, e.g. `openai/gpt-oss-120b`), then Gemini (`GEMINI_API_KEY`,
+  `GEMINI_MODEL`, e.g. `gemini-3.5-flash-lite`; failover only, its free tier may train on inputs),
+  then the authored text. A circuit breaker skips a provider for 60 s after 3 consecutive failures.
   Keys live only in the local `.env` (gitignored) and are read server-side.
 - Never on the play path: events go out with authored text first; background tasks may then
   replace scene narration, hint text and the closing recap via a validated `game.ai_text` event.
