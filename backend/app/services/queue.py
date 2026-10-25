@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.errors import AppError
 from backend.app.models import Profile, Story, User
-from backend.app.services import matching, rooms
+from backend.app.services import matching, rooms, safety
 
 SUGGEST_AFTER_S = 90  # then offer an invite code or (demo) companions
 
@@ -42,11 +42,6 @@ def _candidate(user: User, profile: Profile) -> matching.Candidate:
     )
 
 
-async def blocked_pairs(session: AsyncSession, user_ids: list[str]) -> set[frozenset[str]]:
-    """Pairs that must never be grouped. Blocks are stored from P16 on."""
-    return set()
-
-
 async def join(app: FastAPI, session: AsyncSession, user: User) -> Entry:
     profile = await session.scalar(select(Profile).where(Profile.user_id == user.id))
     if profile is None:
@@ -69,7 +64,7 @@ async def _try_form(queue: Queue, session: AsyncSession) -> None:
             return
         ids = [e.candidate.user_id for e in waiting]
         group = matching.form_group(
-            [e.candidate for e in waiting], await blocked_pairs(session, ids)
+            [e.candidate for e in waiting], await safety.blocked_pairs(session, ids)
         )
         if group is None:
             return

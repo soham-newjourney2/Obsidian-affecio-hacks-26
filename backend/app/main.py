@@ -10,7 +10,17 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.ai.factory import build_chain
-from backend.app.api.v1 import auth, health, matchmaking, meta, rooms, sessions, stories, users
+from backend.app.api.v1 import (
+    auth,
+    health,
+    matchmaking,
+    meta,
+    rooms,
+    safety,
+    sessions,
+    stories,
+    users,
+)
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
@@ -94,6 +104,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(rooms.router, prefix=API_PREFIX)
     app.include_router(sessions.router, prefix=API_PREFIX)
     app.include_router(matchmaking.router, prefix=API_PREFIX)
+    app.include_router(safety.router, prefix=API_PREFIX)
     app.include_router(ws_handlers.router, prefix=API_PREFIX)
     # Mounted last so API routes take precedence.
     app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="frontend")

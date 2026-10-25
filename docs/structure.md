@@ -204,3 +204,14 @@ uv run ruff check .
   between people who both chose "match only"; private profiles reveal nothing.
 - Queue: POST/DELETE `/matchmaking/queue`, GET `/matchmaking/status` (`idle | waiting | matched`,
   `suggest_alternatives` after 90 s). A matched group gets a room for the playable story.
+
+## Connections and safety
+
+- Connections are mutual opt-in, only between human co-players of a finished case. A request
+  stays "waiting on them" until accepted; a decline is never shown to the asker. Connections show
+  a display name and the shareable summary, nothing else.
+- Blocks (either direction) withdraw pending requests, refuse new ones with the same generic
+  `409 CONNECTION_UNAVAILABLE`, and keep the pair out of the same matchmaking group.
+- Reports (`harassment | hate | spam | safety | other`, ≤500 chars) are stored as `open`; the
+  reporter's open table gets a `moderation.notice`. `GET /admin/reports` is limited to
+  `ADMIN_EMAILS`.
