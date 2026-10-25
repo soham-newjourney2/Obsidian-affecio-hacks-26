@@ -25,6 +25,11 @@ class Settings(BaseSettings):
 
     # D12: AI companions may fill empty seats only in demo mode.
     demo_mode: bool = False
+    admin_emails: str = ""  # comma-separated; these accounts can read reports
+
+    @property
+    def admins(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
     # AI (§9): "mock" for tests/offline; "chain" = Groq -> Gemini -> authored fallback.
     ai_provider: Literal["mock", "chain"] = "mock"

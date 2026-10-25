@@ -113,6 +113,12 @@ function memberRow(member) {
   if (member.is_you) row.append(el("span", "room-badge", tt("room.members.you")));
   if (member.is_host) row.append(el("span", "room-badge room-badge--host", tt("room.members.host")));
   if (member.is_companion) row.append(el("span", "room-badge", `🤖 ${tt("room.members.companion")}`));
+  if (!member.is_you && !member.is_companion) {
+    const report = el("button", "btn btn--ghost btn--sm room-member__report", tt("results.connect.report"));
+    report.type = "button";
+    report.addEventListener("click", () => reportFromRoom(member.display_name));
+    row.append(report);
+  }
   // Icon + word for every state, never colour alone.
   row.append(el("span", "room-member__presence", `${here ? "●" : "○"} ${tt(here ? "room.members.online" : "room.members.away")}`));
   if (member.status !== "playing") {
@@ -199,6 +205,24 @@ function renderHistory(messages) {
   log.scrollTop = log.scrollHeight;
 }
 
+async function reportFromRoom(name) {
+  const categories = ["harassment", "hate", "spam", "safety", "other"];
+  const category = await openModal({
+    title: tt("results.connect.reportTitle", { name }),
+    body: tt("results.connect.reportBody"),
+    actions: [
+      ...categories.map((c) => ({ label: tt(`safety.categories.${c}`), value: c, kind: "ghost" })),
+      { label: tt("safety.cancel"), value: null, kind: "primary" },
+    ],
+  });
+  if (!category) return;
+  try {
+    await api("/reports", { method: "POST", body: { room_id: current.id, category, description: name } });
+  } catch {
+    toast(tt("results.connect.unavailable"), { kind: "error" });
+  }
+}
+
 // ---- socket frames ---------------------------------------------------------------------
 
 function onFrame(frame) {
@@ -217,6 +241,8 @@ function onFrame(frame) {
     renderRoom();
   } else if (type === "chat.message") {
     addMessage(payload);
+  } else if (type === "moderation.notice") {
+    toast(tt("results.connect.reported"), { kind: "success" });
   } else if (type.startsWith("game.")) {
     setMode(true);
     game.render(payload.view, { event: type, payload });

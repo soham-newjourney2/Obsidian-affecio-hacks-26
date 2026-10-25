@@ -123,7 +123,11 @@ async def _collect(session: AsyncSession, game: GameSession) -> _Facts:
     )
     roles = {r["id"]: r["name"] for r in content["roles"]}
     facts.players = [
-        {"display_name": name, "roles": [roles[r] for r in (m.role or "").split(",") if r in roles]}
+        {
+            "user_id": str(m.user_id),
+            "display_name": name,
+            "roles": [roles[r] for r in (m.role or "").split(",") if r in roles],
+        }
         for m, name in rows.all()
     ]
     return facts
@@ -137,7 +141,7 @@ async def table_facts(session: AsyncSession, game: GameSession) -> dict[str, Any
         "ending": facts.ending["title"] if facts.ending else None,
         "chapters": [{"title": c["title"], "choice": c["choice"]} for c in facts.chapters],
         "counts": {k: v for k, v in facts.team.items() if k != "players"},
-        "players": [p["display_name"] for p in facts.players],
+        "players": [p["display_name"] for p in facts.players],  # names only, never ids
         "base": _recap(facts.story.title, facts.team, facts.ending),
     }
 
@@ -192,6 +196,7 @@ async def build_summary(session: AsyncSession, game: GameSession, member: RoomMe
         "recap": ai_recap or _recap(facts.story.title, facts.team, ending),
         "recap_source": "ai" if ai_recap else "facts",
         "pulse_submitted": pulse is not None,
+        "you_user_id": str(member.user_id),
     }
 
 

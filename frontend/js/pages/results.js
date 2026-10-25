@@ -4,7 +4,15 @@ import { ApiError, api, signOut } from "../core/api.js";
 import { requireSession } from "../core/auth.js";
 import { initAtmosphere } from "../core/fx.js";
 import { applyTempStrings, tt } from "../core/strings-temp.js";
-import { mountAppHeader, setBusy, setFieldError, setFormError, setPageState } from "../core/ui.js";
+import {
+  mountAppHeader,
+  openModal,
+  setBusy,
+  setFieldError,
+  setFormError,
+  setPageState,
+  toast,
+} from "../core/ui.js";
 
 const $ = (s) => document.querySelector(s);
 const statePanel = $("#page-state");
@@ -79,6 +87,70 @@ function renderYou(you) {
     }),
   );
   $("#badges-empty").hidden = you.badges.length > 0;
+}
+
+const CATEGORIES = ["harassment", "hate", "spam", "safety", "other"];
+
+async function reportPerson(name, body) {
+  const category = await openModal({
+    title: tt("results.connect.reportTitle", { name }),
+    body: tt("results.connect.reportBody"),
+    actions: [
+      ...CATEGORIES.map((c) => ({ label: tt(`safety.categories.${c}`), value: c, kind: "ghost" })),
+      { label: tt("safety.cancel"), value: null, kind: "primary" },
+    ],
+  });
+  if (!category) return;
+  try {
+    await api("/reports", { method: "POST", body: { ...body, category } });
+    toast(tt("results.connect.reported"), { kind: "success" });
+  } catch {
+    toast(tt("results.connect.unavailable"), { kind: "error" });
+  }
+}
+
+function renderConnect(data) {
+  const others = data.team.players.filter((p) => p.user_id !== data.you_user_id);
+  $("#connect-list").replaceChildren(
+    ...others.map((p) => {
+      const item = el("li", "results-connect__row");
+      item.append(el("span", "results-player__name", p.display_name));
+      const ask = el("button", "btn btn--primary btn--sm", tt("results.connect.ask"));
+      ask.type = "button";
+      ask.addEventListener("click", async () => {
+        setBusy(ask, true);
+        try {
+          const res = await api(`/sessions/${encodeURIComponent(sessionId)}/connections`, { method: "POST", body: { user_id: p.user_id } });
+          ask.textContent = tt(res.state === "connected" ? "results.connect.connected" : "results.connect.requested");
+          ask.disabled = true;
+          ask.removeAttribute("aria-busy");
+        } catch {
+          setBusy(ask, false);
+          toast(tt("results.connect.unavailable"), { kind: "error" });
+        }
+      });
+      const block = el("button", "btn btn--ghost btn--sm", tt("results.connect.block"));
+      block.type = "button";
+      block.addEventListener("click", async () => {
+        const ok = await openModal({
+          title: tt("results.connect.blockTitle", { name: p.display_name }),
+          body: tt("results.connect.blockBody"),
+          actions: [
+            { label: tt("safety.cancel"), value: false, kind: "ghost" },
+            { label: tt("results.connect.block"), value: true, kind: "seal" },
+          ],
+        });
+        if (!ok) return;
+        await api(`/users/${encodeURIComponent(p.user_id)}/block`, { method: "POST" });
+        item.replaceChildren(el("span", "results-player__name", p.display_name), el("span", "hint", tt("results.connect.blocked")));
+      });
+      const report = el("button", "btn btn--ghost btn--sm", tt("results.connect.report"));
+      report.type = "button";
+      report.addEventListener("click", () => reportPerson(p.display_name, { reported_user: p.user_id }));
+      item.append(ask, block, report);
+      return item;
+    }),
+  );
 }
 
 function option(type, name, value, label) {
@@ -158,6 +230,7 @@ async function load() {
   renderEnding(data);
   renderTeam(data);
   renderYou(data.you);
+  renderConnect(data);
   setupPulse(data.pulse_submitted);
   setPageState(statePanel, null);
   $("#results").hidden = false;
