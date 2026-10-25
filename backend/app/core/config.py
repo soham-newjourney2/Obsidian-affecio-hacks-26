@@ -23,10 +23,12 @@ class Settings(BaseSettings):
     register_rate_limit: int = Field(default=5, ge=1)
     login_rate_limit: int = Field(default=10, ge=1)
 
-    # AI (§9): "mock" for tests/offline; "chain" = Groq -> fallback (Gemini joins in P12).
+    # AI (§9): "mock" for tests/offline; "chain" = Groq -> Gemini -> authored fallback.
     ai_provider: Literal["mock", "chain"] = "mock"
     groq_api_key: SecretStr | None = None
     groq_model: str = ""
+    gemini_api_key: SecretStr | None = None  # failover only: free tier may train on inputs
+    gemini_model: str = ""
     ai_timeout_s: float = Field(default=8.0, gt=0, le=60)
     ai_max_output_tokens: int = Field(default=400, ge=16, le=4096)
     ai_max_calls_per_session: int = Field(default=30, ge=0)
