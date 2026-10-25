@@ -986,3 +986,27 @@
   border-left: 3px solid var(--gold-500);
   font-size: var(--fs-sm);
 }
+
+/* Find a group (P15) */
+.room-find {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.room-find__pulse {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: var(--gold-400);
+  animation: room-find-pulse 1.4s ease-out infinite;
+}
+
+@keyframes room-find-pulse {
+  from { box-shadow: 0 0 0 0 rgb(217 178 106 / 0.6); }
+  to { box-shadow: 0 0 0 14px rgb(217 178 106 / 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-find__pulse { animation: none; }
+}

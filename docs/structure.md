@@ -194,3 +194,13 @@ uv run ruff check .
 - A companion pins its own clue, says one line per scene (AI, with an authored fallback) and votes
   with the humans' majority only once every human has voted, so it never decides for people.
 - No account: excluded from matching, connections, pulse and stats.
+
+## Matching
+
+- `services/matching.py`: pair score = weighted overlap of interests (.50), genres + activities
+  (.25), availability (.15) and complementary roles (.10); empty signals are skipped and the rest
+  renormalized. Greedy best group of 3–4 around the longest-waiting person; blocked pairs never.
+- Players see labels only ("Shared interests: …"), never a score. Interests and times are named only
+  between people who both chose "match only"; private profiles reveal nothing.
+- Queue: POST/DELETE `/matchmaking/queue`, GET `/matchmaking/status` (`idle | waiting | matched`,
+  `suggest_alternatives` after 90 s). A matched group gets a room for the playable story.

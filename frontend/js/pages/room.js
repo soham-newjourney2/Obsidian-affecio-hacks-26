@@ -330,6 +330,62 @@ function wireGate() {
   });
 }
 
+let findTimer = null;
+
+function stopFinding() {
+  clearInterval(findTimer);
+  findTimer = null;
+  $("#find-waiting").hidden = true;
+  $("#find-cancel").hidden = true;
+  $("#find-start").hidden = false;
+}
+
+function showFindStatus(status) {
+  if (status.state === "matched") {
+    stopFinding();
+    toast(tt("room.find.matched", { why: status.explanations.join(" · ") }), { kind: "success" });
+    enterTable({ id: status.room_id, code: null });
+    return;
+  }
+  if (status.state !== "waiting") return stopFinding();
+  $("#find-text").textContent = tt("room.find.waiting", { seconds: status.waited_s });
+  $("#find-alternatives").hidden = !status.suggest_alternatives;
+}
+
+function wireFind() {
+  $("#find-start").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    setBusy(button, true);
+    try {
+      const status = await api("/matchmaking/queue", { method: "POST" });
+      button.hidden = true;
+      $("#find-waiting").hidden = false;
+      $("#find-cancel").hidden = false;
+      showFindStatus(status);
+      findTimer = setInterval(async () => {
+        try {
+          showFindStatus(await api("/matchmaking/status"));
+        } catch {
+          // keep waiting; the next poll retries
+        }
+      }, 3000);
+    } catch (error) {
+      const message = error instanceof ApiError && error.code === "PROFILE_REQUIRED" ? tt("room.find.noProfile") : tt("room.errors.generic");
+      toast(message, { kind: "error" });
+    } finally {
+      setBusy(button, false);
+    }
+  });
+  $("#find-cancel").addEventListener("click", async () => {
+    stopFinding();
+    try {
+      await api("/matchmaking/queue", { method: "DELETE" });
+    } catch {
+      // nothing to undo
+    }
+  });
+}
+
 function wireTable() {
   $("#copy-code").addEventListener("click", async () => {
     try {
@@ -430,6 +486,7 @@ function wireTable() {
 async function load() {
   setPageState(statePanel, "loading", { message: tt("room.loading") });
   wireGate();
+  wireFind();
   wireTable();
   const room = saved();
   if (!room?.id) {

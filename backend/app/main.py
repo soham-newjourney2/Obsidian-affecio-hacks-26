@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.ai.factory import build_chain
-from backend.app.api.v1 import auth, health, meta, rooms, sessions, stories, users
+from backend.app.api.v1 import auth, health, matchmaking, meta, rooms, sessions, stories, users
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
 from backend.app.core.logging import RequestIdMiddleware, configure_logging
@@ -18,6 +18,7 @@ from backend.app.core.ratelimit import RateLimiter, TokenBucket
 from backend.app.core.security import TokenDenylist
 from backend.app.db.session import create_engine, create_sessionmaker
 from backend.app.services import ai_hooks, companions
+from backend.app.services.queue import Queue
 from backend.app.ws import handlers as ws_handlers
 from backend.app.ws.manager import ConnectionManager
 
@@ -80,6 +81,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.ai = build_chain(settings, app.state.sessionmaker)
     app.state.ai_tasks = set()
     app.state.on_game_change = _game_hooks
+    app.state.queue = Queue()
 
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
@@ -91,6 +93,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(stories.router, prefix=API_PREFIX)
     app.include_router(rooms.router, prefix=API_PREFIX)
     app.include_router(sessions.router, prefix=API_PREFIX)
+    app.include_router(matchmaking.router, prefix=API_PREFIX)
     app.include_router(ws_handlers.router, prefix=API_PREFIX)
     # Mounted last so API routes take precedence.
     app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="frontend")

@@ -15,6 +15,16 @@ export const TEMP_STRINGS = Object.freeze({
     title: "Your table",
     loading: "Opening your table…",
     loadError: "We couldn't open this table.",
+    find: {
+      title: "Find a group",
+      body: "We'll seat you with two or three people who share your interests.",
+      start: "Find a group",
+      cancel: "Stop looking",
+      waiting: "Looking for your table… {seconds}s",
+      alternatives: "Taking a while. You can also join with an invite code, or start a table yourself.",
+      matched: "Table found: {why}",
+      noProfile: "Set up your profile first so we can find people for you.",
+    },
     gate: {
       eyebrow: "Gather your table",
       title: "Three or four people, one case.",
