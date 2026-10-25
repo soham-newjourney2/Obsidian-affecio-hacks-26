@@ -85,6 +85,13 @@ class GameHintIn(BaseModel):
     client_action_id: str = ActionId
 
 
+class GameTheoryIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = Field(min_length=1, max_length=280)
+    client_action_id: str = ActionId
+
+
 class GameShareIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

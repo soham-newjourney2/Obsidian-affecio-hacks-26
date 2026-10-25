@@ -67,6 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.ws = ConnectionManager()
     app.state.chat_bucket = TokenBucket(rate=1, burst=5)  # chat: 1/s, burst 5 per member
     app.state.game_bucket = TokenBucket(rate=2, burst=4)  # game actions: 2/s per member
+    app.state.theory_bucket = TokenBucket(rate=0.2, burst=2)  # theories: 1 per 5 s, burst 2
     app.state.game_locks = defaultdict(asyncio.Lock)  # one writer per session in this process
     app.state.game_timers = {}
     app.state.ai = build_chain(settings, app.state.sessionmaker)

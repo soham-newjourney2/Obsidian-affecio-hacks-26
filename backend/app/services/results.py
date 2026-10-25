@@ -151,7 +151,9 @@ async def build_summary(session: AsyncSession, game: GameSession, member: RoomMe
     theories = sum(
         1
         for e in facts.events
-        if e.type == "game.theory.suggestion" and str(e.actor_member_id or "") == me
+        if e.type == "game.theory.suggestion"
+        and str(e.actor_member_id or "") == me
+        and e.payload.get("choice_id")
     )
     badges = []
     if facts.pins_by.get(me):

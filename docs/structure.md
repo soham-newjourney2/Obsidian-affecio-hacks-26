@@ -181,3 +181,9 @@ uv run ruff check .
 - Limits: `AI_TIMEOUT_S` (total per call), `AI_MAX_OUTPUT_TOKENS`, `AI_MAX_CALLS_PER_SESSION`.
 - Inputs are minimal (titles, authored text, shared board clues, display names); never private
   clues, emails or IDs. `ai_logs` keeps metadata only (provider, model, status, latency, tokens).
+
+## Theories
+
+- `game.theory.submit{text ≤ 280, client_action_id}` (1 per 5 s per member): the AI maps the text to
+  one allowed choice of the current decision, or to none (low confidence, unknown ids, any failure).
+  The table sees `game.theory.suggestion{by, choice_id}`; nobody's vote changes (D13).

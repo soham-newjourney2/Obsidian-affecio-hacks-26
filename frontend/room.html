@@ -159,6 +159,13 @@
               <h2 id="decision-prompt" class="game-decision__prompt"></h2>
               <p id="decision-status" class="game-decision__status" aria-live="polite"></p>
               <ul id="choices" class="game-choices"></ul>
+              <form id="theory-form" class="game-theory" method="post" novalidate>
+                <label class="label" for="theory-input" data-st="game.theory.label"></label>
+                <textarea class="input" id="theory-input" rows="2" maxlength="280" aria-describedby="theory-hint"></textarea>
+                <p class="hint" id="theory-hint" data-st="game.theory.hint"></p>
+                <button class="btn btn--ghost btn--sm" type="submit" data-st="game.theory.submit"></button>
+              </form>
+              <ul id="theories" class="game-theories" aria-live="polite"></ul>
             </div>
 
             <div class="game-hints">

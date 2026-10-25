@@ -14,6 +14,7 @@ import anyio
 from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 
+from backend.app.ai.chain import validate_theory
 from backend.app.core.errors import AppError
 from backend.app.core.security import InvalidToken, decode_access_token
 from backend.app.db.base import utcnow
@@ -32,6 +33,7 @@ from backend.app.ws.events import (
     ClientFrame,
     GameHintIn,
     GameShareIn,
+    GameTheoryIn,
     GameVoteIn,
     ReadyIn,
     envelope,
@@ -196,6 +198,58 @@ async def _on_game(app: FastAPI, conn: Connection, frame: ClientFrame, session) 
         await deliver_game(app, applied)
 
 
+async def _on_theory(app: FastAPI, conn: Connection, frame: ClientFrame, session) -> None:
+    """Free text -> AI -> one allowed choice (or none) -> a suggestion. Never a vote (D13)."""
+    manager = app.state.ws
+    data = GameTheoryIn.model_validate(frame.payload)
+    if not app.state.theory_bucket.take(str(conn.member_id)):
+        await manager.send(conn, error(conn.room_id, "RATE_LIMITED", frame.id))
+        return
+    game = await game_service.session_for_room(session, conn.room_id)
+    if game is None or game.status != "active":
+        await manager.send(conn, error(conn.room_id, "NO_SESSION", frame.id))
+        return
+    story = await session.get(Story, game.story_id)
+    content, state = story.config["content"], game.canonical_state
+    tool = engine._Story(content)
+    decision = tool.decision_for(state["scene"])
+    if decision["id"] == engine.CONTINUE:
+        await manager.send(conn, error(conn.room_id, "NO_DECISION", frame.id))
+        return
+    scene = tool.scenes[state["scene"]]
+    choices = [{"id": c["id"], "label": c["label"]} for c in decision["choices"]]
+    inputs = {
+        "scene": scene["title"],
+        "objective": scene["objective"],
+        "question": decision["prompt"],
+        "choices": choices,
+        "board": [tool.clue_text(p["clue_id"], state["variant"]) for p in state["board"]],
+        "theory": data.text,
+    }
+    allowed = {c["id"] for c in choices}
+    result = await app.state.ai.run(
+        purpose="theory",
+        inputs=inputs,
+        fallback={"choice_id": None, "confidence": 0.0},
+        session_id=game.id,
+        turn=state["turn"],
+        validate=lambda out: validate_theory(out, allowed),
+    )
+    action = {
+        "type": "theory",
+        "member_id": str(conn.member_id),
+        "action_id": data.client_action_id,
+        "choice_id": result.text["choice_id"],
+    }
+    try:
+        applied = await game_service.apply_action(app, game.id, action)
+    except GameError as exc:
+        await manager.send(conn, error(conn.room_id, exc.code, frame.id))
+        return
+    if applied.events:
+        await deliver_game(app, applied)
+
+
 async def _handle(app: FastAPI, conn: Connection, raw: str) -> None:
     manager = app.state.ws
     if len(raw.encode()) > MAX_FRAME_BYTES:
@@ -226,6 +280,8 @@ async def _handle(app: FastAPI, conn: Connection, raw: str) -> None:
                 await _on_ready(app, conn, frame, session)
             elif frame.type == "room.leave":
                 await _on_leave(app, conn, session)
+            elif frame.type == "game.theory.submit":
+                await _on_theory(app, conn, frame, session)
             elif frame.type in GAME_ACTIONS:
                 await _on_game(app, conn, frame, session)
             else:

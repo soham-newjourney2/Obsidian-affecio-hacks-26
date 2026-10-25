@@ -20,7 +20,7 @@ function svg(tag, attrs) {
   return node;
 }
 
-export function createGame({ onVote, onShare, onHint }) {
+export function createGame({ onVote, onShare, onHint, onTheory }) {
   const $ = (s) => document.querySelector(s);
   let view = null;
   let names = new Map(); // member_id -> display name
@@ -251,6 +251,22 @@ export function createGame({ onVote, onShare, onHint }) {
       if (choice) toast(tt("game.decision.resolved", { label: choiceLabel(previous.decision, choice) }));
     }
     if (event === "game.vote.tally" && payload.tie) toast(tt("game.decision.tie"));
+    if (event === "game.theory.suggestion") addTheory(payload, previous?.decision ?? view.decision);
+    if (event === "game.decision.resolved") $("#theories").replaceChildren();
+  }
+
+  function addTheory(payload, decision) {
+    const name = names.get(payload.by) ?? "?";
+    const choice = decision?.choices.find((c) => c.id === payload.choice_id);
+    const item = el("li", "game-theory-card");
+    item.append(el("p", null, choice ? tt("game.theory.points", { name, label: choice.label }) : tt("game.theory.unmapped", { name })));
+    if (choice && view.status === "active" && view.decision?.your_vote !== choice.id) {
+      const vote = el("button", "btn btn--ghost btn--sm", tt("game.theory.voteFor"));
+      vote.type = "button";
+      vote.addEventListener("click", () => onVote(choice.id)); // still an explicit vote by you
+      item.append(vote);
+    }
+    $("#theories").prepend(item);
   }
 
   function setNames(members) {
@@ -266,6 +282,14 @@ export function createGame({ onVote, onShare, onHint }) {
     $("#narration").textContent = view?.chapter.narration ?? "";
   });
   $("#hint-request").addEventListener("click", () => onHint());
+  $("#theory-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = $("#theory-input");
+    const text = input.value.trim();
+    if (!text) return;
+    onTheory(text.slice(0, 280));
+    input.value = "";
+  });
   window.addEventListener("resize", () => requestAnimationFrame(drawStrings));
 
   // Mobile tabs.

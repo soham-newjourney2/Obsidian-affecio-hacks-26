@@ -961,3 +961,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Theories (P13) */
+.game-theory {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-theory .btn {
+  justify-self: start;
+}
+
+.game-theories {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-theory-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--gold-500);
+  font-size: var(--fs-sm);
+}

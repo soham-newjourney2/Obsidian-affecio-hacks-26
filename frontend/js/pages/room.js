@@ -31,6 +31,7 @@ const game = createGame({
   },
   onShare: (clueId) => sendGame("game.clue.share", { clue_id: clueId }),
   onHint: () => sendGame("game.hint.request", {}),
+  onTheory: (text) => sendGame("game.theory.submit", { text }),
 });
 
 // Identity comes from the socket on the server; the client only says what it wants to do.

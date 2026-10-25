@@ -11,8 +11,9 @@ import time
 import uuid
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -22,6 +23,7 @@ from backend.app.models import AILog
 log = logging.getLogger("echo.ai")
 
 MAX_WORDS = {"narrate": 90, "hint": 60, "summary": 80}
+THEORY_MIN_CONFIDENCE = 0.6
 BREAKER_FAILURES = 3
 BREAKER_COOLDOWN_S = 60.0
 
@@ -65,9 +67,16 @@ class TextOut(BaseModel):
     text: str
 
 
+class TheoryOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    choice_id: str | None
+    confidence: float = Field(ge=0, le=1)
+
+
 @dataclass(frozen=True)
 class AIResult:
-    text: str
+    text: Any  # the validated output: a string, or a dict for "theory"
     provider: str  # which provider produced it, or "fallback"
 
 
@@ -88,6 +97,18 @@ def validate_text(purpose: str, data: object, forbidden: Iterable[str]) -> str:
         if item and item.lower() in lowered:
             raise InvalidOutput("hidden content")
     return text
+
+
+def validate_theory(data: object, allowed: set[str]) -> dict:
+    """A theory maps to one allowed choice id, or to nothing. Low confidence counts as nothing."""
+    try:
+        out = TheoryOut.model_validate(data)
+    except ValidationError as exc:
+        raise InvalidOutput("schema") from exc
+    if out.choice_id is not None and out.choice_id not in allowed:
+        raise InvalidOutput("choice not allowed")
+    mapped = out.choice_id if out.confidence >= THEORY_MIN_CONFIDENCE else None
+    return {"choice_id": mapped, "confidence": out.confidence}
 
 
 def build_user_message(inputs: dict) -> str:
@@ -117,14 +138,16 @@ class AIChain:
         *,
         purpose: str,
         inputs: dict,
-        fallback: str,
+        fallback: Any,
         forbidden: Iterable[str] = (),
         session_id: uuid.UUID | None = None,
         turn: int | None = None,
+        validate: Callable[[object], Any] | None = None,
     ) -> AIResult:
         system, version = load_prompt(purpose)
         user = build_user_message(inputs)
         forbidden = list(forbidden)
+        check = validate or (lambda data: validate_text(purpose, data, forbidden))
         if await self._calls_used(session_id) >= self._cap:
             await self._log(session_id, turn, "fallback", None, version, purpose, "fallback", 0)
             return AIResult(fallback, "fallback")
@@ -138,7 +161,7 @@ class AIChain:
             try:
                 async with asyncio.timeout(self._timeout):  # total budget, whatever the transport
                     result = await provider.complete(system, user, self._max_tokens)
-                text = validate_text(purpose, result.data, forbidden)
+                text = check(result.data)
             except TimeoutError:
                 status = "timeout"
             except ProviderError as exc:
