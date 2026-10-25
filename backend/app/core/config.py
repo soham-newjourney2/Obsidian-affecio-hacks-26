@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     register_rate_limit: int = Field(default=5, ge=1)
     login_rate_limit: int = Field(default=10, ge=1)
 
+    # D12: AI companions may fill empty seats only in demo mode.
+    demo_mode: bool = False
+
     # AI (§9): "mock" for tests/offline; "chain" = Groq -> Gemini -> authored fallback.
     ai_provider: Literal["mock", "chain"] = "mock"
     groq_api_key: SecretStr | None = None

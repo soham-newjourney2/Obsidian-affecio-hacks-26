@@ -112,6 +112,7 @@ function memberRow(member) {
   row.append(el("span", "room-member__name", member.display_name));
   if (member.is_you) row.append(el("span", "room-badge", tt("room.members.you")));
   if (member.is_host) row.append(el("span", "room-badge room-badge--host", tt("room.members.host")));
+  if (member.is_companion) row.append(el("span", "room-badge", `🤖 ${tt("room.members.companion")}`));
   // Icon + word for every state, never colour alone.
   row.append(el("span", "room-member__presence", `${here ? "●" : "○"} ${tt(here ? "room.members.online" : "room.members.away")}`));
   if (member.status !== "playing") {
@@ -152,6 +153,7 @@ function renderRoom() {
   toggle.textContent = tt(ready ? "room.actions.notReady" : "room.actions.ready");
   toggle.className = `btn ${ready ? "btn--ghost" : "btn--primary"}`;
   const start = $("#start");
+  $("#add-companions").hidden = !view.companions_allowed;
   start.hidden = !view.you_are_host;
   start.disabled = !view.can_start;
   game.setNames(view.members);
@@ -341,6 +343,19 @@ function wireTable() {
   $("#ready-toggle").addEventListener("click", (event) => {
     const ready = event.currentTarget.getAttribute("aria-pressed") !== "true";
     if (!socket?.send("player.ready", { ready })) toast(tt("room.status.reconnecting"));
+  });
+
+  $("#add-companions").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    setBusy(button, true);
+    try {
+      const count = Math.min(3, view.story.max_players - view.members.length);
+      await api(`/rooms/${encodeURIComponent(current.id)}/companions`, { method: "POST", body: { count } });
+    } catch (error) {
+      toast(error instanceof ApiError ? error.message : tt("room.errors.generic"), { kind: "error" });
+    } finally {
+      setBusy(button, false);
+    }
   });
 
   $("#start").addEventListener("click", async (event) => {

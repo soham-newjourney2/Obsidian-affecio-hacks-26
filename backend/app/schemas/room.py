@@ -40,6 +40,7 @@ class MemberOut(BaseModel):
     status: Literal["joined", "ready", "playing"]
     is_host: bool
     is_you: bool
+    is_companion: bool  # D12: AI companions are always labelled
 
 
 class RoomOut(BaseModel):
@@ -53,6 +54,7 @@ class RoomOut(BaseModel):
     created_at: datetime
     started_at: datetime | None
     session_id: uuid.UUID | None  # the game, once the case has started
+    companions_allowed: bool  # demo mode, host, waiting and a free seat
 
 
 class CreatedRoomOut(RoomOut):
@@ -66,6 +68,7 @@ def room_view(
     members: list[tuple[RoomMember, str]],
     viewer_id: uuid.UUID,
     session_id: uuid.UUID | None = None,
+    demo: bool = False,
 ) -> RoomOut:
     you_are_host = room.host_user_id == viewer_id
     ready_count = sum(m.status == "ready" for m, _ in members)
@@ -83,8 +86,9 @@ def room_view(
                 member_id=m.id,
                 display_name=name,
                 status=m.status,
-                is_host=m.user_id == room.host_user_id,
-                is_you=m.user_id == viewer_id,
+                is_host=m.user_id is not None and m.user_id == room.host_user_id,
+                is_you=m.user_id is not None and m.user_id == viewer_id,
+                is_companion=m.companion_key is not None,
             )
             for m, name in members
         ],
@@ -99,4 +103,7 @@ def room_view(
         created_at=room.created_at,
         started_at=room.started_at,
         session_id=session_id,
+        companions_allowed=(
+            demo and you_are_host and room.status == "waiting" and len(members) < story.max_players
+        ),
     )

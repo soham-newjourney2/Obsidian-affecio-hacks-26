@@ -6,13 +6,18 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.content.companions import companion_name
 from backend.app.models import Message, RoomMember, User
 
 HISTORY_LIMIT = 50
 
 
 async def save_message(
-    session: AsyncSession, member: RoomMember, body: str, client_message_id: str
+    session: AsyncSession,
+    member: RoomMember,
+    body: str,
+    client_message_id: str,
+    kind: str = "text",
 ) -> tuple[Message, bool]:
     """Returns (message, created). A retried client id returns the original message."""
 
@@ -27,7 +32,11 @@ async def save_message(
     if found is not None:
         return found, False
     message = Message(
-        room_id=member.room_id, member_id=member.id, body=body, client_message_id=client_message_id
+        room_id=member.room_id,
+        member_id=member.id,
+        type=kind,
+        body=body,
+        client_message_id=client_message_id,
     )
     session.add(message)
     try:
@@ -43,14 +52,15 @@ async def recent_messages(
 ) -> list[tuple[Message, str | None]]:
     """Latest visible messages, oldest first, with the sender's display name."""
     rows = await session.execute(
-        select(Message, User.display_name)
+        select(Message, User.display_name, RoomMember.companion_key)
         .outerjoin(RoomMember, RoomMember.id == Message.member_id)
         .outerjoin(User, User.id == RoomMember.user_id)
         .where(Message.room_id == room_id, Message.moderation == "allowed")
         .order_by(Message.created_at.desc(), Message.id.desc())
         .limit(limit)
     )
-    return list(reversed(rows.all()))
+    named = [(m, name or (companion_name(key) if key else None)) for m, name, key in rows.all()]
+    return list(reversed(named))
 
 
 def message_out(message: Message, display_name: str | None) -> dict:

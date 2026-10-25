@@ -96,7 +96,10 @@ async def _snapshot(app: FastAPI, conn: Connection) -> dict:
         members = await room_service.members_with_names(session, room)
         history = await chat.recent_messages(session, conn.room_id)
         game = await game_service.session_for_room(session, conn.room_id)
-    view = room_view(room, story, members, conn.user_id, session_id=game.id if game else None)
+    view = room_view(
+        room, story, members, conn.user_id, session_id=game.id if game else None,
+        demo=app.state.settings.demo_mode,
+    )  # fmt: skip
     return {
         "room": view.model_dump(mode="json"),
         "you": str(conn.member_id),
