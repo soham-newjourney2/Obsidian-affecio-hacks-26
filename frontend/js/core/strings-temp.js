@@ -126,6 +126,14 @@ export const TEMP_STRINGS = Object.freeze({
       resolved: "The table chose: {label}",
       tie: "It's a tie. Here's a nudge, then vote again.",
     },
+    theory: {
+      label: "Your theory",
+      hint: "Say what you think in your own words. It becomes a suggestion; nobody's vote changes.",
+      submit: "Suggest",
+      points: "{name}'s theory points to: {label}",
+      unmapped: "{name}'s theory couldn't be matched to a choice.",
+      voteFor: "Vote for this",
+    },
     hints: {
       request: "Ask for a hint ({left} left)",
       none: "No hints left for this chapter",

@@ -182,6 +182,8 @@ def apply(content: dict, state: State, action: dict, now: float) -> tuple[State,
         events = _share(story, state, action)
     elif kind == "hint":
         events = _hint(story, state)
+    elif kind == "theory":
+        events = _theory(story, state, action)
     elif kind == "leave":
         events = _leave(story, state, action, now)
     elif kind == "tick":
@@ -322,6 +324,20 @@ def _share(story: _Story, state: State, action: dict) -> list[Event]:
         raise GameError("ALREADY_SHARED")
     state["board"].append({"clue_id": clue_id, "by": action["member_id"]})
     return [_event("game.board.updated", {"added": [clue_id], "by": action["member_id"]})]
+
+
+def _theory(story: _Story, state: State, action: dict) -> list[Event]:
+    """A suggestion only: it never casts or changes a vote (D13)."""
+    allowed = {c["id"] for c in story.decision_for(state["scene"])["choices"]}
+    choice = action.get("choice_id")
+    if choice not in allowed:
+        choice = None
+    return [
+        _event(
+            "game.theory.suggestion",
+            {"by": action["member_id"], "choice_id": choice, "turn": state["turn"]},
+        )
+    ]
 
 
 def _ai_text(state: State, action: dict) -> list[Event]:
