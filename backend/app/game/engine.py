@@ -23,6 +23,7 @@ from copy import deepcopy
 from typing import Any
 
 CONTINUE = "continue"
+SYSTEM_ACTIONS = ("tick", "ai_text")  # sent by the server, never by a member
 DEFAULT_RULES = {"vote_grace_s": 45}
 MAX_HINT_LEVEL = 3
 PROCESSED_LIMIT = 500
@@ -160,12 +161,12 @@ def _enter_scene(story: _Story, state: State, scene_id: str) -> list[Event]:
 
 def apply(content: dict, state: State, action: dict, now: float) -> tuple[State, list[Event]]:
     story = _Story(content)
-    if state["status"] != "active":
+    kind = action["type"]
+    if state["status"] != "active" and kind != "ai_text":  # AI text may land after the end
         raise GameError("GAME_OVER")
     state = deepcopy(state)
-    kind = action["type"]
 
-    if kind != "tick":
+    if kind not in SYSTEM_ACTIONS:
         member = action["member_id"]
         seat = next((s for s in state["seats"] if s["member_id"] == member), None)
         if seat is None or not seat["active"]:
@@ -187,6 +188,10 @@ def apply(content: dict, state: State, action: dict, now: float) -> tuple[State,
         events = _maybe_resolve(story, state, now)
         if not events:
             return state, []  # nothing due yet: no new version
+    elif kind == "ai_text":
+        events = _ai_text(state, action)
+        if not events:
+            return state, []  # the table moved on: drop stale text
     else:
         raise GameError("UNKNOWN_ACTION")
 
@@ -319,6 +324,15 @@ def _share(story: _Story, state: State, action: dict) -> list[Event]:
     return [_event("game.board.updated", {"added": [clue_id], "by": action["member_id"]})]
 
 
+def _ai_text(state: State, action: dict) -> list[Event]:
+    """Stores AI-rephrased text (validated by the AI chain) keyed like "narration:<scene>",
+    "hint:<scene>:<level>" or "summary". Scene-bound text is dropped once the scene has passed."""
+    if action.get("scene_id") and action["scene_id"] != state["scene"]:
+        return []
+    state.setdefault("ai_text", {})[action["key"]] = action["text"]
+    return [_event("game.ai_text", {"key": action["key"]})]
+
+
 def _hint(story: _Story, state: State) -> list[Event]:
     scene = state["scene"]
     level = state["hints_used"].get(scene, 0) + 1
@@ -367,6 +381,7 @@ def view(content: dict, state: State, member_id: str) -> dict:
     decision = story.decision_for(state["scene"])
     used = state["hints_used"].get(state["scene"], 0)
     completed = state["status"] != "active"
+    ai = state.get("ai_text", {})
     out = {
         "status": state["status"],
         "version": state["version"],
@@ -376,7 +391,7 @@ def view(content: dict, state: State, member_id: str) -> dict:
             "total": len(story.scene_order),
             "scene_id": scene["id"],
             "title": scene["title"],
-            "narration": scene["narration_base"],
+            "narration": ai.get(f"narration:{scene['id']}", scene["narration_base"]),
             "objective": scene["objective"],
         },
         "you": {
@@ -409,7 +424,13 @@ def view(content: dict, state: State, member_id: str) -> dict:
             "deadline": _deadline(state),
             "seats": len(_active(state)),
         },
-        "hints": [{"level": i + 1, "text": story.hints[state["scene"]][i]} for i in range(used)],
+        "hints": [
+            {
+                "level": i + 1,
+                "text": ai.get(f"hint:{state['scene']}:{i + 1}", story.hints[state["scene"]][i]),
+            }
+            for i in range(used)
+        ],
         "hints_left": MAX_HINT_LEVEL - used,
         "ending": None,
     }

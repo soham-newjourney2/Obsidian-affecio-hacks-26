@@ -2,6 +2,7 @@
 inferences about people (§8). Badges are private and never ranked. Plus the 2-question pulse."""
 
 import uuid
+from dataclasses import dataclass, field
 from typing import Any
 
 from sqlalchemy import select
@@ -40,34 +41,59 @@ def _choice_label(content: dict, decision_id: str, choice_id: str) -> str | None
     return None  # the "continue" step between scenes
 
 
-async def build_summary(session: AsyncSession, game: GameSession, member: RoomMember) -> dict:
+@dataclass
+class _Facts:
+    """Table-level facts, all derived from recorded events and votes."""
+
+    story: Story
+    content: dict[str, Any]
+    events: list[GameEvent]
+    votes: list[Vote]
+    visited: list[str] = field(default_factory=list)
+    chapters: list[dict[str, Any]] = field(default_factory=list)
+    pins_by: dict[str, int] = field(default_factory=dict)
+    hints_by: dict[str, int] = field(default_factory=dict)
+    ending: dict[str, Any] | None = None
+    players: list[dict[str, Any]] = field(default_factory=list)
+
+    @property
+    def team(self) -> dict[str, Any]:
+        return {
+            "chapters": len(self.visited),
+            "decisions": len(self.chapters),
+            "clues_pinned": sum(self.pins_by.values()),
+            "hints_used": sum(self.hints_by.values()),
+            "players": self.players,
+        }
+
+
+async def _collect(session: AsyncSession, game: GameSession) -> _Facts:
     story = await session.get(Story, game.story_id)
     content = story.config["content"]
     scenes = {s["id"]: s for s in content["scenes"]}
     decisions = {d["id"]: d for d in content["decisions"]}
     endings = {e["id"]: e for e in content["endings"]}
-
-    events = list(
-        await session.scalars(
-            select(GameEvent).where(GameEvent.session_id == game.id).order_by(GameEvent.seq)
-        )
+    facts = _Facts(
+        story=story,
+        content=content,
+        events=list(
+            await session.scalars(
+                select(GameEvent).where(GameEvent.session_id == game.id).order_by(GameEvent.seq)
+            )
+        ),
+        votes=list(
+            await session.scalars(
+                select(Vote).where(Vote.session_id == game.id, Vote.status == "active")
+            )
+        ),
     )
-    votes = list(
-        await session.scalars(
-            select(Vote).where(Vote.session_id == game.id, Vote.status == "active")
-        )
-    )
-    me = str(member.id)
-
-    visited, chapters, pins_by, hints_by = [], [], {}, {}
-    ending_id = None
-    for event in events:
+    for event in facts.events:
         payload = event.payload
-        if event.type == "game.scene" and payload["scene_id"] not in visited:
-            visited.append(payload["scene_id"])
+        if event.type == "game.scene" and payload["scene_id"] not in facts.visited:
+            facts.visited.append(payload["scene_id"])
         elif event.type == "game.decision.resolved":
             if payload["decision_id"] in decisions:  # skip the "continue" steps
-                chapters.append(
+                facts.chapters.append(
                     {
                         "scene_id": payload["scene_id"],
                         "title": scenes[payload["scene_id"]]["title"],
@@ -81,28 +107,13 @@ async def build_summary(session: AsyncSession, game: GameSession, member: RoomMe
                     }
                 )
         elif event.type == "game.board.updated" and payload.get("by"):
-            pins_by[payload["by"]] = pins_by.get(payload["by"], 0) + len(payload["added"])
+            by = payload["by"]
+            facts.pins_by[by] = facts.pins_by.get(by, 0) + len(payload["added"])
         elif event.type == "game.hint" and not payload.get("tie") and event.actor_member_id:
             key = str(event.actor_member_id)
-            hints_by[key] = hints_by.get(key, 0) + 1
-        elif event.type == "game.completed":
-            ending_id = payload.get("ending_id")
-
-    my_votes = {v.turn: v.choice_id for v in votes if str(v.member_id) == me}
-    matched = sum(1 for c in chapters if my_votes.get(c["turn"]) == c["choice_id"])
-    voted_in = sum(1 for c in chapters if c["turn"] in my_votes)
-    theories = sum(
-        1
-        for e in events
-        if e.type == "game.theory.suggestion" and str(e.actor_member_id or "") == me
-    )
-    badges = []
-    if pins_by.get(me):
-        badges.append({"id": "clue_sharer", "count": pins_by[me]})
-    if matched >= CONSENSUS_MIN:
-        badges.append({"id": "consensus_builder", "count": matched})
-    if theories:
-        badges.append({"id": "theory_crafter", "count": theories})
+            facts.hints_by[key] = facts.hints_by.get(key, 0) + 1
+        elif event.type == "game.completed" and payload.get("ending_id"):
+            facts.ending = endings[payload["ending_id"]]
 
     rows = await session.execute(
         select(RoomMember, User.display_name)
@@ -111,47 +122,73 @@ async def build_summary(session: AsyncSession, game: GameSession, member: RoomMe
         .order_by(RoomMember.joined_at, RoomMember.id)
     )
     roles = {r["id"]: r["name"] for r in content["roles"]}
-    players = [
+    facts.players = [
         {"display_name": name, "roles": [roles[r] for r in (m.role or "").split(",") if r in roles]}
         for m, name in rows.all()
     ]
-    ending = endings.get(ending_id) if ending_id else None
-    variant = next(v for v in content["variants"] if v["id"] == game.variant_id)
+    return facts
+
+
+async def table_facts(session: AsyncSession, game: GameSession) -> dict[str, Any]:
+    """The AI summary's whole input: facts only, display names only, no IDs or clues."""
+    facts = await _collect(session, game)
+    return {
+        "story": facts.story.title,
+        "ending": facts.ending["title"] if facts.ending else None,
+        "chapters": [{"title": c["title"], "choice": c["choice"]} for c in facts.chapters],
+        "counts": {k: v for k, v in facts.team.items() if k != "players"},
+        "players": [p["display_name"] for p in facts.players],
+        "base": _recap(facts.story.title, facts.team, facts.ending),
+    }
+
+
+async def build_summary(session: AsyncSession, game: GameSession, member: RoomMember) -> dict:
+    facts = await _collect(session, game)
+    me = str(member.id)
+    my_votes = {v.turn: v.choice_id for v in facts.votes if str(v.member_id) == me}
+    matched = sum(1 for c in facts.chapters if my_votes.get(c["turn"]) == c["choice_id"])
+    voted_in = sum(1 for c in facts.chapters if c["turn"] in my_votes)
+    theories = sum(
+        1
+        for e in facts.events
+        if e.type == "game.theory.suggestion" and str(e.actor_member_id or "") == me
+    )
+    badges = []
+    if facts.pins_by.get(me):
+        badges.append({"id": "clue_sharer", "count": facts.pins_by[me]})
+    if matched >= CONSENSUS_MIN:
+        badges.append({"id": "consensus_builder", "count": matched})
+    if theories:
+        badges.append({"id": "theory_crafter", "count": theories})
+
+    variant = next(v for v in facts.content["variants"] if v["id"] == game.variant_id)
     pulse = await session.scalar(
         select(PulseResponse.id).where(
             PulseResponse.session_id == game.id, PulseResponse.user_id == member.user_id
         )
     )
-    team = {
-        "chapters": len(visited),
-        "decisions": len(chapters),
-        "clues_pinned": sum(pins_by.values()),
-        "hints_used": sum(hints_by.values()),
-        "players": players,
-    }
+    ai_recap = (game.canonical_state.get("ai_text") or {}).get("summary")
+    ending = facts.ending
     return {
         "session_id": str(game.id),
         "status": game.status,
-        "story": {"title": story.title},
-        "ending": {
-            "id": ending["id"],
-            "kind": ending["kind"],
-            "title": ending["title"],
-            "text": ending["text"],
-        }
-        if ending
-        else None,
+        "story": {"title": facts.story.title},
+        "ending": {k: ending[k] for k in ("id", "kind", "title", "text")} if ending else None,
         "solution": variant["solution_summary"],
-        "chapters": [{k: c[k] for k in ("title", "prompt", "choice", "votes")} for c in chapters],
-        "team": team,
+        "chapters": [
+            {k: c[k] for k in ("title", "prompt", "choice", "votes")} for c in facts.chapters
+        ],
+        "team": facts.team,
         "you": {
-            "clues_pinned": pins_by.get(me, 0),
-            "hints_asked": hints_by.get(me, 0),
+            "clues_pinned": facts.pins_by.get(me, 0),
+            "hints_asked": facts.hints_by.get(me, 0),
             "votes_matched": matched,
             "decisions_voted": voted_in,
             "badges": badges,
         },
-        "recap": _recap(story.title, team, ending),
+        # The AI recap (validated) once it has arrived; the factual one until then.
+        "recap": ai_recap or _recap(facts.story.title, facts.team, ending),
+        "recap_source": "ai" if ai_recap else "facts",
         "pulse_submitted": pulse is not None,
     }
 

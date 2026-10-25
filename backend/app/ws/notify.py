@@ -64,7 +64,17 @@ async def notify_presence(
 
 async def deliver_game(app: FastAPI, applied: Any) -> None:
     """Sends game events to each socket: only events addressed to it (public, or its own member
-    id), each carrying that member's own projection. Private clues never leave their owner."""
+    id), each carrying that member's own projection. Private clues never leave their owner.
+    Then starts any AI rewrites, so a rewrite can never overtake the event it rewrites."""
+    try:
+        await _send_game(app, applied)
+    finally:
+        hook = getattr(app.state, "on_game_change", None)  # services/ai_hooks.schedule
+        if hook is not None and applied.events:
+            hook(app, applied)
+
+
+async def _send_game(app: FastAPI, applied: Any) -> None:
     manager = app.state.ws
     for conn in manager.connections(applied.room_id):
         member = str(conn.member_id)
