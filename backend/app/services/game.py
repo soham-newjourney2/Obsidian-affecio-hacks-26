@@ -102,7 +102,9 @@ async def start_game(app: FastAPI, room_id: uuid.UUID) -> Applied:
             member.role = ",".join(roles[str(member.id)])
         await _record_events(session, game, events, state["version"], None)
         await session.commit()
-        return Applied(game.id, room.id, content, state, events)
+        applied = Applied(game.id, room.id, content, state, events)
+    _after_commit(app, applied)
+    return applied
 
 
 async def apply_action(app: FastAPI, session_id: uuid.UUID, action: dict) -> Applied:
@@ -125,7 +127,8 @@ async def apply_action(app: FastAPI, session_id: uuid.UUID, action: dict) -> App
                     "turn": state["turn"],
                     "status": state["status"],
                 }
-                if state["status"] != "active":
+                just_ended = game.status == "active" and state["status"] != "active"
+                if just_ended:
                     ending = state["ending"]
                     values["outcome"] = (
                         engine._Story(content).endings[ending]["kind"] if ending else "abandoned"
@@ -143,13 +146,13 @@ async def apply_action(app: FastAPI, session_id: uuid.UUID, action: dict) -> App
                 await _record_events(session, game, events, state["version"], actor)
                 if action["type"] == "vote":
                     await _record_vote(session, game.id, action)
-                if state["status"] != "active":
+                if just_ended:
                     room = await session.get(Room, game.room_id)
                     room.status = "completed" if state["status"] == "completed" else "abandoned"
                     room.ended_at = utcnow()
                 await session.commit()
                 applied = Applied(game.id, game.room_id, content, state, events)
-                _schedule_tick(app, applied)
+                _after_commit(app, applied)
                 return applied
         raise GameError("CONFLICT")
 
@@ -175,6 +178,10 @@ async def _record_vote(session: AsyncSession, session_id: uuid.UUID, action: dic
             client_action_id=action["action_id"],
         )
     )
+
+
+def _after_commit(app: FastAPI, applied: Applied) -> None:
+    _schedule_tick(app, applied)
 
 
 def _schedule_tick(app: FastAPI, applied: Applied) -> None:
@@ -205,12 +212,6 @@ async def _tick_at(app: FastAPI, session_id: uuid.UUID, deadline: float) -> None
         await deliver_game(app, applied)
     else:  # not due after all (or a newer vote moved the clock): look again
         _schedule_tick(app, applied)
-
-
-def cancel_timers(app: FastAPI) -> None:
-    for task in app.state.game_timers.values():
-        task.cancel()
-    app.state.game_timers.clear()
 
 
 async def leave_game(app: FastAPI, room_id: uuid.UUID, member_id: uuid.UUID) -> Applied | None:

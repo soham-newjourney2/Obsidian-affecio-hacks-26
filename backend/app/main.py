@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from backend.app.ai.factory import build_chain
 from backend.app.api.v1 import auth, health, meta, rooms, sessions, stories, users
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.errors import register_error_handlers
@@ -16,7 +17,7 @@ from backend.app.core.logging import RequestIdMiddleware, configure_logging
 from backend.app.core.ratelimit import RateLimiter, TokenBucket
 from backend.app.core.security import TokenDenylist
 from backend.app.db.session import create_engine, create_sessionmaker
-from backend.app.services import game as game_service
+from backend.app.services import ai_hooks
 from backend.app.ws import handlers as ws_handlers
 from backend.app.ws.manager import ConnectionManager
 
@@ -35,7 +36,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app_: FastAPI) -> AsyncIterator[None]:
         yield
-        game_service.cancel_timers(app_)
+        # Stop background work and let it unwind before the engine goes away.
+        pending = [*app_.state.game_timers.values(), *app_.state.ai_tasks]
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.wait(pending, timeout=5)
+        app_.state.game_timers.clear()
+        await app_.state.ai.aclose()
         await engine.dispose()
 
     is_dev = settings.app_env == "development"
@@ -61,6 +69,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.game_bucket = TokenBucket(rate=2, burst=4)  # game actions: 2/s per member
     app.state.game_locks = defaultdict(asyncio.Lock)  # one writer per session in this process
     app.state.game_timers = {}
+    app.state.ai = build_chain(settings, app.state.sessionmaker)
+    app.state.ai_tasks = set()
+    app.state.on_game_change = ai_hooks.schedule
 
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)

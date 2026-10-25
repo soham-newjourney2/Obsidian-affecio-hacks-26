@@ -22,9 +22,10 @@ echo/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
 │   │   ├── core/           # config, errors (standard shape), logging (request id), security (Argon2, JWT, denylist), ratelimit
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
-│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes, pulse_responses)
+│   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes, pulse_responses, ai_logs)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse, ai_hooks: background AI rewrites)
+│   │   ├── ai/             # base, mock, groq (httpx), chain (validate, cap, timeout, fallback), factory, prompts/*.v1.txt
 │   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
 │   │   ├── game/           # story_schema (story file model + validator), engine (pure start/apply/view)
 │   │   ├── content/        # profile options; stories/*.json (1 playable, 4 coming soon)
@@ -165,3 +166,16 @@ uv run ruff check .
 - Private badges, never ranked: Clue Sharer (pinned ≥ 1 clue), Consensus Builder (vote matched the
   table's choice ≥ 2 times), Theory Crafter (a theory of yours was mapped, from P13).
 - The pulse is the only impact data collected: two answers, once per person per case.
+
+## AI (narration, hints, recap)
+
+- `AI_PROVIDER=mock` (tests, offline) returns the authored text; `AI_PROVIDER=chain` uses Groq
+  (`GROQ_API_KEY`, `GROQ_MODEL`, e.g. `openai/gpt-oss-120b`) and falls back to the authored text.
+  Keys live only in the local `.env` (gitignored) and are read server-side.
+- Never on the play path: events go out with authored text first; background tasks may then
+  replace scene narration, hint text and the closing recap via a validated `game.ai_text` event.
+- Output is untrusted: JSON object -> `{"text"}` only -> word limit (90/60/80) -> no hidden clue
+  wording, solutions, ending texts or internal IDs. Any failure -> next provider -> authored text.
+- Limits: `AI_TIMEOUT_S` (total per call), `AI_MAX_OUTPUT_TOKENS`, `AI_MAX_CALLS_PER_SESSION`.
+- Inputs are minimal (titles, authored text, shared board clues, display names); never private
+  clues, emails or IDs. `ai_logs` keeps metadata only (provider, model, status, latency, tokens).

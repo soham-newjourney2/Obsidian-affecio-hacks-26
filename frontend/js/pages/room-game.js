@@ -25,6 +25,7 @@ export function createGame({ onVote, onShare, onHint }) {
   let view = null;
   let names = new Map(); // member_id -> display name
   let lastScene = null;
+  let lastNarration = null;
   let typing = null;
   let countdown = null;
 
@@ -230,7 +231,10 @@ export function createGame({ onVote, onShare, onHint }) {
       void story.offsetWidth; // restart the transition
       story.classList.add("is-entering");
       narrate(view.chapter.narration, Boolean(previous) || event === "game.scene");
+    } else if (view.chapter.narration !== lastNarration) {
+      narrate(view.chapter.narration, true); // the narrator's rewrite of this scene arrived
     }
+    lastNarration = view.chapter.narration;
     renderRole(view.you);
     renderPrivate(view.private_clues, newClues);
     renderBoard(view.board, newPins);
