@@ -8,6 +8,12 @@ export function applyStrings(root = document) {
   for (const el of root.querySelectorAll("[data-s-label]")) {
     el.setAttribute("aria-label", t(el.dataset.sLabel));
   }
+  for (const el of root.querySelectorAll("[data-s-placeholder]")) {
+    el.setAttribute("placeholder", t(el.dataset.sPlaceholder));
+  }
+  for (const el of root.querySelectorAll("[data-s-title]")) {
+    el.setAttribute("title", t(el.dataset.sTitle));
+  }
 }
 
 function el(tag, className, text) {
@@ -125,6 +131,9 @@ export function setPageState(panel, state, { message = "", onRetry } = {}) {
 export function mountAppHeader(user, onSignOut) {
   const name = document.querySelector("#user-name");
   if (name) name.textContent = user.display_name;
+  for (const avatar of document.querySelectorAll("[data-user-initial]")) {
+    avatar.textContent = [...user.display_name.trim()][0]?.toUpperCase() ?? "";
+  }
   document.querySelector("#sign-out")?.addEventListener("click", (event) => {
     setBusy(event.currentTarget, true);
     onSignOut();
