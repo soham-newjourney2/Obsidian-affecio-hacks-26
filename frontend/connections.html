@@ -26,38 +26,53 @@
         <span class="brand__name" data-st="common.brand"></span>
       </a>
       <nav class="sidebar__nav" data-st-label="common.navLabel">
-        <a class="sidebar__link" href="/lobby.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg><span data-st="common.lobby"></span></a>
-        <a class="sidebar__link" href="/room.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg><span data-st="common.table"></span></a>
-        <a class="sidebar__link" href="/connections.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-message"></use></svg><span data-st="connections.title"></span></a>
+        <a class="sidebar__link" href="/lobby.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg><span data-st="common.home"></span></a>
+        <a class="sidebar__link" href="/connections.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg><span data-st="connections.nav"></span></a>
+        <a class="sidebar__link" href="/room.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-book"></use></svg><span data-st="common.room"></span></a>
+        
+        <a class="sidebar__link" href="/onboarding.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg><span data-st="common.profile"></span></a>
       </nav>
+      <div class="sidebar__art" aria-hidden="true"></div>
       <div class="sidebar__footer">
         <button class="sidebar__link" type="button" id="sign-out"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-logout"></use></svg><span data-st="common.signOut"></span></button>
       </div>
     </aside>
-    <div class="app-main">
-      <header class="app-topbar">
+    <div class="app-main connections-main">
+      <header class="app-topbar connections-topbar">
+        <div class="connections-search" role="search">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>
+          <input class="connections-search__input" id="connection-search" type="search" autocomplete="off" data-st-label="connections.searchLabel" data-st-placeholder="connections.searchPlaceholder">
+        </div>
         <a class="user-chip" href="/onboarding.html"><span class="avatar" id="user-initial" aria-hidden="true"></span><span class="app-header__user" id="user-name"></span></a>
       </header>
-      <main id="main" class="results-page">
+      <main id="main" class="results-page connections-page">
         <div id="page-state" class="state" role="status" aria-live="polite"></div>
-        <div id="content" class="results" hidden>
-          <header>
-            <h1 class="results-card__title" data-st="connections.title"></h1>
-            <p class="hint" data-st="connections.lede"></p>
+        <div id="content" class="results connections-content" hidden>
+          <header class="connections-heading">
+            <p class="eyebrow" data-st="connections.eyebrow"></p>
+            <h1 class="connections-title" data-st="connections.nav"></h1>
+            <p class="connections-lede" data-st="connections.lede"></p>
           </header>
-          <section class="panel results-card" aria-labelledby="incoming-title" id="incoming-panel">
+          <div class="connection-filters" role="group" aria-label="Filter connections">
+            <button class="connection-filter is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="connection-filter" type="button" data-filter="connections" aria-pressed="false">Connections</button>
+            <button class="connection-filter" type="button" data-filter="requests" aria-pressed="false">Requests</button>
+            <button class="connection-filter" type="button" data-filter="sent" aria-pressed="false">Sent</button>
+          </div>
+          <section class="panel results-card connection-section" aria-labelledby="incoming-title" id="incoming-panel" data-connection-kind="requests">
             <h2 id="incoming-title" class="results-card__subtitle" data-st="connections.incoming"></h2>
             <ul id="incoming" class="results-connect"></ul>
           </section>
-          <section class="panel results-card" aria-labelledby="connections-title">
+          <section class="panel results-card connection-section" aria-labelledby="connections-title" id="connections-panel" data-connection-kind="connections">
             <h2 id="connections-title" class="results-card__subtitle" data-st="connections.title"></h2>
             <ul id="connections" class="results-connect"></ul>
             <p id="none" class="game-empty" data-st="connections.none" hidden></p>
           </section>
-          <section class="panel results-card" aria-labelledby="outgoing-title" id="outgoing-panel">
+          <section class="panel results-card connection-section" aria-labelledby="outgoing-title" id="outgoing-panel" data-connection-kind="sent">
             <h2 id="outgoing-title" class="results-card__subtitle" data-st="connections.outgoing"></h2>
             <ul id="outgoing" class="results-connect"></ul>
           </section>
+          <p id="filter-empty" class="connection-empty" role="status" data-st="connections.noMatches" hidden></p>
         </div>
       </main>
     </div>
