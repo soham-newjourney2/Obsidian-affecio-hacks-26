@@ -7,14 +7,6 @@ import { applyStrings, mountAppHeader, setPageState, toast } from "../core/ui.js
 const statePanel = document.querySelector("#page-state");
 const content = document.querySelector("#lobby-content");
 
-// Warm avatar gradients, cycled by position.
-const AVATAR_TONES = [
-  ["#c0803f", "#6e3a1c"],
-  ["#3f6b52", "#163225"],
-  ["#a8393d", "#5c1619"],
-  ["#8a6a3c", "#3d2a14"],
-];
-
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -22,42 +14,71 @@ function el(tag, className, text) {
   return node;
 }
 
-function avatar(name, index) {
-  const node = el("span", "avatar", [...name][0]?.toUpperCase() ?? "");
-  const [a, b] = AVATAR_TONES[index % AVATAR_TONES.length];
-  node.style.setProperty("--avatar-a", a);
-  node.style.setProperty("--avatar-b", b);
-  node.setAttribute("aria-hidden", "true");
-  return node;
-}
+function renderCatalogue(stories) {
+  const grid = document.querySelector(".game-grid");
+  const heading = document.querySelector("#recommended-title");
+  const pill = document.querySelector(".lobby-section__head .sample-pill");
+  if (pill) pill.remove();
+  grid.replaceChildren();
 
-// Sample people until matching ships; the section header carries a "Sample" pill.
-function renderSamples() {
-  const people = STRINGS.lobby.samplePeople.map((person, i) => {
-    const item = el("li", "person");
-    item.append(avatar(person.name, i), el("span", "person__name", person.name), el("span", "person__note", person.note));
-    return item;
-  });
-  document.querySelector("#people").replaceChildren(...people);
-
-  const active = STRINGS.lobby.sampleActive.map((person, i) => {
-    const item = el("li", "active-list__item");
-    const who = el("span", "active-list__who");
-    who.append(el("span", "active-list__name", person.name), el("span", "active-list__note", person.note));
-    item.append(avatar(person.name, i + 1), who, el("span", "active-list__dot"));
-    return item;
-  });
-  document.querySelector("#active").replaceChildren(...active);
-}
-
-function wireComingSoon() {
-  for (const button of document.querySelectorAll("[data-soon]")) {
-    button.addEventListener("click", () => toast(t("lobby.soonToast")));
+  if (!stories.length) {
+    const empty = el("li", "game-empty", "No stories are available right now. Please try again later.");
+    empty.setAttribute("role", "status");
+    grid.append(empty);
+    return;
   }
-  document.querySelector("#search").addEventListener("submit", (event) => {
-    event.preventDefault();
-    toast(t("lobby.soonToast"));
+
+  stories.forEach((story, index) => {
+    const card = el("li", `game-card ${["game-card--manor", "game-card--expedition", "game-card--archive"][index % 3]}`);
+    card.dataset.gameCard = "";
+    card.append(el("h3", "game-card__title", story.title));
+    card.append(el("p", "game-card__description", story.description));
+    const tags = el("p", "game-card__tags");
+    (story.genres || []).slice(0, 2).forEach((genre) => tags.append(el("span", "tag", genre)));
+    tags.append(el("span", "tag", `${story.min_players}–${story.max_players} players`));
+    if (story.est_minutes) tags.append(el("span", "tag", `${story.est_minutes} min`));
+    card.append(tags);
+
+    if (story.playable) {
+      card.classList.add("game-card--playable");
+      card.tabIndex = 0;
+      card.setAttribute("role", "link");
+      card.setAttribute("aria-label", `Play ${story.title}`);
+      const status = el("span", "game-status game-status--playable", "Playable now");
+      card.append(status);
+      const openStory = () => { location.href = `/room.html?story=${encodeURIComponent(story.slug)}#find-panel`; };
+      card.addEventListener("click", openStory);
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStory(); }
+      });
+    } else {
+      card.classList.add("game-card--coming-soon");
+      card.append(el("span", "game-status", "Coming soon"));
+      card.setAttribute("aria-label", `${story.title}, coming soon`);
+    }
+    grid.append(card);
   });
+}
+
+function wireLobbyActions() {
+  const searchForm = document.querySelector("#search");
+  const searchInput = searchForm.querySelector("input[type=search]");
+  const filterSearch = () => {
+    const query = searchInput.value.trim().toLocaleLowerCase();
+    const cards = [...document.querySelectorAll("[data-game-card]")];
+    cards.forEach((card) => { card.hidden = Boolean(query) && !card.textContent.toLocaleLowerCase().includes(query); });
+    const visible = cards.some((card) => !card.hidden);
+    let empty = document.querySelector("#search-empty");
+    if (!empty) {
+      empty = el("p", "game-empty", "No matching stories. Try another title or genre.");
+      empty.id = "search-empty";
+      empty.hidden = true;
+      document.querySelector(".game-grid").insertAdjacentElement("afterend", empty);
+    }
+    empty.hidden = !query || visible;
+  };
+  searchForm.addEventListener("submit", (event) => { event.preventDefault(); filterSearch(); });
+  searchInput.addEventListener("input", filterSearch);
   document.querySelector("#notifications").addEventListener("click", () => toast(t("lobby.noNotifications")));
 }
 
@@ -76,14 +97,21 @@ async function load(user) {
     return;
   }
   document.querySelector("#welcome").textContent = t("lobby.welcome", { name: user.display_name });
+  try {
+    const stories = await api("/stories", { auth: false });
+    renderCatalogue(Array.isArray(stories) ? stories : []);
+  } catch (error) {
+    const grid = document.querySelector(".game-grid");
+    grid.replaceChildren(el("li", "game-empty", "We couldn't load the story catalogue. Refresh to try again."));
+    console.error("Story catalogue failed to load", error);
+  }
   setPageState(statePanel, null);
   content.hidden = false;
 }
 
 applyStrings();
 initAtmosphere();
-renderSamples();
-wireComingSoon();
+wireLobbyActions();
 
 const user = requireSession();
 if (user) {
