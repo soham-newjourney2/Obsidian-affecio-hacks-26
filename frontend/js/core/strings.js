@@ -12,7 +12,7 @@ export const STRINGS = Object.freeze({
     retry: "Try again",
     loading: "Loading…",
     sample: "Sample",
-    sampleHint: "Sample content — the live catalogue and matching arrive in the next build.",
+    sampleHint: "These are example stories and people. Open a story to enter the game room.",
   },
   nav: {
     label: "Account",
@@ -221,7 +221,7 @@ export const STRINGS = Object.freeze({
       messages: "Messages",
       profile: "Profile",
     },
-    soonToast: "That opens with the case catalogue in the next build.",
+    soonToast: "",
     searchLabel: "Search",
     searchPlaceholder: "Search for people, games or interests…",
     notifications: "Notifications",
