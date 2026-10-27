@@ -7,6 +7,9 @@ export const TEMP_STRINGS = Object.freeze({
     skip: "Skip to content",
     signOut: "Sign out",
     navLabel: "Main",
+    home: "Home",
+    room: "Room",
+    results: "Results",
     lobby: "Lobby",
     table: "Your table",
     profile: "Profile",
@@ -172,6 +175,10 @@ export const TEMP_STRINGS = Object.freeze({
     },
   },
   results: {
+    nav: "Results",
+    completeEyebrow: "CASE FILE CLOSED",
+    completeTitle: "Story complete!",
+    completeLede: "Here’s how your table brought the story to its ending.",
     loading: "Opening the case file…",
     loadError: "We couldn't load these results.",
     missing: "No case was given. Open results from the end of a case.",
@@ -245,6 +252,11 @@ export const TEMP_STRINGS = Object.freeze({
   },
   connections: {
     title: "Your connections",
+    nav: "Connections",
+    eyebrow: "YOUR STORY CIRCLE",
+    searchLabel: "Search connections",
+    searchPlaceholder: "Search names or profile notes…",
+    noMatches: "No people match this search.",
     lede: "People you both chose to stay in touch with after a case.",
     none: "No connections yet. After a case, you can ask to stay in touch with your table.",
     incoming: "Asked to stay in touch with you",
@@ -268,4 +280,5 @@ export function tt(key, params) {
 export function applyTempStrings(root = document) {
   for (const el of root.querySelectorAll("[data-st]")) el.textContent = tt(el.dataset.st);
   for (const el of root.querySelectorAll("[data-st-label]")) el.setAttribute("aria-label", tt(el.dataset.stLabel));
+  for (const el of root.querySelectorAll("[data-st-placeholder]")) el.setAttribute("placeholder", tt(el.dataset.stPlaceholder));
 }
