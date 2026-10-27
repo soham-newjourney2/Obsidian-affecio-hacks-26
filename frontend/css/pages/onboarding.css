@@ -139,8 +139,48 @@
 
 .onboarding {
   width: min(58rem, 100% - 2 * var(--gutter));
+  min-width: 0;
   margin-inline: auto;
   padding-block: 0.5rem 4rem;
+}
+
+/* Keep nested grid/flex items from forcing their parent wider than the viewport. */
+.onboarding__form,
+.onboarding__form > *,
+.onboarding .step,
+.onboarding .step__intro,
+.onboarding__sections,
+.field-group,
+.field-group__legend,
+.choices,
+.choice,
+.choice span,
+.chips,
+.chip,
+.chip span,
+.review,
+.review__row,
+.review__detail {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.field-group__title,
+.field-group .hint,
+.choice span,
+.chip span,
+.review__detail,
+.review__quote,
+.field-group .field-error {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.onboarding .input,
+.onboarding textarea.input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .progress {
@@ -501,4 +541,3 @@
     grid-template-columns: 1fr;
   }
 }
-
