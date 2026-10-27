@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     demo_mode: bool = False
     admin_emails: str = ""  # comma-separated; these accounts can read reports
 
+    # P17: optional Jitsi as a Service integration; all signing stays server-side.
+    enable_voice_video: bool = False
+    jaas_app_id: str = ""
+    jaas_key_id: str = ""
+    jaas_private_key_path: Path | None = None
+
     @property
     def admins(self) -> set[str]:
         return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
