@@ -27,19 +27,13 @@
         <span class="brand__name" data-st="common.brand"></span>
       </a>
       <nav class="sidebar__nav" data-st-label="common.navLabel">
-        <a class="sidebar__link" href="/lobby.html">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg>
-          <span data-st="common.lobby"></span>
-        </a>
-        <a class="sidebar__link" href="/room.html" aria-current="page">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
-          <span data-st="common.table"></span>
-        </a>
-        <a class="sidebar__link" href="/onboarding.html">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
-          <span data-st="common.profile"></span>
-        </a>
+        <a class="sidebar__link" href="/lobby.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg><span data-st="common.home"></span></a>
+        <a class="sidebar__link" href="/connections.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg><span data-st="connections.nav"></span></a>
+        <a class="sidebar__link" href="/room.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-book"></use></svg><span data-st="common.room"></span></a>
+        
+        <a class="sidebar__link" href="/onboarding.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg><span data-st="common.profile"></span></a>
       </nav>
+      <div class="sidebar__art" aria-hidden="true"></div>
       <div class="sidebar__footer">
         <button class="sidebar__link" type="button" id="sign-out">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-logout"></use></svg>
@@ -106,6 +100,12 @@
 
         <!-- At a table: waiting room, then the case itself -->
         <section id="table" class="room-table" data-mode="waiting" aria-labelledby="table-title" hidden>
+          <header class="room-heading" id="room-heading">
+            <a class="room-back icon-btn" href="/lobby.html" aria-label="Back to home"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow-left"></use></svg></a>
+            <span class="room-heading__book" aria-hidden="true"><svg class="icon"><use href="/assets/icons.svg#i-book"></use></svg></span>
+            <div class="room-heading__copy"><h1 id="room-heading-title" class="room-heading__title"></h1><p class="room-heading__subtitle">A collaborative story game</p></div>
+          </header>
+
           <!-- Mobile tabs (game mode) -->
           <div class="game-tabs" role="tablist" data-st-label="game.tabs.label">
             <button class="game-tabs__tab" type="button" role="tab" id="tab-story" aria-controls="game-story" aria-selected="true" data-st="game.tabs.story"></button>
@@ -155,6 +155,7 @@
 
           <!-- Game: the story -->
           <section id="game-story" class="panel game-story" role="tabpanel" aria-labelledby="chapter-title">
+            <div class="game-story__cover" aria-hidden="true"></div>
             <div class="game-progress">
               <p class="eyebrow" id="chapter-label"></p>
               <ol class="game-progress__dots" id="chapter-dots" aria-hidden="true"></ol>
@@ -205,6 +206,22 @@
             <p id="board-empty" class="game-empty" data-st="game.board.empty"></p>
           </section>
 
+          <!-- Optional voice/video. Text chat remains available regardless of media status. -->
+          <section id="media-panel" class="panel room-media" aria-labelledby="media-title">
+            <div class="room-media__heading">
+              <div>
+                <h2 id="media-title" class="room-card__subtitle">Voice &amp; video</h2>
+                <p class="hint">Joining is optional. Your text chat will keep working.</p>
+              </div>
+              <div class="room-media__actions">
+                <button class="btn btn--primary" type="button" id="media-join">Join voice/video</button>
+                <button class="btn btn--ghost btn--sm" type="button" id="media-leave" hidden>Leave call</button>
+              </div>
+            </div>
+            <p id="media-status" class="hint" role="status" aria-live="polite">Voice/video is optional.</p>
+            <div id="media-frame" class="room-media__frame" aria-label="Voice and video call" hidden></div>
+          </section>
+
           <!-- Chat (both modes) -->
           <section id="chat-panel" class="panel room-chat" role="tabpanel" aria-labelledby="chat-title">
             <h2 id="chat-title" class="room-card__subtitle" data-st="room.chat.title"></h2>
@@ -236,3 +253,4 @@
   </div>
 </body>
 </html>
+
