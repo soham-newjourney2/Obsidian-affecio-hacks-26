@@ -17,11 +17,19 @@ import {
 const $ = (s) => document.querySelector(s);
 const statePanel = $("#page-state");
 const sessionId = new URLSearchParams(location.search).get("session");
+const resultsNav = document.querySelector("#results-nav-link");
+if (sessionId && resultsNav) resultsNav.href = `/results.html?session=${encodeURIComponent(sessionId)}`;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text != null) node.textContent = text;
+  return node;
+}
+
+function avatar(name) {
+  const node = el("span", "storybook-avatar", [...(name || "?")][0]?.toUpperCase() ?? "?");
+  node.setAttribute("aria-hidden", "true");
   return node;
 }
 
@@ -63,7 +71,7 @@ function renderTeam(data) {
   $("#players").replaceChildren(
     ...team.players.map((p) => {
       const item = el("li", "results-player");
-      item.append(el("span", "results-player__name", p.display_name), el("span", "results-player__role", p.roles.join(", ")));
+      item.append(avatar(p.display_name), el("span", "results-player__name", p.display_name), el("span", "results-player__role", p.roles.join(", ")));
       return item;
     }),
   );
@@ -114,7 +122,7 @@ function renderConnect(data) {
   $("#connect-list").replaceChildren(
     ...others.map((p) => {
       const item = el("li", "results-connect__row");
-      item.append(el("span", "results-player__name", p.display_name));
+      item.append(avatar(p.display_name), el("span", "results-player__name", p.display_name));
       const ask = el("button", "btn btn--primary btn--sm", tt("results.connect.ask"));
       ask.type = "button";
       ask.addEventListener("click", async () => {
@@ -245,3 +253,4 @@ if (user) {
   $("#user-initial").textContent = [...user.display_name][0]?.toUpperCase() ?? "";
   load();
 }
+
