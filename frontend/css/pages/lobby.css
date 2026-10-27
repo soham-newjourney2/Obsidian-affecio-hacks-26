@@ -397,3 +397,13 @@
     flex: 1 1 100%;
   }
 }
+
+
+/* Live catalogue states */
+.game-card--playable { cursor: pointer; }
+.game-card--coming-soon { cursor: default; opacity: .88; }
+.game-card__description { color: #fff4dc; max-width: 42ch; font-size: .92rem; line-height: 1.4; margin: .45rem 0; }
+.game-status { display: inline-flex; align-self: flex-start; margin-top: .5rem; padding: .22rem .55rem; border: 1px solid rgb(255 232 183 / .65); border-radius: 999px; color: #fff0c9; background: rgb(16 37 27 / .72); font-size: .72rem; font-weight: 600; }
+.game-status--playable { background: #f3dfad; color: #183323; border-color: #d2a85a; }
+.game-empty { list-style: none; padding: 1rem; color: var(--text-muted, #645b4d); }
+.game-card[hidden] { display: none !important; }
