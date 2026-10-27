@@ -1,4 +1,8 @@
+import time
 import uuid
+from pathlib import Path
+
+import jwt
 
 from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
@@ -94,6 +98,61 @@ class CompanionsIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     count: int = Field(ge=1, le=3)
+
+
+@router.post("/{room_id}/media-token")
+async def media_token(
+    request: Request, room_id: uuid.UUID, user: CurrentUser, session: SessionDep
+) -> dict[str, str]:
+    """Issue a short-lived, room-scoped JaaS token to a current room member."""
+    settings = request.app.state.settings
+    if not settings.enable_voice_video:
+        raise AppError(404, "MEDIA_DISABLED", "Voice/video is currently unavailable.")
+    if not settings.jaas_app_id or not settings.jaas_key_id or not settings.jaas_private_key_path:
+        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.")
+
+    room = await svc.get_room_for(session, user, room_id)
+    member = await svc.member_of(session, room.id, user.id)
+    if member is None or member.status in {"left", "removed"}:
+        raise AppError(403, "NOT_A_MEMBER", "You are not a member of this room.")
+
+    try:
+        private_key = Path(settings.jaas_private_key_path).read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.") from None
+
+    now = int(time.time())
+    # JaaS tokens use RS256 and a room claim; never return the key or expose it to the browser.
+    claims = {
+        "aud": "jitsi",
+        "iss": "chat",
+        "sub": settings.jaas_app_id,
+        "room": str(room.id),
+        "iat": now,
+        "nbf": now - 5,
+        "exp": now + 60 * 60,
+        "context": {
+            "user": {
+                "id": str(user.id),
+                "name": user.display_name,
+                "moderator": bool(room.host_user_id == user.id),
+            },
+            "features": {
+                "recording": False,
+                "livestreaming": False,
+                "transcription": False,
+                "outbound-call": False,
+                "sip-outbound-call": False,
+            },
+        },
+    }
+    try:
+        token = jwt.encode(
+            claims, private_key, algorithm="RS256", headers={"kid": settings.jaas_key_id}
+        )
+    except (ValueError, TypeError):
+        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.") from None
+    return {"token": token, "room": str(room.id), "app_id": settings.jaas_app_id, "domain": "8x8.vc"}
 
 
 @router.post("/{room_id}/companions")
