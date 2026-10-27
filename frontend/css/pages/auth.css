@@ -130,7 +130,31 @@
   display: grid;
   gap: 1.4rem;
   width: 100%;
+  min-width: 0;
   padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+/* Grid items default to min-width:auto; let form content shrink inside the panel. */
+.auth-panel > *,
+.auth-panel .form,
+.auth-panel .field,
+.auth-panel .field__control,
+.auth-panel .auth-intro {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.auth-panel .field__control > .input {
+  width: 100%;
+  min-width: 0;
+}
+
+.auth-panel .field-error,
+.auth-panel .form-error,
+.auth-panel .hint,
+.auth-panel .auth-lede {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .auth-panel .tabs {
