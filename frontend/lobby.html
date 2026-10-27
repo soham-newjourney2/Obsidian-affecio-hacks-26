@@ -32,22 +32,22 @@
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg>
           <span data-s="lobby.nav.home"></span>
         </a>
-        <button class="sidebar__link" type="button" data-soon>
+        <a class="sidebar__link" href="/room.html#find-panel">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-compass"></use></svg>
           <span data-s="lobby.nav.find"></span>
-        </button>
-        <button class="sidebar__link" type="button" data-soon>
+        </a>
+        <a class="sidebar__link" href="/room.html">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-layers"></use></svg>
           <span data-s="lobby.nav.games"></span>
-        </button>
-        <button class="sidebar__link" type="button" data-soon>
+        </a>
+        <a class="sidebar__link" href="/connections.html">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
           <span data-s="lobby.nav.community"></span>
-        </button>
-        <button class="sidebar__link" type="button" data-soon>
+        </a>
+        <a class="sidebar__link" href="/connections.html">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-message"></use></svg>
           <span data-s="lobby.nav.messages"></span>
-        </button>
+        </a>
         <a class="sidebar__link" href="/onboarding.html">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
           <span data-s="lobby.nav.profile"></span>
@@ -87,10 +87,10 @@
             <h1 id="lobby-hero-title" class="lobby-hero__title" data-s="lobby.hero.title"></h1>
             <p class="lobby-hero__body" data-s="lobby.hero.body"></p>
             <div class="lobby-hero__actions">
-              <button class="btn btn--primary" type="button" data-soon>
+              <a class="btn btn--primary" href="/room.html#find-panel">
                 <span data-s="lobby.hero.cta"></span>
                 <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-arrow"></use></svg>
-              </button>
+              </a>
               <a class="btn btn--glass" href="/onboarding.html" data-s="lobby.editProfile"></a>
             </div>
           </section>
@@ -98,41 +98,11 @@
           <section class="lobby-section" aria-labelledby="recommended-title">
             <header class="lobby-section__head">
               <h2 id="recommended-title" class="lobby-section__title" data-s="lobby.recommended"></h2>
-              <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
+
             </header>
-            <ul class="game-grid">
-              <li class="game-card game-card--manor">
-                <h3 class="game-card__title" data-s="stories.manor.title"></h3>
-                <p class="game-card__tags"><span class="tag" data-s="stories.manor.genre"></span><span class="tag" data-s="stories.manor.players"></span><span class="tag" data-s="stories.manor.level"></span></p>
-              </li>
-              <li class="game-card game-card--expedition">
-                <h3 class="game-card__title" data-s="stories.expedition.title"></h3>
-                <p class="game-card__tags"><span class="tag" data-s="stories.expedition.genre"></span><span class="tag" data-s="stories.expedition.players"></span><span class="tag" data-s="stories.expedition.level"></span></p>
-              </li>
-              <li class="game-card game-card--archive">
-                <h3 class="game-card__title" data-s="stories.archive.title"></h3>
-                <p class="game-card__tags"><span class="tag" data-s="stories.archive.genre"></span><span class="tag" data-s="stories.archive.players"></span><span class="tag" data-s="stories.archive.level"></span></p>
-              </li>
-            </ul>
+            <ul class="game-grid" aria-live="polite" aria-label="Available stories"></ul>
           </section>
 
-          <div class="lobby-row">
-            <section class="lobby-section" aria-labelledby="people-title">
-              <header class="lobby-section__head">
-                <h2 id="people-title" class="lobby-section__title" data-s="lobby.people"></h2>
-                <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
-              </header>
-              <ul class="people" id="people"></ul>
-            </section>
-
-            <section class="lobby-section active-card" aria-labelledby="active-title">
-              <header class="lobby-section__head">
-                <h2 id="active-title" class="lobby-section__title" data-s="lobby.active"></h2>
-                <span class="sample-pill" data-s="common.sample" data-s-title="common.sampleHint"></span>
-              </header>
-              <ul class="active-list" id="active"></ul>
-            </section>
-          </div>
         </div>
       </main>
     </div>
