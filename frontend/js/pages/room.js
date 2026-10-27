@@ -20,6 +20,8 @@ let socket = null;
 let view = null; // latest room view (personal)
 let you = null; // my member id
 let online = new Set();
+let mediaApi = null;
+let mediaScriptPromise = null;
 const pending = new Map(); // client_message_id -> body, until the server echoes it
 const sentFrames = new Map(); // frame id -> client_message_id, to retry rate-limited sends
 const RETRY_MS = 1200;
@@ -105,6 +107,9 @@ function showStatus(status) {
 
 function memberRow(member) {
   const row = el("li", "room-member");
+  const avatar = el("span", `storybook-avatar${member.is_you ? " storybook-avatar--you" : ""}`, [...(member.display_name || "?")][0]?.toUpperCase() ?? "?");
+  avatar.setAttribute("aria-hidden", "true");
+  row.append(avatar);
   const ready = member.status === "ready" || member.status === "playing";
   if (ready) row.classList.add("is-ready");
   const here = online.has(member.member_id);
@@ -142,6 +147,7 @@ function renderRoom() {
   if (!view) return;
   const waiting = view.status === "waiting";
   $("#table-title").textContent = view.story.title;
+  $("#room-heading-title").textContent = view.story.title;
   $("#invite").hidden = !waiting;
   $("#invite-known").hidden = !current?.code;
   $("#invite-unknown").hidden = Boolean(current?.code);
@@ -151,16 +157,17 @@ function renderRoom() {
   $("#members").replaceChildren(...view.members.map(memberRow));
   $("#table-hint").textContent = hintFor(view);
 
-  $("#table-actions").hidden = !waiting;
+  $("#table-actions").hidden = false;
   const me = view.members.find((m) => m.is_you);
   const ready = me?.status === "ready";
   const toggle = $("#ready-toggle");
   toggle.setAttribute("aria-pressed", String(ready));
   toggle.textContent = tt(ready ? "room.actions.notReady" : "room.actions.ready");
   toggle.className = `btn ${ready ? "btn--ghost" : "btn--primary"}`;
+  toggle.hidden = !waiting;
   const start = $("#start");
-  $("#add-companions").hidden = !view.companions_allowed;
-  start.hidden = !view.you_are_host;
+  $("#add-companions").hidden = !waiting || !view.companions_allowed;
+  start.hidden = !waiting || !view.you_are_host;
   start.disabled = !view.can_start;
   game.setNames(view.members);
   if (view.session_id) $("#results-link").href = `/results.html?session=${encodeURIComponent(view.session_id)}`;
@@ -282,6 +289,7 @@ function enterTable(room) {
 }
 
 function leaveLocally(message) {
+  leaveMedia();
   socket?.close();
   socket = null;
   view = null;
@@ -307,11 +315,19 @@ async function showGate() {
       option.value = s.slug;
       return option;
     }));
+    const requestedStory = new URLSearchParams(location.search).get("story");
+    if (requestedStory && stories.some((story) => story.slug === requestedStory)) {
+      select.value = requestedStory;
+      select.focus({ preventScroll: true });
+    }
     const create = $("#create-form [type=submit]");
     create.disabled = stories.length === 0;
     if (!stories.length) setFieldError(select, tt("room.gate.noStories"));
   } catch (error) {
     setFieldError(select, error instanceof ApiError ? error.message : tt("room.errors.generic"));
+  }
+  if (location.hash === "#find-panel") {
+    requestAnimationFrame(() => document.querySelector("#find-panel")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 }
 
@@ -412,7 +428,71 @@ function wireFind() {
   });
 }
 
+function loadJaasScript() {
+  if (window.JitsiMeetExternalAPI) return Promise.resolve();
+  if (mediaScriptPromise) return mediaScriptPromise;
+  mediaScriptPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://8x8.vc/external_api.js";
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("The voice/video service could not be loaded."));
+    document.head.append(script);
+  });
+  return mediaScriptPromise;
+}
+
+async function joinMedia() {
+  const button = $("#media-join");
+  const status = $("#media-status");
+  if (!current?.id || mediaApi) return;
+  setBusy(button, true);
+  status.textContent = "Connecting to voice/video…";
+  try {
+    const credentials = await api(`/rooms/${encodeURIComponent(current.id)}/media-token`, { method: "POST" });
+    await loadJaasScript();
+    const frame = $("#media-frame");
+    frame.replaceChildren();
+    mediaApi = new window.JitsiMeetExternalAPI(credentials.domain, {
+      roomName: `${credentials.app_id}/${credentials.room}`,
+      parentNode: frame,
+      jwt: credentials.token,
+      width: "100%",
+      height: 420,
+      configOverwrite: { prejoinPageEnabled: false, startWithAudioMuted: true, startWithVideoMuted: true },
+      interfaceConfigOverwrite: { DISABLE_JOIN_LEAVE_NOTIFICATIONS: true },
+    });
+    frame.hidden = false;
+    $("#media-leave").hidden = false;
+    button.hidden = true;
+    status.textContent = "You joined the optional call. Text chat remains available.";
+    mediaApi.addEventListener("readyToClose", leaveMedia);
+  } catch (error) {
+    const disabled = error instanceof ApiError && (error.status === 404 || error.status === 503);
+    status.textContent = disabled
+      ? "Voice/video is not enabled right now. Please use your own call app; text chat is still available."
+      : "Could not join voice/video. Please try again or use your own call app; text chat is still available.";
+    if (!disabled) toast(status.textContent, { kind: "error" });
+  } finally {
+    setBusy(button, false);
+  }
+}
+
+function leaveMedia() {
+  if (mediaApi) {
+    try { mediaApi.dispose(); } catch { /* already disposed by the provider */ }
+  }
+  mediaApi = null;
+  $("#media-frame").replaceChildren();
+  $("#media-frame").hidden = true;
+  $("#media-leave").hidden = true;
+  $("#media-join").hidden = false;
+  $("#media-status").textContent = "You left the call. Text chat remains available.";
+}
+
 function wireTable() {
+  $("#media-join").addEventListener("click", joinMedia);
+  $("#media-leave").addEventListener("click", leaveMedia);
   $("#copy-code").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(current.code);
