@@ -27,19 +27,13 @@
         <span class="brand__name" data-st="common.brand"></span>
       </a>
       <nav class="sidebar__nav" data-st-label="common.navLabel">
-        <a class="sidebar__link" href="/lobby.html">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg>
-          <span data-st="common.lobby"></span>
-        </a>
-        <a class="sidebar__link" href="/room.html">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg>
-          <span data-st="common.table"></span>
-        </a>
-        <a class="sidebar__link" href="/onboarding.html">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg>
-          <span data-st="common.profile"></span>
-        </a>
+        <a class="sidebar__link" href="/lobby.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-home"></use></svg><span data-st="common.home"></span></a>
+        <a class="sidebar__link" href="/connections.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-users"></use></svg><span data-st="connections.nav"></span></a>
+        <a class="sidebar__link" href="/room.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-book"></use></svg><span data-st="common.room"></span></a>
+        <a class="sidebar__link" id="results-nav-link" href="/results.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-sparkle"></use></svg><span data-st="results.nav"></span></a>
+        <a class="sidebar__link" href="/onboarding.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-user"></use></svg><span data-st="common.profile"></span></a>
       </nav>
+      <div class="sidebar__art" aria-hidden="true"></div>
       <div class="sidebar__footer">
         <button class="sidebar__link" type="button" id="sign-out">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-logout"></use></svg>
@@ -48,7 +42,7 @@
       </div>
     </aside>
 
-    <div class="app-main">
+    <div class="app-main results-main">
       <header class="app-topbar">
         <a class="user-chip" href="/onboarding.html">
           <span class="avatar" id="user-initial" aria-hidden="true"></span>
@@ -65,7 +59,12 @@
           <a class="btn btn--primary" id="back-to-room" href="/room.html" data-st="results.active.back"></a>
         </section>
 
-        <div id="results" class="results" hidden>
+        <div id="results" class="results results-content" hidden>
+          <header class="results-heading">
+            <p class="eyebrow" data-st="results.completeEyebrow"></p>
+            <h1 class="results-heading__title" data-st="results.completeTitle"></h1>
+            <p class="results-heading__lede" data-st="results.completeLede"></p>
+          </header>
           <!-- The ending reveal -->
           <section class="panel results-ending" aria-labelledby="ending-title">
             <p class="eyebrow" id="results-story"></p>
@@ -74,13 +73,17 @@
             <p id="ending-text" class="results-ending__text"></p>
             <h2 class="results-card__subtitle" data-st="results.solution"></h2>
             <p id="solution" class="results-ending__solution"></p>
+            <dl class="results-stats results-stats--hero" id="team-stats"></dl>
+            <nav class="results-actions" data-st-label="results.actionsLabel">
+              <a class="btn btn--primary" href="/room.html" data-st="results.playAgain"></a>
+              <a class="btn btn--ghost" href="/lobby.html" data-st="common.lobby"></a>
+            </nav>
           </section>
 
           <!-- What the table did together -->
           <section class="panel results-card" aria-labelledby="team-title">
             <h2 id="team-title" class="results-card__subtitle" data-st="results.team.title"></h2>
             <p id="recap" class="results-recap"></p>
-            <dl class="results-stats" id="team-stats"></dl>
             <h3 class="results-card__minor" data-st="results.team.path"></h3>
             <ol id="chapters" class="results-chapters"></ol>
             <h3 class="results-card__minor" data-st="results.team.players"></h3>
@@ -124,10 +127,6 @@
             <p id="pulse-thanks" class="results-thanks" role="status" data-st="results.pulse.thanks" hidden></p>
           </section>
 
-          <nav class="results-actions" data-st-label="results.actionsLabel">
-            <a class="btn btn--primary" href="/room.html" data-st="results.playAgain"></a>
-            <a class="btn btn--ghost" href="/lobby.html" data-st="common.lobby"></a>
-          </nav>
         </div>
       </main>
     </div>
