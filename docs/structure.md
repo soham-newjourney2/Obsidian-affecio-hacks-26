@@ -9,14 +9,16 @@ echo/
 ├── .gitignore
 ├── .python-version         # 3.12
 ├── LICENSE
-├── README.md               # short intro (full version in P20)
+├── README.md               # what/why/audience, features, screenshots, setup, flags, rights, tests, team
 ├── alembic.ini             # migrations config (URL comes from DATABASE_URL)
 ├── scripts/
-│   └── seed.py             # validate story files and upsert them (idempotent)
-├── pyproject.toml          # deps, pytest and ruff config (uv-managed)
+│   ├── seed.py             # validate story files and upsert them (idempotent)
+│   └── demo.py             # 3 labelled demo accounts + a waiting room (refuses APP_ENV=production)
+├── pyproject.toml          # deps (+ optional `postgres` group: asyncpg), pytest and ruff config (uv-managed)
 ├── uv.lock
 ├── docs/
-│   └── structure.md        # this file
+│   ├── structure.md        # this file
+│   └── screenshots/        # real screens used by README.md
 ├── backend/
 │   ├── app/
 │   │   ├── main.py         # app factory: settings, engine, limiters, middleware, routers, static mount
@@ -33,9 +35,9 @@ echo/
 │   └── tests/
 │       ├── conftest.py     # runtime secret, per-test migrated SQLite, TestClient
 │       ├── wsutil.py       # WebSocket test helpers
-│       ├── unit/           # security, rate limiter, settings, schemas, story validator, engine
-│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), results, migrations
-│       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
+│       ├── unit/           # security, rate limiter, settings, schemas, story validator, engine, AI chain + failover, matching, media claims
+│       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), results, theories, companions, matchmaking, safety, media, migrations; test_postgres (only with TEST_POSTGRES_URL)
+│       └── e2e/            # Playwright against a live, seeded uvicorn in demo mode (marker: e2e): landing, onboarding, catalogue, table, story (3 humans; 1 human + companions), results
 └── frontend/               # served at "/"
     ├── index.html          # landing: hero, features, how it works, story shelf (live catalogue), CTA
     ├── auth.html           # sign in / create account (tabs)
@@ -69,6 +71,7 @@ uv run python scripts/seed.py
 uv run uvicorn backend.app.main:app --reload
 uv run pytest -q            # unit + integration
 uv run pytest -q -m e2e     # browser tests (needs network for CDN fonts/GSAP)
+uv run python scripts/demo.py   # optional: demo accounts + a waiting room
 uv run ruff check .
 ```
 
@@ -227,3 +230,13 @@ uv run ruff check .
   livestreaming, transcription and dial-in/out are `"false"`. The private key never leaves the server.
 - room.html loads `https://8x8.vc/external_api.js` only after "Join voice/video"; mic and camera start
   muted. Text chat never depends on the call.
+
+## Database portability
+
+- SQLite (WAL, foreign keys, busy timeout) by default. `DATABASE_URL=postgres://…` or
+  `postgresql://…` is rewritten to the async `postgresql+asyncpg://` driver
+  (`uv sync --group postgres`).
+- Migrations and models use portable types only (JSON, Uuid, timezone-aware UTC datetimes, plain
+  CHECK constraints); row locks come from `UPDATE … RETURNING`, which locks the row on Postgres.
+- `test_postgres.py` runs migrations, seeding, auth, room capacity under the lock and a game start
+  against `TEST_POSTGRES_URL` (a throwaway database; its schema is reset). Skipped otherwise.

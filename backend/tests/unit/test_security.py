@@ -88,3 +88,17 @@ def test_settings_reject_placeholder_in_production() -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, app_env="production", secret_key=PLACEHOLDER_SECRET)
     assert Settings(_env_file=None, app_env="development", secret_key=PLACEHOLDER_SECRET)
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["postgres://u:p@db:5432/echo", "postgresql://u:p@db:5432/echo"],
+)
+def test_settings_use_asyncpg_for_postgres(url: str) -> None:
+    s = Settings(_env_file=None, secret_key=PLACEHOLDER_SECRET, database_url=url)
+    assert s.database_url == "postgresql+asyncpg://u:p@db:5432/echo"
+    sqlite = "sqlite+aiosqlite:///./echo.db"
+    assert (
+        Settings(_env_file=None, secret_key=PLACEHOLDER_SECRET, database_url=sqlite).database_url
+        == sqlite
+    )

@@ -224,7 +224,7 @@ export const STRINGS = Object.freeze({
       profile: "Profile",
     },
     searchLabel: "Search",
-    searchPlaceholder: "Search for people, games or interests…",
+    searchPlaceholder: "Search cases by title or genre…",
     notifications: "Notifications",
     noNotifications: "No new notifications.",
     hero: {

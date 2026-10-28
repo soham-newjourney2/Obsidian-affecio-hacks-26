@@ -59,6 +59,3 @@ class TokenBucket:
             return False
         self._state[key] = (tokens - 1, now)
         return True
-
-    def forget(self, key: str) -> None:
-        self._state.pop(key, None)

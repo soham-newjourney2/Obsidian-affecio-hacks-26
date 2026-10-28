@@ -112,7 +112,8 @@ function memberRow(member) {
   row.append(avatar);
   const ready = member.status === "ready" || member.status === "playing";
   if (ready) row.classList.add("is-ready");
-  const here = online.has(member.member_id);
+  // Companions have no socket; they are always at the table.
+  const here = member.is_companion || online.has(member.member_id);
   row.classList.toggle("is-away", !here);
   row.append(el("span", "room-member__name", member.display_name));
   if (member.is_you) row.append(el("span", "room-badge", tt("room.members.you")));
