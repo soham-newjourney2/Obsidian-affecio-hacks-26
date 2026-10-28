@@ -1,4 +1,4 @@
-// Every user-facing string lives here (D14). Look up with t("dotted.key").
+// Every user-facing string lives here. Look up with t("dotted.key").
 
 export const STRINGS = Object.freeze({
   common: {
@@ -6,15 +6,11 @@ export const STRINGS = Object.freeze({
     tagline: "Stories bring people closer.",
     skip: "Skip to content",
     home: "ECHO home",
-    close: "Close",
     ok: "OK",
-    cancel: "Cancel",
     retry: "Try again",
     loading: "Loading…",
   },
   nav: {
-    label: "Account",
-    profile: "Edit profile",
     signOut: "Sign out",
     lobby: "Lobby",
   },
@@ -147,11 +143,9 @@ export const STRINGS = Object.freeze({
     },
   },
   onboarding: {
-    eyebrow: "Your case file",
     title: "Your case file",
     stepOf: "Step {step} of {total}",
     stepsLabel: "Case file steps",
-    progressLabel: "Case file progress",
     loading: "Opening your case file…",
     loadError: "We couldn't open your case file.",
     counter: "{count} of {max} chosen",
@@ -209,10 +203,8 @@ export const STRINGS = Object.freeze({
     summaryCounter: "{count} / {max}",
     submitNew: "Save and continue",
     submitEdit: "Save changes",
-    saved: "Case file saved.",
   },
   lobby: {
-    eyebrow: "The lobby",
     welcome: "Welcome, {name}.",
     navLabel: "Lobby navigation",
     nav: {

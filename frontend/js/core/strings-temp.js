@@ -1,4 +1,4 @@
-// Strings for the room, results and connections pages (D14: no UI text in page code).
+// Strings for the room, results and connections pages (no UI text in page code).
 // Look up with tt("room.key") in JS and data-st="room.key" in HTML.
 
 export const TEMP_STRINGS = Object.freeze({
@@ -9,15 +9,12 @@ export const TEMP_STRINGS = Object.freeze({
     navLabel: "Main",
     home: "Home",
     room: "Room",
-    results: "Results",
     lobby: "Lobby",
-    table: "Your table",
     profile: "Profile",
   },
   room: {
     title: "Your table",
     loading: "Opening your table…",
-    loadError: "We couldn't open this table.",
     media: {
       title: "Voice & video",
       hint: "Joining is optional. Your text chat keeps working either way.",
@@ -128,7 +125,6 @@ export const TEMP_STRINGS = Object.freeze({
     clues: {
       title: "Your clues",
       role: "You are {role}",
-      roleFocus: "{focus}",
       empty: "No clues yet. New ones appear as the story moves.",
       private: "Private",
       shared: "Shared",
@@ -149,8 +145,6 @@ export const TEMP_STRINGS = Object.freeze({
       deadline: "Deciding in {seconds}s unless everyone votes sooner.",
       votes: "{count} vote(s)",
       yourVote: "Your vote",
-      vote: "Vote",
-      change: "Change vote",
       resolved: "The table chose: {label}",
       tie: "It's a tie. Here's a nudge, then vote again.",
     },

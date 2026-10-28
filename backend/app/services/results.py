@@ -1,5 +1,5 @@
 """Results and reflection, built only from recorded events (game_events + votes), never from
-inferences about people (§8). Badges are private and never ranked. Plus the 2-question pulse."""
+inferences about people. Badges are private and never ranked. Plus the 2-question pulse."""
 
 import uuid
 from dataclasses import dataclass, field
@@ -201,7 +201,7 @@ async def build_summary(session: AsyncSession, game: GameSession, member: RoomMe
 
 
 def _recap(title: str, team: dict[str, Any], ending: dict | None) -> str:
-    """A plain, factual recap (P11 may rephrase it with AI; the facts stay the same)."""
+    """A plain, factual recap (the AI may rephrase it; the facts stay the same)."""
     people = len(team["players"])
     outcome = ending["title"] if ending else "the case was closed early"
     return (

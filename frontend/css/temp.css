@@ -961,7 +961,7 @@
   }
 }
 
-/* Theories (P13) */
+/* Theories */
 .game-theory {
   display: grid;
   gap: var(--space-2);
@@ -986,7 +986,7 @@
   font-size: var(--fs-sm);
 }
 
-/* Find a group (P15) */
+/* Find a group */
 .room-find {
   display: flex;
   align-items: center;
@@ -1010,7 +1010,7 @@
   .room-find__pulse { animation: none; }
 }
 
-/* Connections + safety (P16) */
+/* Connections + safety */
 .results-connect {
   display: grid;
   gap: var(--space-2);
@@ -1394,9 +1394,6 @@
 
 .page-room .room-table[data-mode="game"] {
   grid-template-columns: minmax(13rem, 0.72fr) minmax(21rem, 1.38fr) minmax(16rem, 0.8fr);
-  grid-template-areas:
-    "clues story players"
-    "board story chat";
   align-items: start;
   gap: 0.85rem;
 }
@@ -1726,10 +1723,6 @@
 @media (max-width: 1100px) {
   .page-room .room-table[data-mode="game"] {
     grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.72fr);
-    grid-template-areas:
-      "story players"
-      "story clues"
-      "board chat";
   }
 
   .page-room .room-table[data-mode="game"] .room-chat {
@@ -1740,11 +1733,6 @@
 @media (max-width: 900px) {
   .page-room .room-table[data-mode="game"] {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "heading" "tabs" "panel";
-  }
-
-  .page-room .room-table[data-mode="game"] .room-heading {
-    grid-area: heading;
   }
 
   .page-room .room-table[data-mode="game"] #waiting,
@@ -1901,7 +1889,7 @@
 }
 
 
-/* P17 optional JaaS panel; chat remains independently usable. */
+/* Optional voice/video panel; chat remains independently usable. */
 .room-media { display: grid; gap: var(--space-3); min-width: 0; }
 .room-media__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .room-media__actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
@@ -2086,14 +2074,10 @@
    table controls rather than leaving a huge blank right-hand column. */
 .page-room .room-table[data-mode="waiting"] {
   grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-  grid-template-areas:
-    "side media"
-    "side chat";
   align-items: start;
 }
 
 .page-room .room-table[data-mode="waiting"] .room-table__side { grid-area: side; }
-.page-room .room-table[data-mode="waiting"] .room-media { grid-area: media; }
 .page-room .room-table[data-mode="waiting"] .room-chat { grid-area: chat; min-width: 0; }
 .page-room .room-media,
 .page-room .room-media__heading,
@@ -2109,7 +2093,6 @@
   .page-onboarding .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .page-room .room-table[data-mode="waiting"] {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "side" "media" "chat";
   }
 }
 

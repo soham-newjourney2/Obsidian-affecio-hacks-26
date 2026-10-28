@@ -1,4 +1,4 @@
-"""P17: the JaaS payload is room-scoped, short-lived and never records."""
+"""The JaaS payload is room-scoped, short-lived and never records."""
 
 import uuid
 

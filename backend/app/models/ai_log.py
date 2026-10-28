@@ -10,7 +10,7 @@ AI_STATUSES = ("success", "timeout", "invalid", "error", "fallback")
 
 
 class AILog(Base):
-    """One row per AI attempt. Never stores prompt or response bodies (§6, §9)."""
+    """One row per AI attempt. Never stores prompt or response bodies."""
 
     __tablename__ = "ai_logs"
     __table_args__ = (CheckConstraint(f"status IN {AI_STATUSES}", name="status"),)

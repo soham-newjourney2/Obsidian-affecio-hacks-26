@@ -10,7 +10,7 @@ REPORT_CATEGORIES = ("harassment", "hate", "spam", "safety", "other")
 
 
 class ConnectionRequest(Base):
-    """Mutual opt-in between human co-players of a finished case (P16)."""
+    """Mutual opt-in between human co-players of a finished case."""
 
     __tablename__ = "connection_requests"
     __table_args__ = (

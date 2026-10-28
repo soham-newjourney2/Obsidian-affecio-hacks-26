@@ -264,107 +264,6 @@
   gap: 0.35rem;
 }
 
-/* People + active row */
-.lobby-row {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
-  gap: 1.5rem;
-  align-items: start;
-}
-
-.people {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: 1rem;
-}
-
-.person {
-  display: grid;
-  justify-items: center;
-  gap: 0.3rem;
-  padding: 1.25rem 0.75rem;
-  border: 1px solid var(--sb-line);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgb(255 251 242 / 0.95), rgb(251 241 220 / 0.95));
-  text-align: center;
-  box-shadow: var(--sb-shadow-soft);
-}
-
-.person .avatar {
-  width: 4rem;
-  height: 4rem;
-  margin-bottom: 0.4rem;
-  font-size: 1.7rem;
-}
-
-.person__name {
-  color: var(--sb-ink);
-  font-weight: 600;
-}
-
-.person__note {
-  color: var(--sb-muted);
-  font-size: var(--fs-xs);
-}
-
-.active-card {
-  padding: 1.25rem 1.35rem;
-  border: 1px solid var(--sb-line);
-  border-radius: var(--sb-radius);
-  background: linear-gradient(180deg, rgb(255 251 242 / 0.95), rgb(251 241 220 / 0.95));
-  box-shadow: var(--sb-shadow-soft);
-}
-
-.active-card .lobby-section__title {
-  font-size: 1.45rem;
-}
-
-.active-list {
-  display: grid;
-}
-
-.active-list__item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-block: 0.7rem;
-}
-
-.active-list__item + .active-list__item {
-  border-top: 1px dashed var(--sb-line);
-}
-
-.active-list__who {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-}
-
-.active-list__name {
-  color: var(--sb-ink);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-}
-
-.active-list__note {
-  color: var(--sb-muted);
-  font-size: var(--fs-xs);
-}
-
-.active-list__dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: #3f9a5f;
-  box-shadow: 0 0 0 3px rgb(63 154 95 / 0.2);
-}
-
-@media (max-width: 1100px) {
-  .lobby-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 900px) {
   .page-lobby .sidebar__brand .brand__name {
     font-size: 1.5rem;
@@ -397,7 +296,6 @@
     flex: 1 1 100%;
   }
 }
-
 
 /* Live catalogue states */
 .game-card--coming-soon { cursor: default; opacity: .88; }

@@ -1,4 +1,4 @@
-"""WebSocket envelopes (§7).
+"""WebSocket envelopes.
 
 Client frames are {type, id, payload}; server frames are {type, id, ts, room_id, payload}.
 """

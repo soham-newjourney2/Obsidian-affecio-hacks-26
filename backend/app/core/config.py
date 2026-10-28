@@ -23,11 +23,11 @@ class Settings(BaseSettings):
     register_rate_limit: int = Field(default=5, ge=1)
     login_rate_limit: int = Field(default=10, ge=1)
 
-    # D12: AI companions may fill empty seats only in demo mode.
+    # AI companions may fill empty seats only in demo mode.
     demo_mode: bool = False
     admin_emails: str = ""  # comma-separated; these accounts can read reports
 
-    # P17: optional Jitsi as a Service integration; all signing stays server-side.
+    # Optional Jitsi as a Service integration; all signing stays server-side.
     enable_voice_video: bool = False
     jaas_app_id: str = ""
     jaas_key_id: str = ""
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     def admins(self) -> set[str]:
         return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
-    # AI (§9): "mock" for tests/offline; "chain" = Groq -> Gemini -> authored fallback.
+    # AI: "mock" for tests/offline; "chain" = Groq -> Gemini -> authored fallback.
     ai_provider: Literal["mock", "chain"] = "mock"
     groq_api_key: SecretStr | None = None
     groq_model: str = ""

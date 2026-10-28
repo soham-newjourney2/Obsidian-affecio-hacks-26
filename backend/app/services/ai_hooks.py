@@ -1,4 +1,4 @@
-"""Background AI rewrites: scene narration, hints and the closing summary (§9).
+"""Background AI rewrites: scene narration, hints and the closing summary.
 
 Never on the play path: game events go out at once with the authored text; these tasks may later
 replace it with validated AI text (an `ai_text` action + `game.ai_text` event). Inputs are the

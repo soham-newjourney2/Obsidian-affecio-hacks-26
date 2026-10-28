@@ -271,11 +271,6 @@
 }
 
 /* App header (signed-in pages) */
-.app-header {
-  border-bottom: 1px solid var(--border);
-  background: rgb(11 15 23 / 0.6);
-  backdrop-filter: blur(6px);
-}
 
 .app-header__user {
   color: var(--text);

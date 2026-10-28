@@ -13,10 +13,6 @@ from backend.app.schemas.room import room_view
 from backend.app.services.rooms import members_with_names
 from backend.app.ws.events import envelope
 
-# State events carry each viewer's room view; presence events only the online list.
-STATE_EVENTS = ("joined", "left", "ready", "unready", "started")
-PRESENCE_EVENTS = ("online", "offline")
-
 
 async def notify_room(app: FastAPI, room_id: uuid.UUID, event: str, member_id: uuid.UUID) -> None:
     manager = app.state.ws

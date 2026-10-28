@@ -1,4 +1,4 @@
-"""Pure, deterministic game engine (§8). No I/O: callers persist state and deliver events.
+"""Pure, deterministic game engine. No I/O: callers persist state and deliver events.
 
     start(content, member_ids, seed, now, rules) -> (state, events)
     apply(content, state, action, now)           -> (state, events)
@@ -327,7 +327,7 @@ def _share(story: _Story, state: State, action: dict) -> list[Event]:
 
 
 def _theory(story: _Story, state: State, action: dict) -> list[Event]:
-    """A suggestion only: it never casts or changes a vote (D13)."""
+    """A suggestion only: it never casts or changes a vote."""
     allowed = {c["id"] for c in story.decision_for(state["scene"])["choices"]}
     choice = action.get("choice_id")
     if choice not in allowed:

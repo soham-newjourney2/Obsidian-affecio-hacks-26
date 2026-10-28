@@ -1,4 +1,4 @@
-"""AI companions (D12, demo mode only): labelled seats that play along, never decide.
+"""AI companions (demo mode only): labelled seats that play along, never decide.
 
 Per scene a companion pins its own revealed clue, says one line in chat (AI-rephrased, with an
 authored fallback) and, once every human has voted, votes with the humans' majority.

@@ -3,7 +3,7 @@
 Checked against ai.google.dev (2026-10): POST /v1beta/models/{model}:generateContent,
 `systemInstruction`, `generationConfig.responseMimeType` + `responseSchema`, `maxOutputTokens`;
 text in `candidates[0].content.parts[0].text`, usage in `usageMetadata`. The key goes in the
-`x-goog-api-key` header, never the URL. Failover only (§9): its free tier may use inputs for
+`x-goog-api-key` header, never the URL. Failover only: its free tier may use inputs for
 training, and it gets the same minimal inputs as every provider.
 """
 
