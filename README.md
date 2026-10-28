@@ -107,6 +107,45 @@ ever sees their own clues. There's also a Postgres test that runs when you set
 
 More on how the code is laid out: [docs/structure.md](docs/structure.md).
 
+## Team
+
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://github.com/soham-newjourney2">
+        <img src="https://github.com/soham-newjourney2.png?size=200" width="110" alt="Soham Chowdhury">
+      </a>
+      <h3>Soham Chowdhury</h3>
+      <sub><b>Team Lead</b> · AI · Backend support</sub><br>
+      <a href="https://github.com/soham-newjourney2">@soham-newjourney2</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/Arkoprabho-Roy">
+        <img src="https://github.com/Arkoprabho-Roy.png?size=200" width="110" alt="Arkoprabho Roy">
+      </a>
+      <h3>Arkoprabho Roy</h3>
+      <sub>Backend</sub><br>
+      <a href="https://github.com/Arkoprabho-Roy">@Arkoprabho-Roy</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/Saswata427">
+        <img src="https://github.com/Saswata427.png?size=200" width="110" alt="Saswata Biswas">
+      </a>
+      <h3>Saswata Biswas</h3>
+      <sub>UI · Testing</sub><br>
+      <a href="https://github.com/Saswata427">@Saswata427</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://github.com/Ayush-Adhikary">
+        <img src="https://github.com/Ayush-Adhikary.png?size=200" width="110" alt="Ayush Adhikary">
+      </a>
+      <h3>Ayush Adhikary</h3>
+      <sub>Research · Docs support</sub><br>
+      <a href="https://github.com/Ayush-Adhikary">@Ayush-Adhikary</a>
+    </td>
+  </tr>
+</table>
+
 ## License
 
 [MIT](LICENSE)
