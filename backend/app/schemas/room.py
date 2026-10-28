@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.app.core.config import Settings
 from backend.app.models import Room, RoomMember, Story
 
 
@@ -55,6 +56,7 @@ class RoomOut(BaseModel):
     started_at: datetime | None
     session_id: uuid.UUID | None  # the game, once the case has started
     companions_allowed: bool  # demo mode, host, waiting and a free seat
+    media_allowed: bool  # optional voice/video is on and configured (P17)
 
 
 class CreatedRoomOut(RoomOut):
@@ -68,8 +70,9 @@ def room_view(
     members: list[tuple[RoomMember, str]],
     viewer_id: uuid.UUID,
     session_id: uuid.UUID | None = None,
-    demo: bool = False,
+    settings: Settings | None = None,
 ) -> RoomOut:
+    demo = settings is not None and settings.demo_mode
     you_are_host = room.host_user_id == viewer_id
     ready_count = sum(m.status == "ready" for m, _ in members)
     return RoomOut(
@@ -106,4 +109,5 @@ def room_view(
         companions_allowed=(
             demo and you_are_host and room.status == "waiting" and len(members) < story.max_players
         ),
+        media_allowed=settings is not None and settings.media_enabled,
     )

@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     jaas_private_key_path: Path | None = None
 
     @property
+    def media_enabled(self) -> bool:
+        return bool(
+            self.enable_voice_video
+            and self.jaas_app_id
+            and self.jaas_key_id
+            and self.jaas_private_key_path
+        )
+
+    @property
     def admins(self) -> set[str]:
         return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 

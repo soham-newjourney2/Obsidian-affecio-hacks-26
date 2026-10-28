@@ -93,3 +93,12 @@ def test_bad_code_message(person) -> None:
     expect(bo.locator("#join-code-error")).to_have_text(
         "That invite code is invalid or has expired."
     )
+
+
+def test_media_off_points_to_own_call_app(person) -> None:
+    ada = person("Ada")
+    start_table(ada)
+    panel = ada.locator("#media-panel")
+    expect(panel.locator("#media-status")).to_contain_text("Use your own call app")
+    expect(panel.get_by_role("button", name="Join voice/video")).to_be_hidden()
+    assert ada.errors == [], ada.errors

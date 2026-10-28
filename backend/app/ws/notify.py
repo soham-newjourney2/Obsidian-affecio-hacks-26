@@ -34,7 +34,7 @@ async def notify_room(app: FastAPI, room_id: uuid.UUID, event: str, member_id: u
     for conn in connections:
         view = room_view(
             room, story, members, conn.user_id, session_id=game_id,
-            demo=app.state.settings.demo_mode,
+            settings=app.state.settings,
         )  # fmt: skip
         await manager.send(
             conn,
