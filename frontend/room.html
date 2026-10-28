@@ -210,16 +210,16 @@
           <section id="media-panel" class="panel room-media" aria-labelledby="media-title">
             <div class="room-media__heading">
               <div>
-                <h2 id="media-title" class="room-card__subtitle">Voice &amp; video</h2>
-                <p class="hint">Joining is optional. Your text chat will keep working.</p>
+                <h2 id="media-title" class="room-card__subtitle" data-st="room.media.title"></h2>
+                <p class="hint" data-st="room.media.hint"></p>
               </div>
               <div class="room-media__actions">
-                <button class="btn btn--primary" type="button" id="media-join">Join voice/video</button>
-                <button class="btn btn--ghost btn--sm" type="button" id="media-leave" hidden>Leave call</button>
+                <button class="btn btn--primary" type="button" id="media-join" data-st="room.media.join" hidden></button>
+                <button class="btn btn--ghost btn--sm" type="button" id="media-leave" data-st="room.media.leave" hidden></button>
               </div>
             </div>
-            <p id="media-status" class="hint" role="status" aria-live="polite">Voice/video is optional.</p>
-            <div id="media-frame" class="room-media__frame" aria-label="Voice and video call" hidden></div>
+            <p id="media-status" class="hint" role="status" aria-live="polite"></p>
+            <div id="media-frame" class="room-media__frame" data-st-label="room.media.frame" hidden></div>
           </section>
 
           <!-- Chat (both modes) -->

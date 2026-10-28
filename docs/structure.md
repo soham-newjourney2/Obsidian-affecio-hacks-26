@@ -24,7 +24,7 @@ echo/
 │   │   ├── db/             # base (naming convention, UTC datetime type), session (engine, SQLite pragmas), migrations/
 │   │   ├── models/         # SQLAlchemy tables (users, profiles, stories, rooms, room_members, messages, game_sessions, game_events, votes, pulse_responses, ai_logs)
 │   │   ├── schemas/        # Pydantic I/O (auth, profile, story cards/detail, rooms)
-│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse, ai_hooks: background AI rewrites)
+│   │   ├── services/       # business logic (auth, profiles, stories + seeding, rooms, chat, game: start/CAS apply/vote timers, results: summary + pulse, ai_hooks: background AI rewrites, matching + queue, safety, media: JaaS tokens)
 │   │   ├── ai/             # base, mock, groq + gemini (httpx), chain (validate, cap, timeout, breaker, fallback), factory, prompts/*.v1.txt
 │   │   ├── ws/             # WebSocket: events (envelopes), manager (room sockets), handlers, notify (fan-out)
 │   │   ├── game/           # story_schema (story file model + validator), engine (pure start/apply/view)
@@ -37,16 +37,17 @@ echo/
 │       ├── integration/    # HTTP + DB: health, errors, static, auth, profile, stories, rooms, ws, game (incl. concurrency), results, migrations
 │       └── e2e/            # Playwright tests against a live, seeded uvicorn (marker: e2e); helpers.py
 └── frontend/               # served at "/"
-    ├── index.html          # landing: hero, how it works, audience, CTA
+    ├── index.html          # landing: hero, features, how it works, story shelf (live catalogue), CTA
     ├── auth.html           # sign in / create account (tabs)
     ├── onboarding.html     # profile case file (create or edit)
-    ├── lobby.html          # signed-in home (teammate-owned)
+    ├── lobby.html          # signed-in home: real case catalogue, case-file dialog, search
+    ├── connections.html    # mutual connections and pending requests
     ├── room.html           # start/join a table, live waiting room + chat, then the story room (game mode)
     ├── results.html        # ending, solution, table recap, private reflection + badges, 2-question pulse
-    ├── css/                # tokens, base, components, effects, pages/ (teammate-owned); temp.css (new pages, to be merged)
+    ├── css/                # tokens, base, components, effects, storybook-theme, pages/; temp.css (room/results/connections)
     ├── js/core/            # strings, api, auth, ui, fx; ws (room socket client); strings-temp (new pages, to be merged)
     ├── js/pages/           # one module per page (room.js + room-game.js for the story room)
-    └── assets/brand/       # logo.svg (wordmark, ripple "O"), favicon.svg
+    └── assets/             # brand/ (logo, emblem, favicon), storybook/ art, icons.svg
 ```
 
 ## Design system
@@ -94,6 +95,7 @@ uv run ruff check .
 | POST | `/rooms/{id}/leave` | member | host hands over to the longest-present member; empty room is abandoned |
 | GET | `/sessions/{id}` | member | the caller's own game projection (never others' private clues) |
 | GET | `/sessions/{id}/summary` | member | finished case: ending, solution, path, table recap, your reflection + badges (409 while active) |
+| POST | `/rooms/{id}/media-token` | member | JaaS token for this room (404 when voice/video is off, 503 if misconfigured) |
 | POST | `/sessions/{id}/pulse` | member | `{play_again: yes|maybe|no, ease_of_talking: 1–5}`, once per person (409 after) |
 
 - Tokens: HS256 JWT, 60 min, claims `sub`, `jti`, `iat`, `exp`; send as `Authorization: Bearer …`.
@@ -215,3 +217,13 @@ uv run ruff check .
 - Reports (`harassment | hate | spam | safety | other`, ≤500 chars) are stored as `open`; the
   reporter's open table gets a `moderation.notice`. `GET /admin/reports` is limited to
   `ADMIN_EMAILS`.
+
+## Voice/video (optional, JaaS)
+
+- Off unless `ENABLE_VOICE_VIDEO=true` and `JAAS_APP_ID`, `JAAS_KEY_ID`, `JAAS_PRIVATE_KEY_PATH` are
+  set; the room view's `media_allowed` tells the page. Off: the panel says to use your own call app.
+- `services/media.py` signs an RS256 token per member (kid header, aud `jitsi`, iss `chat`,
+  sub = AppID, `room` = this room's id only, exp 2 h). The host is moderator; recording,
+  livestreaming, transcription and dial-in/out are `"false"`. The private key never leaves the server.
+- room.html loads `https://8x8.vc/external_api.js` only after "Join voice/video"; mic and camera start
+  muted. Text chat never depends on the call.

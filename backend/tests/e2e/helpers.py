@@ -3,23 +3,11 @@
 import re
 import uuid
 
-import pytest
 from playwright.sync_api import APIRequestContext, Page, expect
-
-# Teammate pages are incomplete in the repo (strings.js keys and storybook-theme.css not pushed,
-# lobby.js crashes on load). Tests of those pages are expected to fail until that lands.
-TEAMMATE_UI = (
-    "teammate frontend incomplete in repo: missing strings.js keys + storybook-theme.css "
-    "(see planning_final.md §13 P07)"
-)
-teammate_ui = pytest.mark.xfail(reason=TEAMMATE_UI, strict=False)
 
 # API responses that are part of normal flows (browsers log every 4xx fetch as an error).
 EXPECTED_HTTP_ERRORS = (
     "/api/v1/users/me/profile",  # 404 until onboarding is done
-    # TEMPORARY (2026-10-25): teammate pages link this file but it isn't in the repo yet.
-    # Remove once they push it.
-    "/css/storybook-theme.css",
 )
 
 

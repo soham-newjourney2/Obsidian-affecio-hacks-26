@@ -3,12 +3,11 @@ import re
 import pytest
 from playwright.sync_api import Browser, Page, expect
 
-from backend.tests.e2e.helpers import PASSWORD, create_user, sign_in, teammate_ui, unique_email
+from backend.tests.e2e.helpers import PASSWORD, create_user, sign_in, unique_email
 
 pytestmark = pytest.mark.e2e
 
 
-@teammate_ui
 def test_register_onboard_lobby(page: Page, console_errors: list[str]) -> None:
     page.goto("/")
     page.locator("#cta-start").click()
@@ -21,15 +20,20 @@ def test_register_onboard_lobby(page: Page, console_errors: list[str]) -> None:
 
     expect(page).to_have_url(re.compile(r"/onboarding\.html$"))
     expect(page.locator("#user-name")).to_have_text("Ada")
+    page.locator("#next").click()  # welcome -> interests
     interests = page.locator("#field-interests")
     for label in ("Books", "Puzzles & riddles", "Coffee & tea"):
         interests.get_by_text(label, exact=True).click()
     expect(interests.locator(".counter")).to_have_text("3 of 8 chosen")
+    page.locator("#next").click()
     page.locator("#field-interaction_style").get_by_text("Thoughtful").click()
     page.locator("#field-availability").get_by_text("Weekday evenings").click()
+    page.locator("#next").click()
     # Private is preselected; the summary is optional.
     expect(page.locator('input[name="visibility"][value="private"]')).to_be_checked()
     page.locator("#summary").fill("New in town.")
+    page.locator("#next").click()  # review step
+    expect(page.locator("#review")).to_contain_text("New in town.")
     page.get_by_role("button", name="Save and continue").click()
 
     expect(page).to_have_url(re.compile(r"/lobby\.html$"))
@@ -64,12 +68,12 @@ def test_duplicate_email_shown_on_field(page: Page) -> None:
     expect(page.locator("#register-email-error")).to_contain_text("already exists")
 
 
-@teammate_ui
 def test_onboarding_enforces_limits(page: Page) -> None:
     email = create_user(page.request, with_profile=False)
     page.goto("/auth.html")
     sign_in(page, email)
     expect(page).to_have_url(re.compile(r"/onboarding\.html$"))
+    page.locator("#next").click()
 
     interests = page.locator("#field-interests")
     boxes = interests.locator('input[type="checkbox"]')
@@ -77,15 +81,18 @@ def test_onboarding_enforces_limits(page: Page) -> None:
         interests.locator(".chip").nth(i).click()
     expect(boxes.nth(8)).to_be_disabled()
     expect(interests.locator(".counter")).to_have_text("8 of 8 chosen")
+    page.locator("#next").click()
     roles = page.locator("#field-preferred_roles")
     roles.get_by_text("Listener").click()
     roles.get_by_text("Archivist").click()
     expect(roles.locator('input[value="strategist"]')).to_be_disabled()
+    page.locator("#next").click()  # nothing chosen on this step yet
+    expect(page.locator("#field-interaction_style-error")).to_have_text("Choose one.")
+    page.locator("#back").click()
     for i in range(6):  # back down to 2
         interests.locator(".chip").nth(i).click()
-    page.get_by_role("button", name="Save and continue").click()
+    page.locator("#next").click()
     expect(page.locator("#field-interests-error")).to_have_text("Choose at least 3.")
-    expect(page.locator("#field-interaction_style-error")).to_have_text("Choose one.")
     expect(page).to_have_url(re.compile(r"/onboarding\.html$"))
 
 
@@ -96,7 +103,6 @@ def test_login_error_is_generic(page: Page) -> None:
     expect(page.locator("#panel-login .form-error")).to_have_text("Incorrect email or password.")
 
 
-@teammate_ui
 def test_guard_redirects_then_returns(page: Page) -> None:
     email = create_user(page.request, with_profile=True)
     page.goto("/lobby.html")
@@ -113,7 +119,6 @@ def test_next_param_cannot_leave_site(page: Page) -> None:
     expect(page).to_have_url(re.compile(r"/lobby\.html$"))
 
 
-@teammate_ui
 def test_session_is_per_tab_and_sign_out_works(browser: Browser, base_url: str) -> None:
     context = browser.new_context(base_url=base_url)
     page = context.new_page()

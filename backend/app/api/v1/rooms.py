@@ -1,8 +1,4 @@
-import time
 import uuid
-from pathlib import Path
-
-import jwt
 
 from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
@@ -18,7 +14,7 @@ from backend.app.schemas.room import (
     RoomOut,
     room_view,
 )
-from backend.app.services import companions
+from backend.app.services import companions, media
 from backend.app.services import game as game_service
 from backend.app.services import rooms as svc
 from backend.app.ws.notify import deliver_game, notify_room
@@ -26,12 +22,17 @@ from backend.app.ws.notify import deliver_game, notify_room
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
 
-async def _view(session: SessionDep, room: Room, viewer: User, demo: bool = False) -> RoomOut:
+async def _view(request: Request, session: SessionDep, room: Room, viewer: User) -> RoomOut:
     story = await session.get(Story, room.story_id)
     game = await game_service.session_for_room(session, room.id)
     members = await svc.members_with_names(session, room)
     return room_view(
-        room, story, members, viewer.id, session_id=game.id if game else None, demo=demo
+        room,
+        story,
+        members,
+        viewer.id,
+        session_id=game.id if game else None,
+        settings=request.app.state.settings,
     )
 
 
@@ -52,7 +53,7 @@ async def create(
     request: Request, body: CreateRoomIn, user: CurrentUser, session: SessionDep
 ) -> CreatedRoomOut:
     room, code = await svc.create_room(session, user, body.story_slug)
-    view = await _view(session, room, user, _demo(request))
+    view = await _view(request, session, room, user)
     return CreatedRoomOut(**view.model_dump(), invite_code=code)
 
 
@@ -63,7 +64,7 @@ async def join(
     request.app.state.limits["join"].check(str(user.id))
     room = await svc.join_room(session, user, body.code)
     await _notify(request, session, room, user, "joined")
-    return await _view(session, room, user, _demo(request))
+    return await _view(request, session, room, user)
 
 
 @router.get("/{room_id}")
@@ -71,7 +72,7 @@ async def read(
     request: Request, room_id: uuid.UUID, user: CurrentUser, session: SessionDep
 ) -> RoomOut:
     room = await svc.get_room_for(session, user, room_id)
-    return await _view(session, room, user, _demo(request))
+    return await _view(request, session, room, user)
 
 
 @router.post("/{room_id}/ready")
@@ -80,7 +81,7 @@ async def ready(
 ) -> RoomOut:
     room = await svc.set_ready(session, user, room_id, body.ready)
     await _notify(request, session, room, user, "ready" if body.ready else "unready")
-    return await _view(session, room, user, _demo(request))
+    return await _view(request, session, room, user)
 
 
 @router.post("/{room_id}/start")
@@ -91,7 +92,7 @@ async def start(
     started = await game_service.start_game(request.app, room.id)
     await _notify(request, session, room, user, "started")  # room view now carries session_id
     await deliver_game(request.app, started)
-    return await _view(session, room, user, _demo(request))
+    return await _view(request, session, room, user)
 
 
 class CompanionsIn(BaseModel):
@@ -104,55 +105,18 @@ class CompanionsIn(BaseModel):
 async def media_token(
     request: Request, room_id: uuid.UUID, user: CurrentUser, session: SessionDep
 ) -> dict[str, str]:
-    """Issue a short-lived, room-scoped JaaS token to a current room member."""
+    """A short-lived JaaS token for a present member; the host joins as moderator."""
     settings = request.app.state.settings
     if not settings.enable_voice_video:
-        raise AppError(404, "MEDIA_DISABLED", "Voice/video is currently unavailable.")
-    if not settings.jaas_app_id or not settings.jaas_key_id or not settings.jaas_private_key_path:
-        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.")
-
-    room = await svc.get_room_for(session, user, room_id)
-    member = await svc.member_of(session, room.id, user.id)
-    if member is None or member.status in {"left", "removed"}:
-        raise AppError(403, "NOT_A_MEMBER", "You are not a member of this room.")
-
-    try:
-        private_key = Path(settings.jaas_private_key_path).read_text(encoding="utf-8")
-    except (OSError, UnicodeError):
-        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.") from None
-
-    now = int(time.time())
-    # JaaS tokens use RS256 and a room claim; never return the key or expose it to the browser.
-    claims = {
-        "aud": "jitsi",
-        "iss": "chat",
-        "sub": settings.jaas_app_id,
-        "room": str(room.id),
-        "iat": now,
-        "nbf": now - 5,
-        "exp": now + 60 * 60,
-        "context": {
-            "user": {
-                "id": str(user.id),
-                "name": user.display_name,
-                "moderator": bool(room.host_user_id == user.id),
-            },
-            "features": {
-                "recording": False,
-                "livestreaming": False,
-                "transcription": False,
-                "outbound-call": False,
-                "sip-outbound-call": False,
-            },
-        },
-    }
-    try:
-        token = jwt.encode(
-            claims, private_key, algorithm="RS256", headers={"kid": settings.jaas_key_id}
-        )
-    except (ValueError, TypeError):
-        raise AppError(503, "MEDIA_UNAVAILABLE", "Voice/video is not configured.") from None
-    return {"token": token, "room": str(room.id), "app_id": settings.jaas_app_id, "domain": "8x8.vc"}
+        raise AppError(404, "NOT_FOUND", "Not Found")
+    room = await svc.get_room_for(session, user, room_id)  # 404 unknown, 403 not a present member
+    return await media.media_token(
+        settings,
+        room_id=room.id,
+        user_id=user.id,
+        display_name=user.display_name,
+        moderator=room.host_user_id == user.id,
+    )
 
 
 @router.post("/{room_id}/companions")
@@ -164,7 +128,7 @@ async def add_companions(
         raise AppError(404, "NOT_FOUND", "Not Found")
     room, first = await companions.add_companions(session, user, room_id, body.count)
     await notify_room(request.app, room.id, "joined", first)
-    return await _view(session, room, user, True)
+    return await _view(request, session, room, user)
 
 
 @router.post("/{room_id}/leave", status_code=204)

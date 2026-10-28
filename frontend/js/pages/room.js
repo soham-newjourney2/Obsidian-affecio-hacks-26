@@ -167,6 +167,7 @@ function renderRoom() {
   toggle.hidden = !waiting;
   const start = $("#start");
   $("#add-companions").hidden = !waiting || !view.companions_allowed;
+  renderMedia(view.media_allowed);
   start.hidden = !waiting || !view.you_are_host;
   start.disabled = !view.can_start;
   game.setNames(view.members);
@@ -436,7 +437,7 @@ function loadJaasScript() {
     script.src = "https://8x8.vc/external_api.js";
     script.async = true;
     script.onload = resolve;
-    script.onerror = () => reject(new Error("The voice/video service could not be loaded."));
+    script.onerror = () => reject(new Error("JaaS external_api.js failed to load"));
     document.head.append(script);
   });
   return mediaScriptPromise;
@@ -447,7 +448,7 @@ async function joinMedia() {
   const status = $("#media-status");
   if (!current?.id || mediaApi) return;
   setBusy(button, true);
-  status.textContent = "Connecting to voice/video…";
+  status.textContent = tt("room.media.connecting");
   try {
     const credentials = await api(`/rooms/${encodeURIComponent(current.id)}/media-token`, { method: "POST" });
     await loadJaasScript();
@@ -465,14 +466,13 @@ async function joinMedia() {
     frame.hidden = false;
     $("#media-leave").hidden = false;
     button.hidden = true;
-    status.textContent = "You joined the optional call. Text chat remains available.";
+    status.textContent = tt("room.media.joined");
     mediaApi.addEventListener("readyToClose", leaveMedia);
   } catch (error) {
     const disabled = error instanceof ApiError && (error.status === 404 || error.status === 503);
-    status.textContent = disabled
-      ? "Voice/video is not enabled right now. Please use your own call app; text chat is still available."
-      : "Could not join voice/video. Please try again or use your own call app; text chat is still available.";
-    if (!disabled) toast(status.textContent, { kind: "error" });
+    status.textContent = tt(disabled ? "room.media.off" : "room.media.failed");
+    if (disabled) button.hidden = true;
+    else toast(status.textContent, { kind: "error" });
   } finally {
     setBusy(button, false);
   }
@@ -487,7 +487,16 @@ function leaveMedia() {
   $("#media-frame").hidden = true;
   $("#media-leave").hidden = true;
   $("#media-join").hidden = false;
-  $("#media-status").textContent = "You left the call. Text chat remains available.";
+  $("#media-status").textContent = tt("room.media.left");
+}
+
+// Called on every room view; join is offered only when the server says media is configured.
+function renderMedia(allowed) {
+  if (mediaApi) return;
+  const status = $("#media-status");
+  $("#media-join").hidden = !allowed;
+  if (!allowed) status.textContent = tt("room.media.off");
+  else if (!status.textContent || status.textContent === tt("room.media.off")) status.textContent = tt("room.media.idle");
 }
 
 function wireTable() {

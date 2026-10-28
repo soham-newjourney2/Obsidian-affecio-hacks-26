@@ -3,19 +3,21 @@ import re
 import pytest
 from playwright.sync_api import Browser, Page, expect
 
-from backend.tests.e2e.helpers import teammate_ui
-
 pytestmark = pytest.mark.e2e
 
 GSAP_CHILDREN = "() => window.gsap.globalTimeline.getChildren(true, true, true).length"
 
 
-@teammate_ui
 def test_landing_renders_without_console_errors(page: Page, console_errors: list[str]) -> None:
     page.goto("/", wait_until="networkidle")
 
-    expect(page.locator("h1")).to_have_text("Every clue is half a conversation.")
+    expect(page.locator("h1")).to_have_text("Find Your People Through Stories")
     expect(page.locator(".steps > li")).to_have_count(3)
+    # The shelf is the real catalogue, playable case first (rule 13: nothing invented).
+    shelf = page.locator("#story-shelf > li")
+    expect(shelf).to_have_count(3)
+    expect(shelf.first).to_contain_text("Blackthorn Manor")
+    expect(shelf.first).to_contain_text("Playable now")
     expect(page.locator("#cta-start")).to_be_visible()
     # Every string binding resolved (no raw keys, no empty bound nodes).
     empty = page.eval_on_selector_all("[data-s]", "els => els.filter(e => !e.textContent.trim())")
@@ -47,7 +49,7 @@ def test_primary_cta_opens_auth(page: Page, console_errors: list[str]) -> None:
 
 def test_how_it_works_link_scrolls(page: Page) -> None:
     page.goto("/")
-    page.locator(".hero__actions").get_by_role("link", name="How it works").click()
+    page.locator(".hero__actions a[href='#how']").click()
     expect(page).to_have_url(re.compile(r"#how$"))
     expect(page.locator("#how-title")).to_be_in_viewport()
 
