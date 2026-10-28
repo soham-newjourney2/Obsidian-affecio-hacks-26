@@ -29,7 +29,6 @@ def live_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
         mp.setenv("DATABASE_URL", database_url)
         mp.setenv("AI_PROVIDER", "mock")
         mp.setenv("ENABLE_VOICE_VIDEO", "false")
-        mp.setenv("ENABLE_BLOCKCHAIN", "false")
         settings = Settings(
             _env_file=None,
             app_env="test",
@@ -37,6 +36,7 @@ def live_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             # Every e2e test registers from 127.0.0.1; limits are covered by API tests.
             register_rate_limit=10_000,
             login_rate_limit=10_000,
+            demo_mode=True,  # lets one person rehearse with AI companions
         )
         port = _free_port()
         server = uvicorn.Server(

@@ -13,10 +13,13 @@ from backend.tests.e2e.helpers import (
     all_vote,
     begin_case,
     chapter_is,
+    start_table,
     vote,
 )
 
 pytestmark = pytest.mark.e2e
+
+COMPANION_WAIT = 15_000
 
 
 def private_clues(page: Page) -> dict[str, str]:
@@ -112,3 +115,28 @@ def test_reconnect_overlay(person) -> None:
     expect(bo.locator("#reconnect")).to_be_hidden(timeout=20_000)
     expect(bo.locator("#conn-text")).to_have_text("Live")
     expect(bo.locator("#chapter-label")).to_have_text("Chapter 1 of 4")  # resynced, same place
+
+
+def test_one_person_and_ai_companions_finish(person) -> None:
+    """Demo mode: one human fills the table with labelled companions and plays to the end."""
+    ada = person("Ada")
+    start_table(ada)
+    ada.get_by_role("button", name="Fill empty seats with AI companions").click()
+    members = ada.locator("#members > li")
+    expect(members).to_have_count(4, timeout=LIVE)
+    expect(members.filter(has_text="AI")).to_have_count(3)
+    ada.get_by_role("button", name="I'm ready").click()
+    start = ada.get_by_role("button", name="Start the case")
+    expect(start).to_be_enabled(timeout=LIVE)
+    start.click()
+    expect(ada.locator("#game-story")).to_be_visible(timeout=LIVE)
+
+    # Companions vote a beat after the human (never first), so allow for their delay.
+    chapter = ada.locator("#chapter-title")
+    vote(ada, D1_ROOM)
+    expect(chapter).to_have_text("The Room", timeout=COMPANION_WAIT)
+    vote(ada, D2_ANY)
+    expect(chapter).to_have_text("The Vigil", timeout=COMPANION_WAIT)
+    vote(ada, D3_SAFE)
+    expect(ada.locator("#ending-stamp")).to_have_text("Safe retreat", timeout=COMPANION_WAIT)
+    assert ada.errors == [], ada.errors

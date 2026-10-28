@@ -1,5 +1,5 @@
-// TEMPORARY string table for pages built while teammates own strings.js (plan rule 18).
-// Teammates fold these into strings.js; until then use tt("room.key") and data-st="room.key".
+// Strings for the room, results and connections pages (D14: no UI text in page code).
+// Look up with tt("room.key") in JS and data-st="room.key" in HTML.
 
 export const TEMP_STRINGS = Object.freeze({
   common: {

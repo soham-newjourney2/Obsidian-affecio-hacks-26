@@ -63,6 +63,15 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY must be at least 32 bytes")
         return v
 
+    @field_validator("database_url")
+    @classmethod
+    def _async_driver(cls, v: str) -> str:
+        """Hosted Postgres URLs (postgres://, postgresql://) use the async asyncpg driver."""
+        for prefix in ("postgres://", "postgresql://"):
+            if v.startswith(prefix):
+                return "postgresql+asyncpg://" + v.removeprefix(prefix)
+        return v
+
     @model_validator(mode="after")
     def _no_placeholder_in_production(self) -> "Settings":
         is_placeholder = self.secret_key.get_secret_value() == PLACEHOLDER_SECRET

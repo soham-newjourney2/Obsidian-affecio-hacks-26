@@ -35,9 +35,14 @@ function getToastRegion() {
   return toastRegion;
 }
 
+const MAX_TOASTS = 3;
+
 export function toast(message, { kind = "info", timeout = 5000 } = {}) {
   const node = el("div", `toast toast--${kind}`, message);
-  getToastRegion().append(node);
+  const region = getToastRegion();
+  region.append(node);
+  // Bursts (e.g. several companions pinning at once) keep only the newest few.
+  while (region.children.length > MAX_TOASTS) region.firstElementChild.remove();
   if (timeout > 0) setTimeout(() => node.remove(), timeout);
   return node;
 }

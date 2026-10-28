@@ -1,6 +1,6 @@
 """Validate every story file and upsert it into the database. Safe to run repeatedly.
 
-    uv run python scripts/seed.py
+uv run python scripts/seed.py
 """
 
 import asyncio

@@ -1,6 +1,5 @@
-/* TEMPORARY styles for pages built while teammates own the UI (plan rule 17).
-   Scoped to new pages; teammates will merge these into their theme and remove this file.
-   Uses only base tokens from tokens.css. */
+/* Styles for the room, results and connections pages (and shared bits used by auth and
+   onboarding). Built on the base tokens from tokens.css. */
 
 /* ---- room.html ---------------------------------------------------------------------- */
 .page-room .room-page {
@@ -2120,4 +2119,51 @@
   .page-onboarding .choice span { min-height: 0; }
   .page-auth .auth-main { width: min(100% - 1rem, 32rem); padding-inline: 0; }
   .page-auth .auth-panel { padding: 1.15rem; }
+}
+
+/* Every room layout names a place for the page heading and the voice/video panel
+   (unnamed grid items were auto-placed in an extra row below everything else). */
+.page-room .room-table .room-heading { grid-area: heading; }
+.page-room .room-table .room-media { grid-area: media; }
+
+.page-room .room-table[data-mode="waiting"] {
+  grid-template-areas:
+    "heading heading"
+    "side media"
+    "side chat";
+}
+
+.page-room .room-table[data-mode="game"] {
+  grid-template-areas:
+    "heading heading heading"
+    "clues story players"
+    "clues story media"
+    "board story chat";
+}
+
+@media (max-width: 1100px) {
+  .page-room .room-table[data-mode="game"] {
+    grid-template-areas:
+      "heading heading"
+      "story players"
+      "story media"
+      "story clues"
+      "board chat";
+  }
+}
+
+@media (max-width: 900px) {
+  .page-room .room-table[data-mode="waiting"] {
+    grid-template-areas: "heading" "side" "media" "chat";
+  }
+
+  .page-room .room-table[data-mode="game"] {
+    grid-template-areas: "heading" "tabs" "panel" "media";
+  }
+}
+
+/* Member rows: avatar | name, then badges, presence and state stacked beside it. */
+.page-room .room-member .room-badge {
+  grid-column: 2;
+  justify-self: start;
 }
