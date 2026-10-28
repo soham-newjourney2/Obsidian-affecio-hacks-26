@@ -13,7 +13,7 @@ def test_landing_renders_without_console_errors(page: Page, console_errors: list
 
     expect(page.locator("h1")).to_have_text("Find Your People Through Stories")
     expect(page.locator(".steps > li")).to_have_count(3)
-    # The shelf is the real catalogue, playable case first (rule 13: nothing invented).
+    # The shelf is the real catalogue, playable case first (nothing invented).
     shelf = page.locator("#story-shelf > li")
     expect(shelf).to_have_count(3)
     expect(shelf.first).to_contain_text("Blackthorn Manor")

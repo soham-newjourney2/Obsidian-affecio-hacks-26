@@ -1,4 +1,4 @@
-"""Optional voice/video (D06): room-scoped JaaS (8x8 Jitsi as a Service) tokens.
+"""Optional voice/video: room-scoped JaaS (8x8 Jitsi as a Service) tokens.
 
 The RS256 private key stays on the server; the browser only ever receives the signed token.
 Claim format per the 8x8 JaaS JWT docs: aud "jitsi", iss "chat", sub = AppID, kid header,
@@ -16,7 +16,7 @@ from backend.app.core.config import Settings
 from backend.app.core.errors import AppError
 
 DOMAIN = "8x8.vc"
-TOKEN_TTL_S = 2 * 60 * 60  # P17: at most 2 h
+TOKEN_TTL_S = 2 * 60 * 60  # At most 2 h
 NBF_SKEW_S = 10  # tolerate small clock drift between us and 8x8
 # Everything that would record or leave the call is off; joining is always optional.
 FEATURES_OFF = (

@@ -1,4 +1,4 @@
-"""P13: a free-text theory becomes a suggestion (never a vote)."""
+"""A free-text theory becomes a suggestion (never a vote)."""
 
 import json
 

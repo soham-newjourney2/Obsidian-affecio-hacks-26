@@ -1,4 +1,4 @@
-"""Pure matching (§P15): pair scores, group formation and plain-language explanations.
+"""Pure matching: pair scores, group formation and plain-language explanations.
 
 Scores stay internal: players only ever see explanation labels, never a number or a percentage.
 Signals a person left empty are skipped and the remaining weights renormalized. Shared interests

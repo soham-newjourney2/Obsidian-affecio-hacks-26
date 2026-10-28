@@ -1,4 +1,4 @@
-"""P17: optional voice/video — room-scoped JaaS tokens for present members only."""
+"""Optional voice/video — room-scoped JaaS tokens for present members only."""
 
 import time
 import uuid
@@ -24,7 +24,7 @@ def rsa_key():
 
 @pytest.fixture
 def settings(settings: Settings, tmp_path: Path, rsa_key) -> Settings:
-    """Voice/video on, with a throwaway key generated at runtime (rule 10)."""
+    """Voice/video on, with a throwaway key generated at runtime."""
     key_path = tmp_path / "jaas.pem"
     key_path.write_bytes(
         rsa_key.private_bytes(

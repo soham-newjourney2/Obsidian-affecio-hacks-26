@@ -1,4 +1,4 @@
-"""Connections (mutual opt-in), blocks and reports (P16).
+"""Connections (mutual opt-in), blocks and reports.
 
 - A connection needs two yeses, and only between human co-players of a finished case.
 - A decline is never visible to the person who asked: their request just stays "requested".

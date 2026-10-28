@@ -1,4 +1,4 @@
-"""P20: migrations, seed and the core flows on Postgres.
+"""Migrations, seed and the core flows on Postgres.
 
 Runs only when TEST_POSTGRES_URL points at a throwaway database (its public schema is reset):
     uv sync --group postgres

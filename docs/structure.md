@@ -169,7 +169,7 @@ uv run ruff check .
   chosen labels, clues pinned, hints asked, and votes that matched the table's choice. Never from the
   live game state, and never inferences about people.
 - Private badges, never ranked: Clue Sharer (pinned ≥ 1 clue), Consensus Builder (vote matched the
-  table's choice ≥ 2 times), Theory Crafter (a theory of yours was mapped, from P13).
+  table's choice ≥ 2 times), Theory Crafter (a theory of yours was mapped).
 - The pulse is the only impact data collected: two answers, once per person per case.
 
 ## AI (narration, hints, recap)
@@ -191,7 +191,7 @@ uv run ruff check .
 
 - `game.theory.submit{text ≤ 280, client_action_id}` (1 per 5 s per member): the AI maps the text to
   one allowed choice of the current decision, or to none (low confidence, unknown ids, any failure).
-  The table sees `game.theory.suggestion{by, choice_id}`; nobody's vote changes (D13).
+  The table sees `game.theory.suggestion{by, choice_id}`; nobody's vote changes.
 
 ## AI companions (demo mode)
 

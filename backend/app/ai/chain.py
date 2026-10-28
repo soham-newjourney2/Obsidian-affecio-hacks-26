@@ -1,4 +1,4 @@
-"""The AI chain (§9): providers in order, then the authored fallback. AI never blocks play:
+"""The AI chain: providers in order, then the authored fallback. AI never blocks play:
 every failure path returns the fallback text, and every attempt is logged without bodies.
 
 Output is untrusted: JSON -> Pydantic (extra='forbid') -> word limit -> no hidden text or IDs.
@@ -29,7 +29,7 @@ BREAKER_COOLDOWN_S = 60.0
 
 
 class CircuitBreaker:
-    """Skips a provider for `cooldown_s` after `failures` consecutive failures (§9). When the
+    """Skips a provider for `cooldown_s` after `failures` consecutive failures. When the
     cooldown ends it gets one trial call: success closes the breaker, failure reopens it."""
 
     def __init__(

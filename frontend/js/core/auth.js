@@ -1,4 +1,4 @@
-// Session in sessionStorage (per tab, D04) and route guards.
+// Session in sessionStorage (per tab) and route guards.
 const KEY = "echo.session";
 
 export function saveSession({ access_token: token, expires_in: expiresIn, user }) {

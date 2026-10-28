@@ -1,4 +1,4 @@
-"""P16: mutual-opt-in connections, blocks and reports."""
+"""Mutual-opt-in connections, blocks and reports."""
 
 import pytest
 

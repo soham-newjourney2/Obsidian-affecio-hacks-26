@@ -41,7 +41,7 @@ class MemberOut(BaseModel):
     status: Literal["joined", "ready", "playing"]
     is_host: bool
     is_you: bool
-    is_companion: bool  # D12: AI companions are always labelled
+    is_companion: bool  # AI companions are always labelled
 
 
 class RoomOut(BaseModel):
@@ -56,7 +56,7 @@ class RoomOut(BaseModel):
     started_at: datetime | None
     session_id: uuid.UUID | None  # the game, once the case has started
     companions_allowed: bool  # demo mode, host, waiting and a free seat
-    media_allowed: bool  # optional voice/video is on and configured (P17)
+    media_allowed: bool  # optional voice/video is on and configured
 
 
 class CreatedRoomOut(RoomOut):

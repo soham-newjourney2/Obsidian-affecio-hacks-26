@@ -1,4 +1,4 @@
-"""Story file schema (Pydantic, extra='forbid') and the structural validator (§8).
+"""Story file schema (Pydantic, extra='forbid') and the structural validator.
 
 A story JSON holds catalogue metadata and rights for every story; playable stories also
 carry `content`: roles, variants, scenes, clues, decisions, hints and endings. The graph

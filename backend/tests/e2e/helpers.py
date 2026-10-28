@@ -86,7 +86,7 @@ def session_page(page: Page, name: str) -> Page:
     """Signs a fresh account (with profile) into this tab without going through the auth UI.
 
     Uses the same sessionStorage shape as js/core/auth.js, so tests of new pages don't depend
-    on the teammate-owned sign-in screens.
+    on the sign-in screens.
     """
     email = create_user(page.request, with_profile=True, display_name=name)
     res = page.request.post("/api/v1/auth/login", data={"email": email, "password": PASSWORD})

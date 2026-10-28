@@ -1,4 +1,4 @@
-"""P14: AI companions fill seats in demo mode, play along and never decide for humans."""
+"""AI companions fill seats in demo mode, play along and never decide for humans."""
 
 import sqlite3
 

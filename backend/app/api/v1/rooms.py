@@ -123,7 +123,7 @@ async def media_token(
 async def add_companions(
     request: Request, room_id: uuid.UUID, body: CompanionsIn, user: CurrentUser, session: SessionDep
 ) -> RoomOut:
-    """Demo only (D12): the host fills empty seats with labelled AI companions."""
+    """Demo only: the host fills empty seats with labelled AI companions."""
     if not _demo(request):
         raise AppError(404, "NOT_FOUND", "Not Found")
     room, first = await companions.add_companions(session, user, room_id, body.count)

@@ -1,4 +1,4 @@
-"""P12: Gemini provider, Groq -> Gemini -> fallback, and the circuit breaker."""
+"""Gemini provider, Groq -> Gemini -> fallback, and the circuit breaker."""
 
 import json
 

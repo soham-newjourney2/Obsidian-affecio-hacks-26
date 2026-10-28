@@ -12,7 +12,7 @@ function el(tag, className, text) {
   return node;
 }
 
-// The shelf shows the real catalogue (rule 13); with nothing to show, the section hides.
+// The shelf shows the real catalogue; with nothing to show, the section hides.
 async function renderShelf() {
   const section = document.querySelector("#stories");
   let stories = [];

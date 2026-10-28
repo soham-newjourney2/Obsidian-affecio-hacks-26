@@ -202,7 +202,7 @@ async def _on_game(app: FastAPI, conn: Connection, frame: ClientFrame, session) 
 
 
 async def _on_theory(app: FastAPI, conn: Connection, frame: ClientFrame, session) -> None:
-    """Free text -> AI -> one allowed choice (or none) -> a suggestion. Never a vote (D13)."""
+    """Free text -> AI -> one allowed choice (or none) -> a suggestion. Never a vote."""
     manager = app.state.ws
     data = GameTheoryIn.model_validate(frame.payload)
     if not app.state.theory_bucket.take(str(conn.member_id)):

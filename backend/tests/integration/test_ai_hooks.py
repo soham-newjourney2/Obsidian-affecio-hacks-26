@@ -1,4 +1,4 @@
-"""AI rewrites hooked into the game: narration, hints and the closing recap (P11)."""
+"""AI rewrites hooked into the game: narration, hints and the closing recap."""
 
 import asyncio
 import json
